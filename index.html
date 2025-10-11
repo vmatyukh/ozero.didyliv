@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Озеро Дідилів — сайт будується</title>
+  <meta name="description" content="Озеро Дідилів — риболовля та відпочинок. Сайт будується." />
+  <meta property="og:title" content="Озеро Дідилів — сайт будується" />
+  <meta property="og:description" content="Якщо хочете порибачити — телефонуйте: 063 845 40 40" />
+  <meta property="og:type" content="website" />
+  <style>
+    :root{
+      --bg1:#e9f7f6;
+      --bg2:#d5f0ee;
+      --brand:#0E3A5B;
+      --accent:#F6B60A;
+      --text:#0E3A5B;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Helvetica Neue", Helvetica, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+    }
+    .card{
+      width:min(720px, 100%);
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      padding:28px;
+      text-align:center;
+      border:1px solid rgba(14,58,91,.08);
+    }
+    .logo{
+      display:block;
+      width:min(340px, 70%);
+      height:auto;
+      margin:0 auto 12px;
+      object-fit:contain;
+    }
+    .logo-ph{
+      display:none;
+      width:min(340px, 70%);
+      margin:0 auto 12px;
+      border:2px dashed rgba(14,58,91,.25);
+      border-radius:16px;
+      padding:22px;
+      color:rgba(14,58,91,.7);
+      font-weight:600;
+    }
+    h1{
+      margin:6px 0 8px;
+      font-size:clamp(22px, 3.5vw, 32px);
+      letter-spacing:.4px;
+    }
+    .subtitle{
+      margin:0 0 18px;
+      font-size:clamp(16px, 2.6vw, 18px);
+      opacity:.85;
+    }
+    .cta{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      background:var(--brand);
+      color:#fff;
+      text-decoration:none;
+      padding:14px 20px;
+      border-radius:12px;
+      font-weight:700;
+      margin:8px 6px;
+      transition:transform .05s ease, box-shadow .2s ease;
+      box-shadow:0 6px 16px rgba(14,58,91,.18);
+    }
+    .cta:hover{transform:translateY(-1px); box-shadow:0 10px 22px rgba(14,58,91,.22);}
+    .cta.secondary{background:#ffffff;color:var(--brand);border:2px solid var(--brand); box-shadow:none;}
+    .row{display:flex;justify-content:center;flex-wrap:wrap}
+    .tel{font-weight:800; letter-spacing:.5px}
+    footer{margin-top:16px; font-size:13px; opacity:.6}
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-label="Озеро Дідилів — сайт будується">
+    <img class="logo" src="logo.png" alt="Логотип Озеро Дідилів" onerror="this.style.display='none';document.getElementById('ph').style.display='block';" />
+    <div id="ph" class="logo-ph">Завантажте свій логотип як <strong>logo.png</strong></div>
+
+    <h1>Сайт будується</h1>
+    <p class="subtitle">Якщо хочете порибачити — телефонуйте:</p>
+
+    <div class="row">
+      <a class="cta" href="tel:+380638454040" aria-label="Подзвонити 063 845 40 40">
+        📞 <span class="tel">063&nbsp;845&nbsp;40&nbsp;40</span>
+      </a>
+      <a class="cta secondary" href="mailto:info@didyliv.com.ua" aria-label="Написати на email">
+        ✉️ Написати на email
+      </a>
+    </div>
+
+    <footer>© Озеро Дідилів</footer>
+  </main>
+</body>
+</html>
