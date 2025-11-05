@@ -23,11 +23,11 @@ button.danger{background:#fdd}
 .participant label{white-space:nowrap}
 .participant .sum{min-width:90px;text-align:right;font-weight:600}
 #totalSum{font-weight:700;text-align:right;margin-top:8px}
-.previewWrap{display:grid;gap:12px;margin-top:10px}
+.previewWrap{display:grid;grid-template-columns: 220px 220px 220px 220px;gap:5px;margin-top:10px}
 .ticketPreview{border:1px dashed #ddd;border-radius:8px;padding:12px;background:#fafafa}
-.ticketPreview pre{margin:0;font-family:monospace;font-size:13px;white-space:pre-wrap}
+.ticketPreview pre{margin:0;font-family:monospace;font-size:12px;white-space:pre-wrap}
 .ticketPreview .qr{margin-top:8px;text-align:center}
-.ticketPreview img.logo{display:block;margin:0 auto 6px auto;max-height:60px}
+.ticketPreview img.logo{display:block;margin:0 auto 6px auto;max-height:160px}
 #status{font-size:12px;color:#555;white-space:pre-wrap;margin-top:12px}
 .small{font-size:12px;color:#666}
 </style>
@@ -54,7 +54,7 @@ button.danger{background:#fdd}
   <legend>Дії</legend>
   <div class="row">
     <button id="connectBtn" class="warn">🔌 Підключити принтер</button>
-    <button id="previewBtn" class="secondary">👁️ Оновити превʼю</button>
+    <!-- <button id="previewBtn" class="secondary">👁️ Оновити превʼю</button> -->
     <button id="testBtn" class="secondary">🧪 Тестовий чек</button>
     <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
   </div>
@@ -109,6 +109,7 @@ function renderList(){
     wrap.appendChild(row);
   });
   updateTotals();
+  renderPreview();
 }
 function updateTotals(){
   const t=participants.reduce((s,p)=>s+calcSum(p),0);
