@@ -109,11 +109,11 @@ function renderList(){
     wrap.appendChild(row);
   });
   updateTotals();
-  renderPreview();
 }
 function updateTotals(){
   const t=participants.reduce((s,p)=>s+calcSum(p),0);
   $('totalSum').textContent=`Разом: ${t} грн`;
+  renderPreview();
 }
 $('add').onclick=addParticipant;
 $('remove').onclick=removeParticipant;
