@@ -166,53 +166,51 @@ const merge=(...a)=>{let l=0;for(const c of a)l+=c.length;const o=new Uint8Array
 let device=null, iface=0, altNumber=0, epOut=1;
 async function connect(auto = false) {
   try {
-    if (auto && device) return; // вже підключений
+    if (auto && device) return;
 
-    // 🟢 якщо це автопідключення — шукаємо збережений пристрій
+    // якщо дозволено — використовуємо наявний
     if (auto) {
-      const devices = await navigator.usb.getDevices();
-      if (devices.length > 0) {
-        device = devices[0];
-        await device.open();
-        if (!device.configuration) await device.selectConfiguration(1);
-        const intf = device.configuration.interfaces.find(i =>
-          i.alternates.some(a => a.endpoints.some(e => e.direction === 'out'))
-        );
-        if (!intf) throw new Error('OUT endpoint не знайдено');
-        iface = intf.interfaceNumber;
-        const alt = intf.alternates.find(a => a.endpoints.some(e => e.direction === 'out'));
-        altNumber = alt.alternateSetting;
-        epOut = alt.endpoints.find(e => e.direction === 'out').endpointNumber;
-        await device.claimInterface(iface);
-        await device.selectAlternateInterface(iface, altNumber);
-        await device.transferOut(epOut, new Uint8Array([ESC, 0x40]));
-        setStatus('✅ Автопідключено до збереженого принтера');
-        return;
-      }
+      const saved = await navigator.usb.getDevices();
+      if (saved.length) device = saved[0];
+    }
+    if (!device) {
+      device = await navigator.usb.requestDevice({ filters: [{}] });
     }
 
-    // 🔸 якщо авто не спрацювало — запитуємо вручну
-    device = await navigator.usb.requestDevice({ filters: [{}] });
     await device.open();
     if (!device.configuration) await device.selectConfiguration(1);
-    const chosen = device.configuration.interfaces
-      .flatMap(i => i.alternates.map(a => ({
-        iface: i.interfaceNumber,
-        alt: a.alternateSetting,
-        ep: a.endpoints.find(e => e.direction === 'out')
-      })))
-      .find(x => x.ep);
+
+    // знаходимо інтерфейс, де є OUT endpoint
+    let chosen = null;
+    for (const intf of device.configuration.interfaces) {
+      for (const alt of intf.alternates) {
+        const outEp = (alt.endpoints || []).find(e => e.direction === 'out');
+        if (outEp) {
+          chosen = { iface: intf.interfaceNumber, alt: alt.alternateSetting, ep: outEp.endpointNumber };
+          break;
+        }
+      }
+      if (chosen) break;
+    }
+    if (!chosen) throw new Error('OUT endpoint не знайдено');
+
     iface = chosen.iface;
     altNumber = chosen.alt;
-    epOut = chosen.ep.endpointNumber;
+    epOut = chosen.ep;
+
+    // обовʼязково reset (на Windows допомагає звільнити інтерфейс)
+    try { await device.reset(); } catch {}
+
     await device.claimInterface(iface);
     await device.selectAlternateInterface(iface, altNumber);
-    await device.transferOut(epOut, new Uint8Array([ESC, 0x40]));
-    setStatus('✅ Принтер підключено');
+    await device.transferOut(epOut, new Uint8Array([0x1B, 0x40])); // ESC @
+
+    setStatus(`✅ Підключено (iface=${iface}, alt=${altNumber}, epOut=${epOut})`);
   } catch (e) {
-    setStatus('Помилка підключення: ' + e.message);
+    setStatus('Помилка підключення: ' + e.message + '\n(спробуй перепідключити принтер і оновити сторінку)');
   }
 }
+
 $('connectBtn').onclick=connect;
 
 async function send(b){ if(!device){await connect(); if(!device) return;} await device.transferOut(epOut,b); }
