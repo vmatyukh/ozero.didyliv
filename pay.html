@@ -168,7 +168,6 @@ async function connect(auto = false) {
   try {
     if (auto && device) return;
 
-    // якщо дозволено — використовуємо наявний
     if (auto) {
       const saved = await navigator.usb.getDevices();
       if (saved.length) device = saved[0];
@@ -180,36 +179,23 @@ async function connect(auto = false) {
     await device.open();
     if (!device.configuration) await device.selectConfiguration(1);
 
-    // знаходимо інтерфейс, де є OUT endpoint
-    let chosen = null;
-    for (const intf of device.configuration.interfaces) {
-      for (const alt of intf.alternates) {
-        const outEp = (alt.endpoints || []).find(e => e.direction === 'out');
-        if (outEp) {
-          chosen = { iface: intf.interfaceNumber, alt: alt.alternateSetting, ep: outEp.endpointNumber };
-          break;
-        }
-      }
-      if (chosen) break;
-    }
-    if (!chosen) throw new Error('OUT endpoint не знайдено');
+    // ФІКС ДЛЯ ТВОГО ПРИНТЕРА:
+    iface = 0;
+    altNumber = 0;
+    epOut = 3;
 
-    iface = chosen.iface;
-    altNumber = chosen.alt;
-    epOut = chosen.ep;
-
-    // обовʼязково reset (на Windows допомагає звільнити інтерфейс)
     try { await device.reset(); } catch {}
 
     await device.claimInterface(iface);
     await device.selectAlternateInterface(iface, altNumber);
-    await device.transferOut(epOut, new Uint8Array([0x1B, 0x40])); // ESC @
+    await device.transferOut(epOut, new Uint8Array([0x1B, 0x40])); // ESC @ init
 
     setStatus(`✅ Підключено (iface=${iface}, alt=${altNumber}, epOut=${epOut})`);
   } catch (e) {
     setStatus('Помилка підключення: ' + e.message + '\n(спробуй перепідключити принтер і оновити сторінку)');
   }
 }
+
 
 $('connectBtn').onclick=connect;
 
@@ -382,7 +368,8 @@ $('printBtn').onclick=async()=>{
 };
 
 /* Кнопка превʼю для візуальної перевірки */
-$('previewBtn').onclick=renderPreview;
+const prvBtn = $('previewBtn');
+if (prvBtn) prvBtn.onclick = renderPreview;
 </script>
 </body>
 </html>
