@@ -153,7 +153,8 @@ function renderPreview(){
   }
   setStatus('✅ Превʼю оновлено');
 }
-$('previewBtn').onclick=renderPreview;
+const prvBtn = $('previewBtn');
+if (prvBtn) prvBtn.onclick = renderPreview;
 
 /* ===== ESC/POS / WebUSB ===== */
 const ESC=0x1B, GS=0x1D;
