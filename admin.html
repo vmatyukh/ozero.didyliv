@@ -68,8 +68,7 @@ button.danger{background:#fdd}
 </head>
 <body>
 <header>
-  <img id="logo" src="logo_white.svg" alt="Логотип Озеро Дідилів">
-  <img id="logoPrint" src="logo.png" alt="" style="display:none">
+  <img id="logo" src="logo.png" alt="Логотип Озеро Дідилів">
   <div><h2 style="margin:0">Адмінка — Озеро Дідилів</h2><p style="margin:2px 0 0;color:#666;font-size:13px">Система друку чеків та бронювання</p></div>
 </header>
 
@@ -296,7 +295,7 @@ function rasterFromCanvas(canvas,threshold=160){
   return merge(new Uint8Array([GS,0x76,0x30,0x00,xL,xH,yL,yH]),raster);
 }
 async function logoRaster(){
-  const img=$('logoPrint') || $('logo');
+  const img=$('logo');
   if(!img.complete)await new Promise((r,j)=>{img.onload=r;img.onerror=()=>j(new Error('Лого'));});
   const nw=img.naturalWidth,nh=img.naturalHeight;
   const sc=Math.min(1,PRINT_WIDTH/nw),w=Math.round(nw*sc),h=Math.round(nh*sc);
@@ -371,9 +370,9 @@ $('printBtn').onclick=async()=>{
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:600 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:600 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:800 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:500 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:500 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:700 },
   ]
 };
 
