@@ -409,6 +409,10 @@ async function submitBooking(){
       `Сектор ${selectedSector} • ${SESSION_LABELS[selectedSession]} • ${d2}.${m}.${y}`;
     document.getElementById('bookingForm').style.display='none';
     document.getElementById('successMsg').style.display='block';
+    // Ховаємо кнопку підтвердження
+    const bookBtn = document.getElementById('bookBtn');
+    if(bookBtn) bookBtn.style.display='none';
+    if(window.Telegram?.WebApp?.MainButton) window.Telegram.WebApp.MainButton.hide();
   }catch(e){
     showLoading(false);
     const eg=document.getElementById('errGeneral');
@@ -424,6 +428,9 @@ function resetForm(){
   document.getElementById('inputDate').value=todayStr;
   document.getElementById('bookingForm').style.display='block';
   document.getElementById('successMsg').style.display='none';
+  // Повертаємо кнопку (якщо не Telegram)
+  const bookBtn = document.getElementById('bookBtn');
+  if(bookBtn && !window.Telegram?.WebApp) bookBtn.style.display='block';
   loadSectors(); updateSummary();
 }
 
