@@ -15,14 +15,14 @@ fieldset{border:1px solid #ccc;border-radius:10px;padding:12px 16px;margin-botto
 legend{font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:12px}
 button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;font-size:14px}
-button.primary{background:#2a7;color:#fff}
+button.primary{background:#005356;color:#fff}
 button.secondary{background:#eef}
 button.warn{background:#ffd966}
 button.danger{background:#fdd}
 /* Tabs */
-.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid #2a7}
+.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid #005356}
 .tab-btn{padding:10px 24px;border:1px solid #ccc;border-bottom:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f5f5f5;font-size:15px;font-weight:600;margin-right:4px}
-.tab-btn.active{background:#fff;border-color:#2a7;border-bottom:2px solid #fff;color:#2a7;margin-bottom:-2px}
+.tab-btn.active{background:#fff;border-color:#005356;border-bottom:2px solid #fff;color:#005356;margin-bottom:-2px}
 .tab-content{display:none;padding-top:18px}
 .tab-content.active{display:block}
 /* Спінінг */
@@ -41,15 +41,15 @@ button.danger{background:#fdd}
 .float-filter input[type=date]{padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
 .session-tabs{display:flex;gap:6px;margin-bottom:12px}
 .stab{padding:7px 16px;border:2px solid #ccc;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;background:#fff}
-.stab.active{border-color:#2a7;background:#e8f5e9;color:#2a7}
+.stab.active{border-color:#005356;background:#e0f0f0;color:#005356}
 /* Таблиця секторів */
 .sectors-table{width:100%;border-collapse:collapse}
 .sectors-table th,.sectors-table td{border:1px solid #ddd;padding:8px 10px;font-size:13px;text-align:left;vertical-align:middle}
-.sectors-table th{background:#e8f5e9;font-weight:600}
+.sectors-table th{background:#e0f0f0;font-weight:600}
 .sectors-table tr.booked-row td{background:#fff8e1}
 .sectors-table tr.free-row td{background:#f9fdf9}
 .status-badge{font-weight:700;font-size:12px;padding:3px 8px;border-radius:12px}
-.status-badge.free{background:#e8f5e9;color:#2a7}
+.status-badge.free{background:#e0f0f0;color:#005356}
 .status-badge.booked{background:#fff3e0;color:#e67e00}
 .act-btns{display:flex;gap:6px;flex-wrap:wrap}
 .act-btns button{padding:5px 10px;font-size:12px}
@@ -62,13 +62,14 @@ button.danger{background:#fdd}
 #status,#statusFloat{font-size:12px;color:#555;white-space:pre-wrap;margin-top:12px}
 /* Stats */
 .stats-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
-.stat-card{background:#e8f5e9;border-radius:10px;padding:10px 18px;font-size:13px;text-align:center}
-.stat-card strong{display:block;font-size:22px;color:#1a6b3a}
+.stat-card{background:#e0f0f0;border-radius:10px;padding:10px 18px;font-size:13px;text-align:center}
+.stat-card strong{display:block;font-size:22px;color:#005356}
 </style>
 </head>
 <body>
 <header>
-  <img id="logo" src="logo.png" alt="Логотип Озеро Дідилів">
+  <img id="logo" src="logo_white.svg" alt="Логотип Озеро Дідилів">
+  <img id="logoPrint" src="logo.png" alt="" style="display:none">
   <div><h2 style="margin:0">Адмінка — Озеро Дідилів</h2><p style="margin:2px 0 0;color:#666;font-size:13px">Система друку чеків та бронювання</p></div>
 </header>
 
@@ -113,11 +114,7 @@ button.danger{background:#fdd}
     <button class="secondary" onclick="setFloatDate(1)">Завтра ▶</button>
   </div>
 
-  <div class="session-tabs">
-    <div class="stab active" data-session="morning" onclick="selectFloatSession(this)">🌅 Ранкова (6:00–13:00) — 500 грн</div>
-    <div class="stab" data-session="evening" onclick="selectFloatSession(this)">🌆 Вечірня (14:00–21:00) — 500 грн</div>
-    <div class="stab" data-session="fullday" onclick="selectFloatSession(this)">☀️ Повний день (6:00–21:00) — 700 грн</div>
-  </div>
+  <div class="session-tabs" id="sessionTabs"></div>
 
   <div class="stats-bar" id="floatStats"></div>
 
@@ -299,7 +296,7 @@ function rasterFromCanvas(canvas,threshold=160){
   return merge(new Uint8Array([GS,0x76,0x30,0x00,xL,xH,yL,yH]),raster);
 }
 async function logoRaster(){
-  const img=$('logo');
+  const img=$('logoPrint') || $('logo');
   if(!img.complete)await new Promise((r,j)=>{img.onload=r;img.onerror=()=>j(new Error('Лого'));});
   const nw=img.naturalWidth,nh=img.naturalHeight;
   const sc=Math.min(1,PRINT_WIDTH/nw),w=Math.round(nw*sc),h=Math.round(nh*sc);
@@ -369,8 +366,27 @@ $('printBtn').onclick=async()=>{
 };
 
 /* ===== ПОПЛАВЦЕВЕ — Firebase ===== */
-const SESSION_LABELS={morning:'Ранкова (6:00–13:00)',evening:'Вечірня (14:00–21:00)',fullday:'Повний день (6:00–21:00)'};
-const SESSION_PRICES={morning:500,evening:500,fullday:700};
+/* ============================================================
+   ⚙️ КОНФІГ — змінюй тільки тут
+   ============================================================ */
+const CONFIG = {
+  sessions: [
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:500 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:500 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:700 },
+  ]
+};
+
+const SESSION_LABELS = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,`${s.name} (${s.time})`]));
+const SESSION_PRICES = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,s.price]));
+const SESSION_UK     = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,s.name]));
+
+// Генеруємо таби сесій
+document.getElementById('sessionTabs').innerHTML = CONFIG.sessions.map((s,i)=>`
+  <div class="stab${i===0?' active':''}" data-session="${s.key}" onclick="selectFloatSession(this)">
+    ${s.icon} ${s.name} (${s.time}) — ${s.price} грн
+  </div>`).join('');
+
 let floatSession='morning';
 let floatBookings={}; // key -> booking obj
 let floatBlocked={};
@@ -445,7 +461,6 @@ function renderFloatTable(){
     if(val&&val.sector) sectorMap[val.sector]={key,...val};
   });
 
-  const SESSION_UK={morning:'Ранкова',evening:'Вечірня',fullday:'Повний день'};
   let bookedCount=0;
   for(let i=1;i<=11;i++){
     const b=sectorMap[i];
@@ -487,7 +502,7 @@ function renderFloatTable(){
       const formRow=document.createElement('tr');
       formRow.id=`manualRow_${i}`;
       formRow.style.display='none';
-      formRow.innerHTML=`<td colspan="6" style="background:#f0f7f0;padding:8px 10px">
+      formRow.innerHTML=`<td colspan="6" style="background:#e0f2f2;padding:8px 10px">
         <div class="manual-form">
           <input type="text" id="mname_${i}" placeholder="Імʼя">
           <input type="tel" id="mphone_${i}" placeholder="Телефон">
