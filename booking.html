@@ -79,8 +79,12 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       <div class="form-group">
         <label>Дата риболовлі</label>
         <div class="date-wrap">
-          <input type="date" id="inputDate" min="">
-          <div class="date-display" id="dateDisplay">Оберіть дату</div>
+          <div id="dateDisplay" onclick="document.getElementById('inputDate').showPicker?document.getElementById('inputDate').showPicker():document.getElementById('inputDate').click()"
+            style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;color:#222;background:#fff;cursor:pointer;box-sizing:border-box;user-select:none">
+            Оберіть дату
+          </div>
+          <input type="date" id="inputDate" min=""
+            style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none">
         </div>
       </div>
     </div>
