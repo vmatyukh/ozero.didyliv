@@ -128,55 +128,74 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
         <line x1="100" y1="375" x2="545" y2="375" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity="0.45"/>
         <text x="322" y="393" text-anchor="middle" font-size="11" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.75">Дамба</text>
 
-        <!-- REED GRASS — top bank (thin curved blades) -->
-        <g stroke="#5a8a2a" stroke-linecap="round" fill="none" opacity="0.7">
-          <!-- each blade: short curved path, vary height and lean -->
-          <path d="M192,62 Q190,48 188,38" stroke-width="1.2"/>
-          <path d="M200,60 Q200,44 202,33" stroke-width="1.4"/>
-          <path d="M208,59 Q209,46 211,37" stroke-width="1.1"/>
-          <path d="M218,58 Q220,43 218,32" stroke-width="1.3"/>
-          <path d="M228,56 Q230,42 232,32" stroke-width="1.2"/>
-          <path d="M238,55 Q240,41 238,30" stroke-width="1.4"/>
-          <path d="M250,54 Q252,40 254,30" stroke-width="1.1"/>
-          <path d="M262,53 Q264,39 262,29" stroke-width="1.3"/>
-          <path d="M274,52 Q276,38 278,28" stroke-width="1.2"/>
-          <path d="M286,52 Q288,37 286,27" stroke-width="1.4"/>
-          <path d="M298,51 Q300,36 302,27" stroke-width="1.1"/>
-          <path d="M310,51 Q312,36 310,26" stroke-width="1.3"/>
-          <path d="M322,51 Q324,36 322,26" stroke-width="1.2"/>
-          <path d="M334,51 Q336,36 334,26" stroke-width="1.4"/>
-          <path d="M346,52 Q348,37 350,27" stroke-width="1.1"/>
-          <path d="M358,52 Q360,38 362,28" stroke-width="1.3"/>
-          <path d="M370,53 Q372,39 374,29" stroke-width="1.2"/>
-          <path d="M382,54 Q384,40 386,31" stroke-width="1.4"/>
-          <path d="M394,56 Q396,42 398,33" stroke-width="1.1"/>
-          <path d="M406,58 Q408,44 410,35" stroke-width="1.3"/>
-          <path d="M418,60 Q420,46 420,37" stroke-width="1.2"/>
-          <path d="M428,62 Q430,49 430,40" stroke-width="1.4"/>
+        <!-- GRASS clumps — top bank -->
+        <!-- Each clump: blades fan out from base, wide at root, sharp tip -->
+        <g fill="#6abf1a" opacity="0.85">
+          <!-- clump 1 -->
+          <path d="M200,64 Q194,42 196,22 Q200,40 204,22 Q206,42 200,64Z" fill="#7dd620"/>
+          <path d="M200,64 Q188,48 182,30 Q194,44 200,64Z" fill="#6abf1a"/>
+          <path d="M200,64 Q212,48 218,30 Q206,44 200,64Z" fill="#6abf1a"/>
+          <path d="M200,64 Q178,52 170,38 Q190,50 200,64Z" fill="#5aae10"/>
+          <path d="M200,64 Q222,52 230,38 Q210,50 200,64Z" fill="#5aae10"/>
+          <!-- clump 2 -->
+          <path d="M270,60 Q264,38 266,18 Q270,36 274,18 Q276,38 270,60Z" fill="#7dd620"/>
+          <path d="M270,60 Q258,44 252,26 Q264,40 270,60Z" fill="#6abf1a"/>
+          <path d="M270,60 Q282,44 288,26 Q276,40 270,60Z" fill="#6abf1a"/>
+          <path d="M270,60 Q248,48 240,34 Q260,46 270,60Z" fill="#5aae10"/>
+          <path d="M270,60 Q292,48 300,34 Q280,46 270,60Z" fill="#5aae10"/>
+          <!-- clump 3 -->
+          <path d="M340,62 Q334,40 336,20 Q340,38 344,20 Q346,40 340,62Z" fill="#7dd620"/>
+          <path d="M340,62 Q328,46 322,28 Q334,42 340,62Z" fill="#6abf1a"/>
+          <path d="M340,62 Q352,46 358,28 Q346,42 340,62Z" fill="#6abf1a"/>
+          <path d="M340,62 Q318,50 310,36 Q330,48 340,62Z" fill="#5aae10"/>
+          <path d="M340,62 Q362,50 370,36 Q350,48 340,62Z" fill="#5aae10"/>
+          <!-- clump 4 -->
+          <path d="M410,68 Q404,46 406,26 Q410,44 414,26 Q416,46 410,68Z" fill="#7dd620"/>
+          <path d="M410,68 Q398,52 392,34 Q404,48 410,68Z" fill="#6abf1a"/>
+          <path d="M410,68 Q422,52 428,34 Q416,48 410,68Z" fill="#6abf1a"/>
+          <path d="M410,68 Q388,56 380,42 Q400,54 410,68Z" fill="#5aae10"/>
+          <path d="M410,68 Q432,56 440,42 Q420,54 410,68Z" fill="#5aae10"/>
         </g>
 
-        <!-- REED GRASS — right bank -->
-        <g stroke="#5a8a2a" stroke-linecap="round" fill="none" opacity="0.65">
-          <path d="M612,155 Q622,148 628,138" stroke-width="1.2"/>
-          <path d="M614,170 Q625,164 632,154" stroke-width="1.4"/>
-          <path d="M616,187 Q627,181 634,171" stroke-width="1.1"/>
-          <path d="M617,204 Q628,198 636,188" stroke-width="1.3"/>
-          <path d="M618,221 Q630,215 637,205" stroke-width="1.2"/>
-          <path d="M617,238 Q629,232 637,222" stroke-width="1.4"/>
-          <path d="M616,255 Q628,249 636,239" stroke-width="1.1"/>
-          <path d="M615,272 Q627,266 635,256" stroke-width="1.3"/>
-          <path d="M613,289 Q625,283 632,273" stroke-width="1.2"/>
-          <path d="M611,306 Q622,300 629,290" stroke-width="1.4"/>
-          <path d="M608,323 Q619,317 625,307" stroke-width="1.1"/>
+        <!-- GRASS clumps — right bank (rotated, leaning left) -->
+        <g fill="#6abf1a" opacity="0.8">
+          <path d="M620,170 Q630,150 642,136 Q628,154 620,170Z" fill="#7dd620"/>
+          <path d="M620,170 Q636,158 648,148 Q630,160 620,170Z" fill="#6abf1a"/>
+          <path d="M620,170 Q626,148 624,130 Q622,150 620,170Z" fill="#5aae10"/>
+          <path d="M620,170 Q612,150 606,136 Q616,154 620,170Z" fill="#6abf1a"/>
+
+          <path d="M618,210 Q628,190 640,176 Q626,194 618,210Z" fill="#7dd620"/>
+          <path d="M618,210 Q634,198 646,188 Q628,200 618,210Z" fill="#6abf1a"/>
+          <path d="M618,210 Q622,188 620,170 Q618,190 618,210Z" fill="#5aae10"/>
+          <path d="M618,210 Q610,190 604,176 Q614,194 618,210Z" fill="#6abf1a"/>
+
+          <path d="M615,252 Q625,232 637,218 Q623,236 615,252Z" fill="#7dd620"/>
+          <path d="M615,252 Q631,240 643,230 Q625,242 615,252Z" fill="#6abf1a"/>
+          <path d="M615,252 Q619,230 617,212 Q615,232 615,252Z" fill="#5aae10"/>
+          <path d="M615,252 Q607,232 601,218 Q611,236 615,252Z" fill="#6abf1a"/>
+
+          <path d="M612,294 Q622,274 634,260 Q620,278 612,294Z" fill="#7dd620"/>
+          <path d="M612,294 Q628,282 640,272 Q622,284 612,294Z" fill="#6abf1a"/>
+          <path d="M612,294 Q616,272 614,254 Q612,274 612,294Z" fill="#5aae10"/>
+          <path d="M612,294 Q604,274 598,260 Q608,278 612,294Z" fill="#6abf1a"/>
         </g>
 
-        <!-- REED GRASS — left bank -->
-        <g stroke="#5a8a2a" stroke-linecap="round" fill="none" opacity="0.65">
-          <path d="M68,280 Q57,273 50,263" stroke-width="1.2"/>
-          <path d="M66,298 Q55,291 48,281" stroke-width="1.4"/>
-          <path d="M67,316 Q56,309 49,299" stroke-width="1.1"/>
-          <path d="M70,334 Q59,327 52,317" stroke-width="1.3"/>
-          <path d="M76,350 Q65,343 59,333" stroke-width="1.2"/>
+        <!-- GRASS clumps — left bank -->
+        <g fill="#6abf1a" opacity="0.8">
+          <path d="M62,282 Q52,262 40,248 Q54,266 62,282Z" fill="#7dd620"/>
+          <path d="M62,282 Q46,270 34,260 Q50,272 62,282Z" fill="#6abf1a"/>
+          <path d="M62,282 Q58,260 60,242 Q62,262 62,282Z" fill="#5aae10"/>
+          <path d="M62,282 Q70,262 76,248 Q66,266 62,282Z" fill="#6abf1a"/>
+
+          <path d="M65,318 Q55,298 43,284 Q57,302 65,318Z" fill="#7dd620"/>
+          <path d="M65,318 Q49,306 37,296 Q53,308 65,318Z" fill="#6abf1a"/>
+          <path d="M65,318 Q61,296 63,278 Q65,298 65,318Z" fill="#5aae10"/>
+          <path d="M65,318 Q73,298 79,284 Q69,302 65,318Z" fill="#6abf1a"/>
+
+          <path d="M70,352 Q60,332 48,318 Q62,336 70,352Z" fill="#7dd620"/>
+          <path d="M70,352 Q54,340 42,330 Q58,342 70,352Z" fill="#6abf1a"/>
+          <path d="M70,352 Q66,330 68,312 Q70,332 70,352Z" fill="#5aae10"/>
+          <path d="M70,352 Q78,332 84,318 Q74,336 70,352Z" fill="#6abf1a"/>
         </g>
 
         <!-- SECTORS — placed along the dam shore inside the lake -->
