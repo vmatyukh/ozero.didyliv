@@ -423,7 +423,7 @@ function loadFloatBookings(){
       floatBlocked={};
       Object.entries(combined).forEach(([sector,val])=>{
         if(val.session===floatSession) floatBookings[val.key]=val;
-        else floatBlocked[sector]=val.session;
+        else floatBlocked[sector]={session:val.session, key:val.key};
       });
       renderFloatTable();
     });
@@ -461,12 +461,13 @@ function renderFloatTable(){
     if(isBooked){
       statusBadge=`<span class="status-badge booked">🔴 Зайнято</span>`;
       nameCell=b.name||'—'; phoneCell=b.phone||'—'; timeCell=createdAt;
-      actCell=`<button class="danger" onclick="adminCancel('${b.key}',${i})">❌ Скасувати</button>
+      actCell=`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>
                <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
     } else if(isBlocked){
-      statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[blockedBy]}</span>`;
+      const bl=floatBlocked[i];
+      statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[bl.session]}</span>`;
       nameCell='—'; phoneCell='—'; timeCell='—';
-      actCell=`<span style="font-size:12px;color:#888">Заблоковано (${SESSION_UK[blockedBy]})</span>`;
+      actCell=`<button class="danger" onclick="adminCancel('${bl.key}',${i},'${bl.session}')">❌ Скасувати</button>`;
     } else {
       statusBadge=`<span class="status-badge free">🟢 Вільно</span>`;
       nameCell='—'; phoneCell='—'; timeCell='—';
@@ -525,11 +526,12 @@ async function adminBook(i){
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 }
 
-async function adminCancel(key,sectorNum){
+async function adminCancel(key,sectorNum,session){
+  const s=session||floatSession;
   if(!confirm(`Скасувати бронювання сектору ${sectorNum}?`))return;
   const date=$('floatDate').value;
   try{
-    await db.ref(`bookings/${date}/${floatSession}/${key}`).remove();
+    await db.ref(`bookings/${date}/${s}/${key}`).remove();
     setStatusFloat(`Сектор ${sectorNum} звільнено`);
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 }
