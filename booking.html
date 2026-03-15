@@ -110,61 +110,80 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <!-- Крок 3: Сектор -->
     <div class="card" style="padding:16px 12px">
       <h2 style="margin-bottom:12px">🎣 Крок 3 — Оберіть сектор</h2>
-      <svg id="lakeMap" viewBox="0 0 680 460" style="display:block;width:100%;height:auto;touch-action:manipulation">
+      <svg id="lakeMap" viewBox="0 0 680 420" style="display:block;width:100%;height:auto;touch-action:manipulation">
 
-        <!-- Lake fill — bigger, centered -->
-        <polygon points="100,220 370,60 570,105 610,295 545,385 100,385 55,325" fill="#1a5c7a" opacity="0.2"/>
-        <polygon points="100,220 370,60 570,105 610,295 545,385 100,385 55,325" fill="none" stroke="#2a8aac" stroke-width="2.5" opacity="0.8"/>
+        <!-- Lake fill -->
+        <polygon points="100,210 370,55 570,100 610,285 545,375 100,375 55,315" fill="#1a5c7a" opacity="0.2"/>
+        <polygon points="100,210 370,55 570,100 610,285 545,375 100,375 55,315" fill="none" stroke="#2a8aac" stroke-width="2" opacity="0.75"/>
 
         <!-- Water ripples -->
-        <path d="M 95 250 Q 340 235 595 252" fill="none" stroke="#2a8aac" stroke-width="0.7" opacity="0.18"/>
-        <path d="M 80 300 Q 340 285 600 302" fill="none" stroke="#2a8aac" stroke-width="0.7" opacity="0.18"/>
-        <path d="M 88 350 Q 330 336 545 352" fill="none" stroke="#2a8aac" stroke-width="0.7" opacity="0.18"/>
+        <path d="M 105 250 Q 335 237 590 252" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.16"/>
+        <path d="M  92 295 Q 330 282 592 297" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.14"/>
+        <path d="M  95 338 Q 320 326 538 340" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.13"/>
 
         <!-- Lake label -->
-        <text x="340" y="230" text-anchor="middle" font-size="15" fill="#1a5c7a" opacity="0.6" font-family="system-ui,sans-serif">Поплавцеве озеро</text>
+        <text x="335" y="222" text-anchor="middle" font-size="14" fill="#1a5c7a" opacity="0.55" font-family="system-ui,sans-serif">Поплавцеве озеро</text>
 
-        <!-- Dam dashed line -->
-        <line x1="100" y1="385" x2="545" y2="385" stroke="#8B7355" stroke-width="2.5" stroke-dasharray="7 4" opacity="0.5"/>
-        <text x="322" y="403" text-anchor="middle" font-size="12" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.8">Дамба</text>
+        <!-- Dam -->
+        <line x1="100" y1="375" x2="545" y2="375" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity="0.45"/>
+        <text x="322" y="393" text-anchor="middle" font-size="11" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.75">Дамба</text>
 
-        <!-- REEDS — top bank -->
-        <!-- Reed = thin stem + oval head -->
-        <g opacity="0.55" stroke="#4a7a2a" fill="#4a7a2a">
-          <!-- top area ~x=180..430, y~40-65 -->
-          <line x1="195" y1="65" x2="195" y2="42" stroke-width="1.5"/><ellipse cx="195" cy="39" rx="3" ry="6" fill="#5a8a30"/>
-          <line x1="215" y1="62" x2="215" y2="36" stroke-width="1.5"/><ellipse cx="215" cy="33" rx="3" ry="6" fill="#4a7a2a"/>
-          <line x1="235" y1="60" x2="235" y2="38" stroke-width="1.5"/><ellipse cx="235" cy="35" rx="2.5" ry="5" fill="#5a8a30"/>
-          <line x1="255" y1="60" x2="255" y2="35" stroke-width="1.5"/><ellipse cx="255" cy="32" rx="3" ry="6" fill="#4a7a2a"/>
-          <line x1="278" y1="58" x2="278" y2="33" stroke-width="1.5"/><ellipse cx="278" cy="30" rx="2.5" ry="5" fill="#5a8a30"/>
-          <line x1="300" y1="57" x2="300" y2="32" stroke-width="1.5"/><ellipse cx="300" cy="29" rx="3" ry="6" fill="#4a7a2a"/>
-          <line x1="322" y1="56" x2="322" y2="31" stroke-width="1.5"/><ellipse cx="322" cy="28" rx="2.5" ry="5" fill="#5a8a30"/>
-          <line x1="344" y1="57" x2="344" y2="32" stroke-width="1.5"/><ellipse cx="344" cy="29" rx="3" ry="6" fill="#4a7a2a"/>
-          <line x1="366" y1="58" x2="366" y2="34" stroke-width="1.5"/><ellipse cx="366" cy="31" rx="2.5" ry="5" fill="#5a8a30"/>
-          <line x1="388" y1="60" x2="388" y2="36" stroke-width="1.5"/><ellipse cx="388" cy="33" rx="3" ry="6" fill="#4a7a2a"/>
-          <line x1="410" y1="62" x2="410" y2="40" stroke-width="1.5"/><ellipse cx="410" cy="37" rx="2.5" ry="5" fill="#5a8a30"/>
-          <line x1="430" y1="65" x2="430" y2="44" stroke-width="1.5"/><ellipse cx="430" cy="41" rx="3" ry="6" fill="#4a7a2a"/>
+        <!-- REED GRASS — top bank (thin curved blades) -->
+        <g stroke="#5a8a2a" stroke-linecap="round" fill="none" opacity="0.7">
+          <!-- each blade: short curved path, vary height and lean -->
+          <path d="M192,62 Q190,48 188,38" stroke-width="1.2"/>
+          <path d="M200,60 Q200,44 202,33" stroke-width="1.4"/>
+          <path d="M208,59 Q209,46 211,37" stroke-width="1.1"/>
+          <path d="M218,58 Q220,43 218,32" stroke-width="1.3"/>
+          <path d="M228,56 Q230,42 232,32" stroke-width="1.2"/>
+          <path d="M238,55 Q240,41 238,30" stroke-width="1.4"/>
+          <path d="M250,54 Q252,40 254,30" stroke-width="1.1"/>
+          <path d="M262,53 Q264,39 262,29" stroke-width="1.3"/>
+          <path d="M274,52 Q276,38 278,28" stroke-width="1.2"/>
+          <path d="M286,52 Q288,37 286,27" stroke-width="1.4"/>
+          <path d="M298,51 Q300,36 302,27" stroke-width="1.1"/>
+          <path d="M310,51 Q312,36 310,26" stroke-width="1.3"/>
+          <path d="M322,51 Q324,36 322,26" stroke-width="1.2"/>
+          <path d="M334,51 Q336,36 334,26" stroke-width="1.4"/>
+          <path d="M346,52 Q348,37 350,27" stroke-width="1.1"/>
+          <path d="M358,52 Q360,38 362,28" stroke-width="1.3"/>
+          <path d="M370,53 Q372,39 374,29" stroke-width="1.2"/>
+          <path d="M382,54 Q384,40 386,31" stroke-width="1.4"/>
+          <path d="M394,56 Q396,42 398,33" stroke-width="1.1"/>
+          <path d="M406,58 Q408,44 410,35" stroke-width="1.3"/>
+          <path d="M418,60 Q420,46 420,37" stroke-width="1.2"/>
+          <path d="M428,62 Q430,49 430,40" stroke-width="1.4"/>
         </g>
 
-        <!-- REEDS — right bank -->
-        <g opacity="0.55" stroke="#4a7a2a" fill="#4a7a2a">
-          <line x1="615" y1="175" x2="632" y2="155" stroke-width="1.5"/><ellipse cx="634" cy="152" rx="3" ry="6" transform="rotate(15,634,152)" fill="#5a8a30"/>
-          <line x1="620" y1="205" x2="638" y2="185" stroke-width="1.5"/><ellipse cx="640" cy="182" rx="3" ry="6" transform="rotate(15,640,182)" fill="#4a7a2a"/>
-          <line x1="618" y1="235" x2="636" y2="215" stroke-width="1.5"/><ellipse cx="638" cy="212" rx="2.5" ry="5" transform="rotate(15,638,212)" fill="#5a8a30"/>
-          <line x1="620" y1="265" x2="638" y2="245" stroke-width="1.5"/><ellipse cx="640" cy="242" rx="3" ry="6" transform="rotate(15,640,242)" fill="#4a7a2a"/>
-          <line x1="616" y1="295" x2="634" y2="275" stroke-width="1.5"/><ellipse cx="636" cy="272" rx="2.5" ry="5" transform="rotate(15,636,272)" fill="#5a8a30"/>
-          <line x1="614" y1="325" x2="632" y2="305" stroke-width="1.5"/><ellipse cx="634" cy="302" rx="3" ry="6" transform="rotate(15,634,302)" fill="#4a7a2a"/>
+        <!-- REED GRASS — right bank -->
+        <g stroke="#5a8a2a" stroke-linecap="round" fill="none" opacity="0.65">
+          <path d="M612,155 Q622,148 628,138" stroke-width="1.2"/>
+          <path d="M614,170 Q625,164 632,154" stroke-width="1.4"/>
+          <path d="M616,187 Q627,181 634,171" stroke-width="1.1"/>
+          <path d="M617,204 Q628,198 636,188" stroke-width="1.3"/>
+          <path d="M618,221 Q630,215 637,205" stroke-width="1.2"/>
+          <path d="M617,238 Q629,232 637,222" stroke-width="1.4"/>
+          <path d="M616,255 Q628,249 636,239" stroke-width="1.1"/>
+          <path d="M615,272 Q627,266 635,256" stroke-width="1.3"/>
+          <path d="M613,289 Q625,283 632,273" stroke-width="1.2"/>
+          <path d="M611,306 Q622,300 629,290" stroke-width="1.4"/>
+          <path d="M608,323 Q619,317 625,307" stroke-width="1.1"/>
         </g>
 
-        <!-- REEDS — left bank -->
-        <g opacity="0.55" stroke="#4a7a2a" fill="#4a7a2a">
-          <line x1="44" y1="290" x2="30" y2="270" stroke-width="1.5"/><ellipse cx="28" cy="267" rx="3" ry="6" transform="rotate(-15,28,267)" fill="#5a8a30"/>
-          <line x1="46" y1="318" x2="32" y2="298" stroke-width="1.5"/><ellipse cx="30" cy="295" rx="3" ry="6" transform="rotate(-15,30,295)" fill="#4a7a2a"/>
-          <line x1="50" y1="348" x2="36" y2="328" stroke-width="1.5"/><ellipse cx="34" cy="325" rx="2.5" ry="5" transform="rotate(-15,34,325)" fill="#5a8a30"/>
+        <!-- REED GRASS — left bank -->
+        <g stroke="#5a8a2a" stroke-linecap="round" fill="none" opacity="0.65">
+          <path d="M68,280 Q57,273 50,263" stroke-width="1.2"/>
+          <path d="M66,298 Q55,291 48,281" stroke-width="1.4"/>
+          <path d="M67,316 Q56,309 49,299" stroke-width="1.1"/>
+          <path d="M70,334 Q59,327 52,317" stroke-width="1.3"/>
+          <path d="M76,350 Q65,343 59,333" stroke-width="1.2"/>
         </g>
 
-        <!-- Sector rects — generated by JS -->
-        <g id="sectorRects" font-family="system-ui,sans-serif" font-size="13" font-weight="600" text-anchor="middle"></g>
+        <!-- SECTORS — placed along the dam shore inside the lake -->
+        <!-- Dam runs x=100..545 at y=375. Place sectors just above dam. -->
+        <!-- 11 sectors, w=40, h=36, gap=2, total=11*40+10*2=460, startX=(645-460)/2=92 → but dam starts at 100, so startX=100+(445-460)/2 → fit in dam width 445: sector_w=38, gap=2, total=11*38+10*2=438, startX=100+3=103 -->
+        <g id="sectorRects" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle"></g>
+
       </svg>
 
       <div class="legend" style="margin-top:10px">
@@ -297,10 +316,11 @@ function renderSectors(booked){
   // Dam: x=173..539 = 366px. 11*(44+2)-2 = 504 > 366, so place in dam center area
   // Use viewBox width 680, center sectors under lake
   // Two rows if needed — fit all 11 in one row: total=11*44+10*2=504, startX=(680-504)/2=88
-  const w=40, h=44, gap=2;
-  const totalW = 11*w + 10*gap;
-  const startX = Math.round((680 - totalW) / 2);
-  const y = 408;
+  // Dam: x=100..545 = 445px. Sectors inside lake just above dam.
+  // w=38, gap=2, total=11*38+10*2=438, startX=100+3=103
+  const w=38, h=38, gap=2;
+  const startX = 103;
+  const y = 328;
 
   for(let i=1;i<=SECTORS_COUNT;i++){
     const x = startX + (i-1)*(w+gap);
