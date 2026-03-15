@@ -373,7 +373,8 @@ const SESSION_LABELS={morning:'Ранкова (6:00–13:00)',evening:'Вечі�
 const SESSION_PRICES={morning:500,evening:500,fullday:700};
 let floatSession='morning';
 let floatBookings={}; // key -> booking obj
-let floatUnsub=null;
+let floatBlocked={};
+let floatUnsubs=[];
 
 const todayStr=new Date().toISOString().split('T')[0];
 $('floatDate').value=todayStr;
@@ -391,17 +392,48 @@ function selectFloatSession(el){
   loadFloatBookings();
 }
 
+function conflictingSessions(session){
+  if(session==='fullday') return ['morning','evening','fullday'];
+  if(session==='morning') return ['morning','fullday'];
+  if(session==='evening') return ['evening','fullday'];
+  return [session];
+}
+
+// floatBookings — бронювання поточної сесії {key->obj}
+// floatBlocked — сектори заблоковані через інші сесії {sectorNum->sessionName}
+let floatBlocked={};
+let floatUnsubs=[];
+
 function loadFloatBookings(){
   const date=$('floatDate').value;
-  if(floatUnsub){floatUnsub.ref.off('value',floatUnsub.fn);floatUnsub=null;}
+  floatUnsubs.forEach(u=>u.ref.off('value',u.fn));
+  floatUnsubs=[];
   floatBookings={};
-  const ref=db.ref(`bookings/${date}/${floatSession}`);
-  const fn=ref.on('value',snap=>{
-    floatBookings={};
-    snap.forEach(child=>{floatBookings[child.key]=child.val();});
-    renderFloatTable();
+  floatBlocked={};
+
+  const sessions=conflictingSessions(floatSession);
+  const combined={}; // sectorNum -> {session, key, ...data}
+
+  sessions.forEach(s=>{
+    const ref=db.ref(`bookings/${date}/${s}`);
+    const fn=ref.on('value',snap=>{
+      // Прибираємо старі записи цієї сесії
+      Object.keys(combined).forEach(k=>{ if(combined[k].session===s) delete combined[k]; });
+      snap.forEach(child=>{
+        const d=child.val();
+        if(d&&d.sector) combined[d.sector]={session:s,key:child.key,...d};
+      });
+      // Розділяємо на поточну сесію і заблоковані
+      floatBookings={};
+      floatBlocked={};
+      Object.entries(combined).forEach(([sector,val])=>{
+        if(val.session===floatSession) floatBookings[val.key]=val;
+        else floatBlocked[sector]=val.session;
+      });
+      renderFloatTable();
+    });
+    floatUnsubs.push({ref,fn});
   });
-  floatUnsub={ref,fn};
   updateFloatLegend();
 }
 
@@ -413,37 +445,49 @@ function updateFloatLegend(){
 
 function renderFloatTable(){
   const tbody=$('floatTbody'); tbody.innerHTML='';
-  // Map sector -> booking
   const sectorMap={};
   Object.entries(floatBookings).forEach(([key,val])=>{
     if(val&&val.sector) sectorMap[val.sector]={key,...val};
   });
 
+  const SESSION_UK={morning:'Ранкова',evening:'Вечірня',fullday:'Повний день'};
   let bookedCount=0;
   for(let i=1;i<=11;i++){
     const b=sectorMap[i];
+    const blockedBy=floatBlocked[i];
     const isBooked=!!b;
-    if(isBooked)bookedCount++;
+    const isBlocked=!!blockedBy;
+    if(isBooked||isBlocked) bookedCount++;
     const tr=document.createElement('tr');
-    tr.className=isBooked?'booked-row':'free-row';
+    tr.className=(isBooked||isBlocked)?'booked-row':'free-row';
     const createdAt=b?new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}):'—';
+
+    let statusBadge, nameCell, phoneCell, timeCell, actCell;
+    if(isBooked){
+      statusBadge=`<span class="status-badge booked">🔴 Зайнято</span>`;
+      nameCell=b.name||'—'; phoneCell=b.phone||'—'; timeCell=createdAt;
+      actCell=`<button class="danger" onclick="adminCancel('${b.key}',${i})">❌ Скасувати</button>
+               <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
+    } else if(isBlocked){
+      statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[blockedBy]}</span>`;
+      nameCell='—'; phoneCell='—'; timeCell='—';
+      actCell=`<span style="font-size:12px;color:#888">Заблоковано (${SESSION_UK[blockedBy]})</span>`;
+    } else {
+      statusBadge=`<span class="status-badge free">🟢 Вільно</span>`;
+      nameCell='—'; phoneCell='—'; timeCell='—';
+      actCell=`<button class="secondary" onclick="showManualBook(${i})">➕ Бронювати</button>`;
+    }
+
     tr.innerHTML=`
       <td><strong>Сектор ${i}</strong></td>
-      <td><span class="status-badge ${isBooked?'booked':'free'}">${isBooked?'🔴 Зайнято':'🟢 Вільно'}</span></td>
-      <td>${isBooked?(b.name||'—'):'—'}</td>
-      <td>${isBooked?(b.phone||'—'):'—'}</td>
-      <td>${isBooked?createdAt:'—'}</td>
-      <td class="act-btns">
-        ${isBooked
-          ? `<button class="danger" onclick="adminCancel('${b.key}',${i})">❌ Скасувати</button>
-             <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`
-          : `<button class="secondary" onclick="showManualBook(${i})">➕ Бронювати</button>`
-        }
-      </td>`;
-    tbody.appendChild(tr);
+      <td>${statusBadge}</td>
+      <td>${nameCell}</td>
+      <td>${phoneCell}</td>
+      <td>${timeCell}</td>
+      <td class="act-btns">${actCell}</td>`;
 
-    // Inline manual booking form
-    if(!isBooked){
+    if(!isBooked && !isBlocked){
+      tbody.appendChild(tr);
       const formRow=document.createElement('tr');
       formRow.id=`manualRow_${i}`;
       formRow.style.display='none';
@@ -456,14 +500,15 @@ function renderFloatTable(){
         </div>
       </td>`;
       tbody.appendChild(formRow);
+    } else {
+      tbody.appendChild(tr);
     }
   }
 
-  // Stats
   $('floatStats').innerHTML=`
     <div class="stat-card"><strong>${11-bookedCount}</strong>Вільних</div>
     <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
-    <div class="stat-card"><strong>${bookedCount*SESSION_PRICES[floatSession]} грн</strong>Виручка</div>`;
+    <div class="stat-card"><strong>${Object.keys(sectorMap).length*SESSION_PRICES[floatSession]} грн</strong>Виручка</div>`;
 
   renderFloatPreview(sectorMap);
 }

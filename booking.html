@@ -194,20 +194,43 @@ function selectSession(el){
 }
 
 // ---- Сектори з Firebase ----
+// Які сесії блокують поточну
+function conflictingSessions(session){
+  if(session === 'fullday') return ['morning','evening','fullday'];
+  if(session === 'morning') return ['morning','fullday'];
+  if(session === 'evening') return ['evening','fullday'];
+  return [session];
+}
+
+let unsubscribers = [];
+
 function loadSectors(){
   const date = document.getElementById('inputDate').value;
   const session = selectedSession;
-  if(unsubscribe) unsubscribe();
+  // Відписатись від усіх старих listeners
+  unsubscribers.forEach(u=>u.ref.off('value',u.fn));
+  unsubscribers = [];
   bookedSectors = {};
   if(!date || !session){ renderSectors({}); return; }
-  const ref = db.ref(`bookings/${date}/${session}`);
-  unsubscribe = ref.on('value', snap=>{
-    bookedSectors = {};
-    snap.forEach(child=>{
-      const d = child.val();
-      if(d && d.sector) bookedSectors[d.sector] = true;
+
+  const sessions = conflictingSessions(session);
+  let loaded = 0;
+  const combined = {};
+
+  sessions.forEach(s=>{
+    const ref = db.ref(`bookings/${date}/${s}`);
+    const fn = ref.on('value', snap=>{
+      // Очищаємо сектори цієї сесії і перераховуємо
+      Object.keys(combined).forEach(k=>{ if(combined[k]===s) delete combined[k]; });
+      snap.forEach(child=>{
+        const d = child.val();
+        if(d && d.sector) combined[d.sector] = s;
+      });
+      bookedSectors = {};
+      Object.keys(combined).forEach(k=>{ bookedSectors[k]=true; });
+      renderSectors(bookedSectors);
     });
-    renderSectors(bookedSectors);
+    unsubscribers.push({ref, fn});
   });
 }
 
