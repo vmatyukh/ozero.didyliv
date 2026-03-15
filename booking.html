@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#005356">
 <title>Озеро Дідилів — Бронювання</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
 <style>
 *{box-sizing:border-box}
 body{font-family:system-ui,sans-serif;margin:0;background:#e0f2f2;color:#222;padding-bottom:env(safe-area-inset-bottom)}
@@ -190,10 +193,6 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="config.js"></script>
-
 <script>
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -375,7 +374,7 @@ async function submitBooking(){
       `📞 Телефон: ${phone}`;
     fetch(`https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:8459515447, text:msg})
+      body:JSON.stringify({chat_id:'8459515447', text:msg})
     }).catch(()=>{});
 
     showLoading(false);
@@ -417,7 +416,6 @@ const tg = window.Telegram?.WebApp;
 if(tg){
   tg.ready();
   tg.expand();
-  if(tg.requestFullscreen) tg.requestFullscreen();
 
   const applyInsets=()=>{
     const top=tg.safeAreaInset?.top||tg.contentSafeAreaInset?.top||0;
