@@ -414,7 +414,7 @@ async function submitBooking(){
     document.getElementById('bookingForm').style.display='none';
     document.getElementById('successMsg').style.display='block';
     document.getElementById('bookBtn').style.display='none';
-    if(window.Telegram?.WebApp?.MainButton) window.Telegram.WebApp.MainButton.hide();
+    if(isInTelegram) tg.MainButton.hide();
   }catch(e){
     showLoading(false);
     const eg=document.getElementById('errGeneral');
@@ -432,7 +432,7 @@ function resetForm(){
   updateDateDisplay(todayStr);
   document.getElementById('bookingForm').style.display='block';
   document.getElementById('successMsg').style.display='none';
-  if(!window.Telegram?.WebApp) document.getElementById('bookBtn').style.display='block';
+  if(!isInTelegram) document.getElementById('bookBtn').style.display='block';
   loadSectors(); updateSummary();
 }
 
@@ -506,7 +506,8 @@ updateSummary();
 
 /* ===== Telegram Mini App ===== */
 const tg = window.Telegram?.WebApp;
-if(tg){
+const isInTelegram = tg && tg.initData && tg.initData.length > 0;
+if(isInTelegram){
   tg.ready();
   tg.expand();
 
