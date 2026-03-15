@@ -91,26 +91,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <!-- Крок 2: Сесія -->
     <div class="card">
       <h2>🕐 Крок 2 — Оберіть сесію</h2>
-      <div class="sessions">
-        <div class="session-btn" data-session="morning" data-price="500" onclick="selectSession(this)">
-          <div class="icon">🌅</div>
-          <div class="name">Ранкова</div>
-          <div class="time">6:00 – 13:00</div>
-          <div class="price">500 грн</div>
-        </div>
-        <div class="session-btn" data-session="evening" data-price="500" onclick="selectSession(this)">
-          <div class="icon">🌆</div>
-          <div class="name">Вечірня</div>
-          <div class="time">14:00 – 21:00</div>
-          <div class="price">500 грн</div>
-        </div>
-        <div class="session-btn" data-session="fullday" data-price="700" onclick="selectSession(this)">
-          <div class="icon">☀️</div>
-          <div class="name">Повний день</div>
-          <div class="time">6:00 – 21:00</div>
-          <div class="price">700 грн</div>
-        </div>
-      </div>
+      <div class="sessions" id="sessionsContainer"></div>
     </div>
 
     <!-- Крок 3: Сектор -->
@@ -230,14 +211,36 @@ const db = firebase.database();
 
 /* ===== Константи ===== */
 const SECTORS_COUNT = 11;
-const SESSION_LABELS = {
-  morning: 'Ранкова (6:00–13:00)',
-  evening: 'Вечірня (14:00–21:00)',
-  fullday: 'Повний день (6:00–21:00)'
-};
-const SESSION_PRICES = { morning:600, evening:600, fullday:800 };
 const MONTHS_UA = ['січня','лютого','березня','квітня','травня','червня',
                    'липня','серпня','вересня','жовтня','листопада','грудня'];
+
+/* ============================================================
+   ⚙️ КОНФІГ — змінюй тільки тут
+   ============================================================ */
+const CONFIG = {
+  sessions: [
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:500 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:500 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:700 },
+  ]
+};
+
+// Зручні мапи для використання в коді
+const SESSION_LABELS = Object.fromEntries(
+  CONFIG.sessions.map(s=>[ s.key, `${s.name} (${s.time})` ])
+);
+const SESSION_PRICES = Object.fromEntries(
+  CONFIG.sessions.map(s=>[ s.key, s.price ])
+);
+
+// Генеруємо картки сесій
+document.getElementById('sessionsContainer').innerHTML = CONFIG.sessions.map(s=>`
+  <div class="session-btn" data-session="${s.key}" onclick="selectSession(this)">
+    <div class="icon">${s.icon}</div>
+    <div class="name">${s.name}</div>
+    <div class="time">${s.time}</div>
+    <div class="price">${s.price} грн</div>
+  </div>`).join('');
 
 /* ===== Стан ===== */
 let selectedSession = null;
