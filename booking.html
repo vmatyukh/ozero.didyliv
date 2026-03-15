@@ -40,9 +40,9 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 .btn-primary:disabled{background:#aaa;cursor:not-allowed}
 .legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:#666}
 .legend span{display:flex;align-items:center;gap:5px}
-.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
-.dot.free{background:#c8e6c9;border:1.5px solid #2a7}
-.dot.booked{background:#f5f5f5;border:1.5px solid #ddd}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block;flex-shrink:0}
+.dot.free{background:#1a6b3a;border:1.5px solid #0d4a28}
+.dot.booked{background:#e67e00;border:1.5px solid #b35900}
 .summary-box{background:#e8f5e9;border-radius:10px;padding:14px;margin-bottom:14px;font-size:14px;line-height:1.7}
 .summary-box strong{color:#1a6b3a}
 #successMsg{display:none;background:#1a6b3a;color:#fff;border-radius:14px;padding:28px 20px;text-align:center}
@@ -108,36 +108,50 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     </div>
 
     <!-- Крок 3: Сектор -->
-    <div class="card">
-      <h2>🎣 Крок 3 — Оберіть сектор</h2>
-      <div style="width:100%;overflow:hidden">
-        <svg id="lakeMap" viewBox="0 0 680 400" width="100%" style="display:block;max-width:100%">
-          <polygon points="173,211 411,87 573,126 607,288 539,364 173,364 131,313" fill="#1a5c7a" opacity="0.18"/>
-          <polygon points="173,211 411,87 573,126 607,288 539,364 173,364 131,313" fill="none" stroke="#2a8aac" stroke-width="2.5" opacity="0.75"/>
-          <path d="M 168 245 Q 370 232 585 248" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.18"/>
-          <path d="M 158 295 Q 368 282 588 298" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.18"/>
-          <path d="M 164 338 Q 358 325 528 340" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.18"/>
-          <text x="370" y="218" text-anchor="middle" font-size="13" fill="#1a5c7a" opacity="0.6" font-family="system-ui,sans-serif">Поплавцеве озеро</text>
-          <line x1="173" y1="364" x2="539" y2="364" stroke="#8B7355" stroke-width="2.5" stroke-dasharray="7 4" opacity="0.5"/>
-          <text x="356" y="382" text-anchor="middle" font-size="11" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.8">Дамба</text>
-          <circle cx="270" cy="70" r="10" fill="#2d6a2d" opacity="0.28"/>
-          <circle cx="315" cy="62" r="9"  fill="#2d6a2d" opacity="0.25"/>
-          <circle cx="355" cy="60" r="11" fill="#2d6a2d" opacity="0.28"/>
-          <circle cx="395" cy="66" r="9"  fill="#2d6a2d" opacity="0.25"/>
-          <circle cx="622" cy="200" r="10" fill="#2d6a2d" opacity="0.28"/>
-          <circle cx="626" cy="240" r="9"  fill="#2d6a2d" opacity="0.25"/>
-          <circle cx="619" cy="278" r="10" fill="#2d6a2d" opacity="0.28"/>
-          <circle cx="112" cy="288" r="9"  fill="#2d6a2d" opacity="0.25"/>
-          <circle cx="108" cy="323" r="10" fill="#2d6a2d" opacity="0.28"/>
-          <g id="sectorRects" font-family="system-ui,sans-serif" font-size="10" font-weight="600" text-anchor="middle"></g>
-        </svg>
-      </div>
-      <div class="legend" style="margin-top:8px">
+    <div class="card" style="padding:16px 12px">
+      <h2 style="margin-bottom:12px">🎣 Крок 3 — Оберіть сектор</h2>
+      <svg id="lakeMap" viewBox="0 0 680 460" style="display:block;width:100%;height:auto;touch-action:manipulation">
+
+        <!-- Lake fill -->
+        <polygon points="173,190 411,55 573,96 607,268 539,344 173,344 131,293" fill="#1a5c7a" opacity="0.18"/>
+        <polygon points="173,190 411,55 573,96 607,268 539,344 173,344 131,293" fill="none" stroke="#2a8aac" stroke-width="2.5" opacity="0.75"/>
+
+        <!-- Water ripples -->
+        <path d="M 168 220 Q 370 208 585 224" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.15"/>
+        <path d="M 155 268 Q 368 255 590 270" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.15"/>
+        <path d="M 160 312 Q 355 300 530 315" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.15"/>
+
+        <!-- Lake label -->
+        <text x="370" y="200" text-anchor="middle" font-size="14" fill="#1a5c7a" opacity="0.6" font-family="system-ui,sans-serif">Поплавцеве озеро</text>
+
+        <!-- Dam dashed line -->
+        <line x1="173" y1="344" x2="539" y2="344" stroke="#8B7355" stroke-width="2.5" stroke-dasharray="7 4" opacity="0.5"/>
+        <text x="356" y="362" text-anchor="middle" font-size="12" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.8">Дамба</text>
+
+        <!-- Trees top -->
+        <circle cx="265" cy="42" r="11" fill="#2d6a2d" opacity="0.28"/>
+        <circle cx="310" cy="34" r="10" fill="#2d6a2d" opacity="0.25"/>
+        <circle cx="352" cy="32" r="12" fill="#2d6a2d" opacity="0.28"/>
+        <circle cx="395" cy="37" r="10" fill="#2d6a2d" opacity="0.25"/>
+        <!-- Trees right -->
+        <circle cx="622" cy="178" r="11" fill="#2d6a2d" opacity="0.28"/>
+        <circle cx="628" cy="218" r="10" fill="#2d6a2d" opacity="0.25"/>
+        <circle cx="620" cy="256" r="11" fill="#2d6a2d" opacity="0.28"/>
+        <!-- Trees left -->
+        <circle cx="112" cy="268" r="10" fill="#2d6a2d" opacity="0.25"/>
+        <circle cx="108" cy="305" r="11" fill="#2d6a2d" opacity="0.28"/>
+
+        <!-- Sector rects — generated by JS -->
+        <!-- w=40, h=42 — великі touch targets -->
+        <g id="sectorRects" font-family="system-ui,sans-serif" font-size="13" font-weight="600" text-anchor="middle"></g>
+      </svg>
+
+      <div class="legend" style="margin-top:10px">
         <span><span class="dot free"></span> Вільно</span>
         <span><span class="dot booked"></span> Зайнято</span>
-        <span><span class="dot" style="background:#ccc;border:1.5px solid #aaa;display:inline-block;width:12px;height:12px;border-radius:3px"></span> Недоступно</span>
+        <span><span class="dot" style="background:#ccc;border:1.5px solid #aaa;display:inline-block;width:12px;height:12px;border-radius:3px;flex-shrink:0"></span> Недоступно</span>
       </div>
-      <p style="font-size:12px;color:#888;margin-top:6px">* Оновлюється в реальному часі. Натисни на сектор щоб обрати.</p>
+      <p style="font-size:12px;color:#888;margin-top:6px">* Оновлюється в реальному часі</p>
     </div>
 
     <!-- Крок 4: Контакти -->
@@ -258,40 +272,53 @@ function loadSectors(){
 function renderSectors(booked){
   const g = document.getElementById('sectorRects');
   g.innerHTML = '';
-  const startX = 188, step = 31, w = 26, h = 22, y = 340;
+  // Sector size: w=44, h=44, gap=2
+  // Dam: x=173..539 = 366px. 11*(44+2)-2 = 504 > 366, so place in dam center area
+  // Use viewBox width 680, center sectors under lake
+  // Two rows if needed — fit all 11 in one row: total=11*44+10*2=504, startX=(680-504)/2=88
+  const w=40, h=44, gap=2;
+  const totalW = 11*w + 10*gap;
+  const startX = Math.round((680 - totalW) / 2);
+  const y = 385;
+
   for(let i=1;i<=SECTORS_COUNT;i++){
-    const x = startX + (i-1)*step;
+    const x = startX + (i-1)*(w+gap);
     const isBooked = !!booked[i];
     const isSelected = selectedSector === i;
-    let fill, stroke, cursor;
+    let fill, stroke, textFill, cursor;
     if(isBooked){
-      fill='#e67e00'; stroke='#b35900'; cursor='not-allowed';
+      fill='#e67e00'; stroke='#b35900'; textFill='#fff'; cursor='not-allowed';
     } else if(isSelected){
-      fill='#c8e6c9'; stroke='#1a6b3a'; cursor='pointer';
+      fill='#c8e6c9'; stroke='#1a6b3a'; textFill='#1a6b3a'; cursor='pointer';
     } else {
-      fill='#1a6b3a'; stroke='#0d4a28'; cursor='pointer';
+      fill='#1a6b3a'; stroke='#0d4a28'; textFill='#fff'; cursor='pointer';
     }
+
+    const grp = document.createElementNS('http://www.w3.org/2000/svg','g');
+    grp.style.cursor = cursor;
+
     const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('x', x); rect.setAttribute('y', y);
     rect.setAttribute('width', w); rect.setAttribute('height', h);
-    rect.setAttribute('rx','3');
+    rect.setAttribute('rx','6');
     rect.setAttribute('fill', fill);
     rect.setAttribute('stroke', stroke);
-    rect.setAttribute('stroke-width','0.5');
-    rect.style.cursor = cursor;
+    rect.setAttribute('stroke-width','1');
+
     const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
     txt.setAttribute('x', x + w/2);
     txt.setAttribute('y', y + h/2 + 1);
     txt.setAttribute('dominant-baseline','central');
-    txt.setAttribute('fill', isSelected ? '#1a6b3a' : '#fff');
+    txt.setAttribute('fill', textFill);
     txt.textContent = i;
+
+    grp.appendChild(rect);
+    grp.appendChild(txt);
+
     if(!isBooked){
-      rect.onclick = () => { selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
-      txt.onclick  = () => { selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
-      txt.style.cursor = 'pointer';
+      grp.onclick = () => { selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
     }
-    g.appendChild(rect);
-    g.appendChild(txt);
+    g.appendChild(grp);
   }
 }
 
