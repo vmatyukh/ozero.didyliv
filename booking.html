@@ -10,14 +10,9 @@
 <style>
 *{box-sizing:border-box}
 body{font-family:system-ui,sans-serif;margin:0;background:#e0f2f2;color:#222;
-  padding-top:env(safe-area-inset-top);
-  padding-left:env(safe-area-inset-left);
-  padding-right:env(safe-area-inset-right);
   padding-bottom:env(safe-area-inset-bottom);
 }
-header{background:#005356;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px;
-  padding-top:max(16px, env(safe-area-inset-top));
-}
+header{background:#005356;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px;}
 header img{height:56px;border-radius:8px}
 header h1{font-size:20px;margin:0}
 header p{margin:2px 0 0;font-size:13px;opacity:.85}
@@ -443,8 +438,18 @@ const tg = window.Telegram?.WebApp;
 if(tg){
   tg.ready();
   tg.expand();
-  // Повноекранний режим (Telegram 8.0+)
   if(tg.requestFullscreen) tg.requestFullscreen();
+
+  // Safe area для iPhone notch/Dynamic Island
+  const applyInsets = () => {
+    const top = tg.safeAreaInset?.top || tg.contentSafeAreaInset?.top || 0;
+    // Не чіпаємо хедер — він тягнеться під годинник
+    // Додаємо padding зверху до хедера щоб контент не перекривався
+    document.querySelector('header').style.paddingTop = `${top + 16}px`;
+  };
+  applyInsets();
+  tg.onEvent('safeAreaChanged', applyInsets);
+  tg.onEvent('contentSafeAreaChanged', applyInsets);
 
   // Ховаємо звичайну кнопку — використовуємо нативну MainButton
   const bookBtn = document.getElementById('bookBtn');
