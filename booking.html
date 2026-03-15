@@ -195,8 +195,8 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       </div>
       <div class="form-group">
         <label>Номер телефону</label>
-        <input type="tel" id="inputPhone" placeholder="+380XXXXXXXXX">
-        <div class="error-msg" id="errPhone">Введіть телефон</div>
+        <input type="tel" id="inputPhone" placeholder="+380XXXXXXXXX" value="+380">
+        <div class="error-msg" id="errPhone">Введіть коректний номер (+380XXXXXXXXX)</div>
       </div>
     </div>
 
@@ -366,7 +366,8 @@ async function submitBooking(){
   const phone = document.getElementById('inputPhone').value.trim();
   let ok=true;
   document.getElementById('errName').style.display  = name  ?'none':'block'; if(!name)  ok=false;
-  document.getElementById('errPhone').style.display = phone ?'none':'block'; if(!phone) ok=false;
+  const phoneValid = window.isValidPhone(phone);
+  document.getElementById('errPhone').style.display = phoneValid ?'none':'block'; if(!phoneValid) ok=false;
   document.getElementById('errGeneral').style.display='none';
   if(!date||!selectedSession||!selectedSector){
     const eg=document.getElementById('errGeneral');
@@ -501,6 +502,32 @@ function showLoading(v){ document.getElementById('loadingOverlay').classList.tog
   });
   window.addEventListener('mouseup',()=>{ dragging=false; container.style.cursor='grab'; });
 })();
+
+/* ===== Телефон — авто +380 і валідація ===== */
+(function initPhone(){
+  const inp = document.getElementById('inputPhone');
+  function isValid(v){ return /^\+380\d{9}$/.test(v.replace(/\s/g,'')); }
+  inp.addEventListener('input', ()=>{
+    let v = inp.value.replace(/[^\d+]/g,'');
+    if(!v.startsWith('+380')){
+      if(v.startsWith('380'))     v='+'+v;
+      else if(v.startsWith('0'))  v='+38'+v;
+      else                        v='+380';
+    }
+    if(v.length>13) v=v.slice(0,13);
+    inp.value=v;
+    document.getElementById('errPhone').style.display='none';
+  });
+  inp.addEventListener('keydown', e=>{
+    if((e.key==='Backspace'||e.key==='Delete') && inp.selectionStart<=4) e.preventDefault();
+  });
+  inp.addEventListener('blur', ()=>{
+    if(inp.value && inp.value!=='+380' && !isValid(inp.value))
+      document.getElementById('errPhone').style.display='block';
+  });
+})();
+window.isValidPhone = v => /^\+380\d{9}$/.test(v.replace(/\s/g,''));
+
 renderSectors({});
 updateSummary();
 
