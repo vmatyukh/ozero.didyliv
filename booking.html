@@ -273,12 +273,13 @@ inputDate.onchange = e => {
   updateSummary();
 };
 
-// Блокуємо pinch-zoom на мобільному
+// Блокуємо pinch-zoom сторінки але НЕ блокуємо на карті
 document.addEventListener('touchmove', e=>{
-  if(e.touches.length>1) e.preventDefault();
+  if(e.touches.length>1 && !e.target.closest('#lakeContainer')) e.preventDefault();
 },{passive:false});
 document.addEventListener('gesturestart', e=>e.preventDefault());
-document.addEventListener('gesturechange', e=>e.preventDefault()); (мобільний сам спрацює через прозорий інпут)
+document.addEventListener('gesturechange', e=>e.preventDefault());
+// Десктоп — клік по dateDisplay викликає showPicker (мобільний сам спрацює через прозорий інпут)
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 if(!isTouchDevice){
   document.getElementById('dateDisplay').addEventListener('click', ()=>{
