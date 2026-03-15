@@ -4,6 +4,11 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,7 +17,7 @@ jobs:
 
       - name: Generate config.js
         run: |
-          cat > config.js << JSEOF
+          cat > config.js << 'JSEOF'
           const firebaseConfig = {
             apiKey: "${{ secrets.FIREBASE_API_KEY }}",
             authDomain: "didyliv-be39d.firebaseapp.com",
@@ -25,8 +30,8 @@ jobs:
           JSEOF
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
-          exclude_assets: '.github,*.yml'
+          exclude_assets: '.github'
