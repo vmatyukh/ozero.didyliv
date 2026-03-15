@@ -450,9 +450,8 @@ if(tg){
   // Safe area для iPhone notch/Dynamic Island
   const applyInsets = () => {
     const top = tg.safeAreaInset?.top || tg.contentSafeAreaInset?.top || 0;
-    // Не чіпаємо хедер — він тягнеться під годинник
-    // Додаємо padding зверху до хедера щоб контент не перекривався
-    document.querySelector('header').style.paddingTop = `${top + 16}px`;
+    // BackButton займає ~44px зверху + safe area
+    document.querySelector('header').style.paddingTop = `${top + 52}px`;
   };
   applyInsets();
   tg.onEvent('safeAreaChanged', applyInsets);
