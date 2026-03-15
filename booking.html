@@ -6,13 +6,10 @@
 <meta name="theme-color" content="#005356">
 <title>Озеро Дідилів — Бронювання</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
 *{box-sizing:border-box}
-body{font-family:system-ui,sans-serif;margin:0;background:#e0f2f2;color:#222;
-  padding-bottom:env(safe-area-inset-bottom);
-}
-header{background:#005356;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px;}
+body{font-family:system-ui,sans-serif;margin:0;background:#e0f2f2;color:#222;padding-bottom:env(safe-area-inset-bottom)}
+header{background:#005356;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px}
 header img{height:56px;border-radius:8px}
 header h1{font-size:20px;margin:0}
 header p{margin:2px 0 0;font-size:13px;opacity:.85}
@@ -22,7 +19,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 .form-group{margin-bottom:14px}
 .form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#444}
 .form-group input,.form-group select{width:100%;max-width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;box-sizing:border-box}
-.form-group input[type=date]{appearance:none;-webkit-appearance:none;min-width:0}
+.form-group input[type=date]{appearance:none;-webkit-appearance:none;min-width:0;color:#222}
 .form-group input:focus,.form-group select:focus{outline:none;border-color:#005356}
 .sessions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
 .session-btn{border:2px solid #ccc;border-radius:10px;padding:12px 8px;cursor:pointer;background:#fff;text-align:center;transition:.15s}
@@ -32,13 +29,6 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 .session-btn .name{font-size:13px;font-weight:600;margin:4px 0 2px}
 .session-btn .time{font-size:11px;color:#666}
 .session-btn .price{font-size:14px;font-weight:700;color:#005356}
-.sectors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
-.sector-btn{border:2px solid #ccc;border-radius:10px;padding:10px 4px;cursor:pointer;background:#fff;text-align:center;font-weight:700;font-size:15px;transition:.15s}
-.sector-btn.free{border-color:#005356;color:#005356;background:#e0f2f2}
-.sector-btn.free:hover{background:#e0f0f0;border-color:#005356}
-.sector-btn.booked{border-color:#ddd;color:#bbb;background:#f5f5f5;cursor:not-allowed}
-.sector-btn.selected{border-color:#005356;background:#b0dcdc;color:#005356}
-.sector-label{font-size:10px;font-weight:400;color:#888;display:block}
 .btn-primary{width:100%;padding:14px;background:#005356;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
 .btn-primary:hover{background:#003a3c}
 .btn-primary:disabled{background:#aaa;cursor:not-allowed}
@@ -58,6 +48,11 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 .spinner{width:48px;height:48px;border:5px solid #fff4;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .error-msg{color:#c0392b;font-size:13px;margin-top:4px;display:none}
+/* date display overlay */
+.date-wrap{position:relative}
+.date-wrap input[type=date]{color:transparent;background:transparent;position:relative;z-index:2}
+.date-display{position:absolute;top:0;left:0;right:0;bottom:0;padding:10px 12px;font-size:15px;color:#222;pointer-events:none;display:flex;align-items:center;z-index:1;background:#fff;border-radius:8px;border:1px solid #ccc}
+.date-wrap input[type=date]:focus ~ .date-display{border-color:#005356}
 </style>
 </head>
 <body>
@@ -73,8 +68,6 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 </header>
 
 <div class="container">
-
-  <!-- ФОРМА БРОНЮВАННЯ -->
   <div id="bookingForm">
 
     <!-- Крок 1: Дата -->
@@ -82,7 +75,10 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       <h2>📅 Крок 1 — Оберіть дату</h2>
       <div class="form-group">
         <label>Дата риболовлі</label>
-        <input type="date" id="inputDate" min="">
+        <div class="date-wrap">
+          <input type="date" id="inputDate" min="">
+          <div class="date-display" id="dateDisplay">Оберіть дату</div>
+        </div>
       </div>
     </div>
 
@@ -124,24 +120,14 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
             <path d="M0,0 C 9,-12  16,-28  20,-44 C 13,-28  5,-12  0,0Z" fill="#5aae10"/>
           </g>
         </defs>
-
-        <!-- lake -->
         <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="#005356" opacity="0.22"/>
         <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="none" stroke="#007a7e" stroke-width="2.2" opacity="0.8"/>
-
-        <!-- ripples -->
         <path d="M100 248 Q336 234 594 250" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".14"/>
         <path d="M 86 295 Q330 280 596 296" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".12"/>
         <path d="M 90 340 Q320 326 542 342" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".11"/>
-
-        <!-- label -->
         <text x="334" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" fill="#005356" opacity=".55">Поплавцеве озеро</text>
-
-        <!-- dam -->
         <line x1="100" y1="376" x2="546" y2="376" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity=".5"/>
         <text x="323" y="396" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#6b5a3e" opacity=".8">Дамба</text>
-
-        <!-- top bank grass — along shore line -->
         <use href="#gc" transform="translate(140,186)" opacity=".88"/>
         <use href="#gc" transform="translate(181,163)" opacity=".88"/>
         <use href="#gc" transform="translate(221,139)" opacity=".88"/>
@@ -151,22 +137,15 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
         <use href="#gc" transform="translate(420,63)"  opacity=".88"/>
         <use href="#gc" transform="translate(481,77)"  opacity=".88"/>
         <use href="#gc" transform="translate(542,91)"  opacity=".88"/>
-
-        <!-- right bank grass -->
         <use href="#gc" transform="translate(622,162)" opacity=".82"/>
         <use href="#gc" transform="translate(626,220)" opacity=".82"/>
         <use href="#gc" transform="translate(622,278)" opacity=".82"/>
         <use href="#gc" transform="translate(618,334)" opacity=".82"/>
-
-        <!-- left bank grass -->
         <use href="#gc" transform="translate(58,270)"  opacity=".82"/>
         <use href="#gc" transform="translate(56,316)"  opacity=".82"/>
         <use href="#gc" transform="translate(60,358)"  opacity=".82"/>
-
-        <!-- sectors — generated by JS -->
         <g id="sectorRects" font-family="system-ui,sans-serif" font-size="13" font-weight="700" text-anchor="middle"></g>
       </svg>
-
       <div class="legend" style="margin-top:10px">
         <span><span class="dot free"></span> Вільно</span>
         <span><span class="dot booked"></span> Зайнято</span>
@@ -193,16 +172,14 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <!-- Підсумок -->
     <div class="card">
       <h2>📋 Підсумок</h2>
-      <div class="summary-box" id="summaryBox">
-        Оберіть дату, сесію та сектор
-      </div>
+      <div class="summary-box" id="summaryBox">Оберіть дату, сесію та сектор</div>
       <div class="error-msg" id="errGeneral" style="display:none;margin-bottom:10px"></div>
       <button class="btn-primary" id="bookBtn" onclick="submitBooking()">✅ Підтвердити бронювання</button>
     </div>
 
   </div>
 
-  <!-- УСПІХ -->
+  <!-- Успіх -->
   <div id="successMsg">
     <div class="big">🎉</div>
     <h2>Бронювання підтверджено!</h2>
@@ -221,24 +198,51 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+/* ===== Константи ===== */
 const SECTORS_COUNT = 11;
 const SESSION_LABELS = {
-  morning:  'Ранкова (6:00–13:00)',
-  evening:  'Вечірня (14:00–21:00)',
-  fullday:  'Повний день (6:00–21:00)'
+  morning: 'Ранкова (6:00–13:00)',
+  evening: 'Вечірня (14:00–21:00)',
+  fullday: 'Повний день (6:00–21:00)'
 };
 const SESSION_PRICES = { morning:500, evening:500, fullday:700 };
+const MONTHS_UA = ['січня','лютого','березня','квітня','травня','червня',
+                   'липня','серпня','вересня','жовтня','листопада','грудня'];
 
+/* ===== Стан ===== */
 let selectedSession = null;
 let selectedSector  = null;
 let bookedSectors   = {};
-let unsubscribe     = null;
+let unsubscribers   = [];
 
+/* ===== Дата ===== */
 const todayStr = new Date().toISOString().split('T')[0];
-document.getElementById('inputDate').min = todayStr;
-document.getElementById('inputDate').value = todayStr;
-document.getElementById('inputDate').onchange = () => { selectedSector=null; loadSectors(); updateSummary(); };
 
+function formatDateUA(dateStr){
+  if(!dateStr) return '';
+  const [y,m,d] = dateStr.split('-');
+  return `${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}`;
+}
+
+function updateDateDisplay(val){
+  const el = document.getElementById('dateDisplay');
+  if(!el) return;
+  if(val){ el.textContent = formatDateUA(val); el.style.color='#222'; }
+  else   { el.textContent = 'Оберіть дату';   el.style.color='#aaa'; }
+}
+
+const inputDate = document.getElementById('inputDate');
+inputDate.min   = todayStr;
+inputDate.value = todayStr;
+updateDateDisplay(todayStr);
+inputDate.onchange = e => {
+  selectedSector = null;
+  updateDateDisplay(e.target.value);
+  loadSectors();
+  updateSummary();
+};
+
+/* ===== Сесія ===== */
 function selectSession(el){
   document.querySelectorAll('.session-btn').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
@@ -248,184 +252,138 @@ function selectSession(el){
   updateSummary();
 }
 
-// ---- Сектори з Firebase ----
-// Які сесії блокують поточну
+/* ===== Конфлікти сесій ===== */
 function conflictingSessions(session){
-  if(session === 'fullday') return ['morning','evening','fullday'];
-  if(session === 'morning') return ['morning','fullday'];
-  if(session === 'evening') return ['evening','fullday'];
+  if(session==='fullday') return ['morning','evening','fullday'];
+  if(session==='morning') return ['morning','fullday'];
+  if(session==='evening') return ['evening','fullday'];
   return [session];
 }
 
-let unsubscribers = [];
-
+/* ===== Сектори з Firebase ===== */
 function loadSectors(){
-  const date = document.getElementById('inputDate').value;
+  const date    = document.getElementById('inputDate').value;
   const session = selectedSession;
-  // Відписатись від усіх старих listeners
   unsubscribers.forEach(u=>u.ref.off('value',u.fn));
   unsubscribers = [];
   bookedSectors = {};
-  if(!date || !session){ renderSectors({}); return; }
-
+  if(!date||!session){ renderSectors({}); return; }
   const sessions = conflictingSessions(session);
-  let loaded = 0;
   const combined = {};
-
   sessions.forEach(s=>{
     const ref = db.ref(`bookings/${date}/${s}`);
-    const fn = ref.on('value', snap=>{
-      // Очищаємо сектори цієї сесії і перераховуємо
+    const fn  = ref.on('value', snap=>{
       Object.keys(combined).forEach(k=>{ if(combined[k]===s) delete combined[k]; });
       snap.forEach(child=>{
         const d = child.val();
-        if(d && d.sector) combined[d.sector] = s;
+        if(d&&d.sector) combined[d.sector]=s;
       });
-      bookedSectors = {};
+      bookedSectors={};
       Object.keys(combined).forEach(k=>{ bookedSectors[k]=true; });
       renderSectors(bookedSectors);
     });
-    unsubscribers.push({ref, fn});
+    unsubscribers.push({ref,fn});
   });
 }
 
+/* ===== Рендер секторів на SVG ===== */
 function renderSectors(booked){
   const g = document.getElementById('sectorRects');
-  g.innerHTML = '';
-  // Sector size: w=44, h=44, gap=2
-  // Dam: x=173..539 = 366px. 11*(44+2)-2 = 504 > 366, so place in dam center area
-  // Use viewBox width 680, center sectors under lake
-  // Two rows if needed — fit all 11 in one row: total=11*44+10*2=504, startX=(680-504)/2=88
-  // dam x=100..546=446px, sectors w=36 h=38 gap=4.6, start=102, y=326
-  const w=36, h=38, gap=4;
-  const startX = 102;
-  const y = 326;
-
+  g.innerHTML='';
+  const w=36, h=38, gap=4, startX=102, y=326;
   for(let i=1;i<=SECTORS_COUNT;i++){
-    const x = startX + (i-1)*(w+gap);
-    const isBooked = !!booked[i];
-    const isSelected = selectedSector === i;
-    let fill, stroke, textFill, cursor;
-    if(isBooked){
-      fill='#e67e00'; stroke='#b35900'; textFill='#fff'; cursor='not-allowed';
-    } else if(isSelected){
-      fill='#b0dcdc'; stroke='#005356'; textFill='#005356'; cursor='pointer';
-    } else {
-      fill='#005356'; stroke='#003a3c'; textFill='#fff'; cursor='pointer';
-    }
-
-    const grp = document.createElementNS('http://www.w3.org/2000/svg','g');
-    grp.style.cursor = cursor;
-
-    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x', x); rect.setAttribute('y', y);
-    rect.setAttribute('width', w); rect.setAttribute('height', h);
-    rect.setAttribute('rx','6');
-    rect.setAttribute('fill', fill);
-    rect.setAttribute('stroke', stroke);
-    rect.setAttribute('stroke-width','1');
-
-    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
-    txt.setAttribute('x', x + w/2);
-    txt.setAttribute('y', y + h/2 + 1);
-    txt.setAttribute('dominant-baseline','central');
-    txt.setAttribute('fill', textFill);
-    txt.textContent = i;
-
-    grp.appendChild(rect);
-    grp.appendChild(txt);
-
-    if(!isBooked){
-      grp.onclick = () => { selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
-    }
+    const x = startX+(i-1)*(w+gap);
+    const isBooked   = !!booked[i];
+    const isSelected = selectedSector===i;
+    let fill, stroke, textFill;
+    if(isBooked){       fill='#e67e00'; stroke='#b35900'; textFill='#fff'; }
+    else if(isSelected){fill='#b0dcdc'; stroke='#005356'; textFill='#005356'; }
+    else{               fill='#005356'; stroke='#003a3c'; textFill='#fff'; }
+    const grp=document.createElementNS('http://www.w3.org/2000/svg','g');
+    grp.style.cursor=isBooked?'not-allowed':'pointer';
+    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x',x); rect.setAttribute('y',y);
+    rect.setAttribute('width',w); rect.setAttribute('height',h);
+    rect.setAttribute('rx','6'); rect.setAttribute('fill',fill);
+    rect.setAttribute('stroke',stroke); rect.setAttribute('stroke-width','1');
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',x+w/2); txt.setAttribute('y',y+h/2+1);
+    txt.setAttribute('dominant-baseline','central'); txt.setAttribute('fill',textFill);
+    txt.textContent=i;
+    grp.appendChild(rect); grp.appendChild(txt);
+    if(!isBooked) grp.onclick=()=>{ selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
     g.appendChild(grp);
   }
 }
 
+/* ===== Підсумок ===== */
 function updateSummary(){
-  const date  = document.getElementById('inputDate').value;
-  const box   = document.getElementById('summaryBox');
+  const date = document.getElementById('inputDate').value;
+  const box  = document.getElementById('summaryBox');
   if(!date||!selectedSession||!selectedSector){
-    box.innerHTML='Оберіть дату, сесію та сектор';
-    return;
+    box.innerHTML='Оберіть дату, сесію та сектор'; return;
   }
-  const price = SESSION_PRICES[selectedSession];
-  const [y,m,d] = date.split('-');
+  const [y,m,d]=date.split('-');
   box.innerHTML=`
-    <strong>📅 Дата:</strong> ${d}.${m}.${y}<br>
+    <strong>📅 Дата:</strong> ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}<br>
     <strong>🕐 Сесія:</strong> ${SESSION_LABELS[selectedSession]}<br>
     <strong>🎣 Сектор:</strong> ${selectedSector}<br>
     <strong>🐟 Включено:</strong> 2 кг риби<br>
-    <strong>💰 Сума:</strong> ${price} грн`;
+    <strong>💰 Сума:</strong> ${SESSION_PRICES[selectedSession]} грн`;
 }
 
-// ---- Підтвердження ----
+/* ===== Підтвердження ===== */
 async function submitBooking(){
   const date  = document.getElementById('inputDate').value;
   const name  = document.getElementById('inputName').value.trim();
   const phone = document.getElementById('inputPhone').value.trim();
   let ok=true;
-
-  document.getElementById('errName').style.display  = name  ? 'none':'block'; if(!name)  ok=false;
-  document.getElementById('errPhone').style.display = phone ? 'none':'block'; if(!phone) ok=false;
+  document.getElementById('errName').style.display  = name  ?'none':'block'; if(!name)  ok=false;
+  document.getElementById('errPhone').style.display = phone ?'none':'block'; if(!phone) ok=false;
   document.getElementById('errGeneral').style.display='none';
-
   if(!date||!selectedSession||!selectedSector){
     const eg=document.getElementById('errGeneral');
-    eg.textContent='Оберіть дату, сесію та сектор'; eg.style.display='block';
-    ok=false;
+    eg.textContent='Оберіть дату, сесію та сектор'; eg.style.display='block'; ok=false;
   }
   if(!ok) return;
-
   showLoading(true);
   try{
-    // Перевірка race condition
-    const checkRef = db.ref(`bookings/${date}/${selectedSession}`);
-    const snap = await checkRef.once('value');
+    const checkRef=db.ref(`bookings/${date}/${selectedSession}`);
+    const snap=await checkRef.once('value');
     let alreadyBooked=false;
     snap.forEach(c=>{ if(c.val()&&c.val().sector===selectedSector) alreadyBooked=true; });
     if(alreadyBooked){
       showLoading(false);
       const eg=document.getElementById('errGeneral');
       eg.textContent='Цей сектор щойно зайняли. Оберіть інший.'; eg.style.display='block';
-      loadSectors();
-      return;
+      loadSectors(); return;
     }
-
-    const newRef = db.ref(`bookings/${date}/${selectedSession}`).push();
-    await newRef.set({
-      sector: selectedSector,
-      name, phone,
-      session: selectedSession,
-      price: SESSION_PRICES[selectedSession],
-      date,
-      createdAt: new Date().toISOString()
+    await db.ref(`bookings/${date}/${selectedSession}`).push({
+      sector:selectedSector, name, phone,
+      session:selectedSession, price:SESSION_PRICES[selectedSession],
+      date, createdAt:new Date().toISOString()
     });
 
-    // Надсилаємо повідомлення адміну
-    const [y2,m2,d2]=date.split('-');
-    const msg = `🎣 Нове бронювання!\n\n`+
-      `📅 Дата: ${d2}.${m2}.${y2}\n`+
+    // Telegram повідомлення адміну
+    const [y,m,d]=date.split('-');
+    const msg=`🎣 Нове бронювання!\n\n`+
+      `📅 Дата: ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}\n`+
       `🕐 Сесія: ${SESSION_LABELS[selectedSession]}\n`+
       `🎯 Сектор: ${selectedSector}\n`+
       `💰 Сума: ${SESSION_PRICES[selectedSession]} грн\n`+
       `👤 Імʼя: ${name}\n`+
       `📞 Телефон: ${phone}`;
-    fetch(`https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({chat_id: 8459515447, text: msg})
-    }).catch(()=>{}); // не блокуємо якщо не вдалось
+    fetch(`https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:8459515447, text:msg})
+    }).catch(()=>{});
 
     showLoading(false);
-    const [y,m,d2]=date.split('-');
     document.getElementById('successDetails').textContent=
-      `Сектор ${selectedSector} • ${SESSION_LABELS[selectedSession]} • ${d2}.${m}.${y}`;
+      `Сектор ${selectedSector} • ${SESSION_LABELS[selectedSession]} • ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}`;
     document.getElementById('bookingForm').style.display='none';
     document.getElementById('successMsg').style.display='block';
-    // Ховаємо кнопку підтвердження
-    const bookBtn = document.getElementById('bookBtn');
-    if(bookBtn) bookBtn.style.display='none';
+    document.getElementById('bookBtn').style.display='none';
     if(window.Telegram?.WebApp?.MainButton) window.Telegram.WebApp.MainButton.hide();
   }catch(e){
     showLoading(false);
@@ -434,22 +392,23 @@ async function submitBooking(){
   }
 }
 
+/* ===== Скинути форму ===== */
 function resetForm(){
   selectedSession=null; selectedSector=null;
   document.querySelectorAll('.session-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('inputName').value='';
   document.getElementById('inputPhone').value='';
   document.getElementById('inputDate').value=todayStr;
+  updateDateDisplay(todayStr);
   document.getElementById('bookingForm').style.display='block';
   document.getElementById('successMsg').style.display='none';
-  const bookBtn = document.getElementById('bookBtn');
-  if(bookBtn && !window.Telegram?.WebApp) bookBtn.style.display='block';
+  if(!window.Telegram?.WebApp) document.getElementById('bookBtn').style.display='block';
   loadSectors(); updateSummary();
 }
 
 function showLoading(v){ document.getElementById('loadingOverlay').classList.toggle('show',v); }
 
-// Ініціалізація
+/* ===== Ініціалізація ===== */
 renderSectors({});
 updateSummary();
 
@@ -460,50 +419,35 @@ if(tg){
   tg.expand();
   if(tg.requestFullscreen) tg.requestFullscreen();
 
-  // Safe area для iPhone notch/Dynamic Island
-  const applyInsets = () => {
-    const top = tg.safeAreaInset?.top || tg.contentSafeAreaInset?.top || 0;
-    // BackButton займає ~44px зверху + safe area
-    document.querySelector('header').style.paddingTop = `${top + 52}px`;
+  const applyInsets=()=>{
+    const top=tg.safeAreaInset?.top||tg.contentSafeAreaInset?.top||0;
+    document.querySelector('header').style.paddingTop=`${top+52}px`;
   };
   applyInsets();
   tg.onEvent('safeAreaChanged', applyInsets);
   tg.onEvent('contentSafeAreaChanged', applyInsets);
 
-  // Ховаємо звичайну кнопку — використовуємо нативну MainButton
-  const bookBtn = document.getElementById('bookBtn');
-  if(bookBtn) bookBtn.style.display = 'none';
-
+  document.getElementById('bookBtn').style.display='none';
   tg.MainButton.setText('✅ Підтвердити бронювання');
-  tg.MainButton.color = '#005356';
-  tg.MainButton.textColor = '#ffffff';
+  tg.MainButton.color='#005356';
+  tg.MainButton.textColor='#ffffff';
   tg.MainButton.hide();
   tg.MainButton.onClick(submitBooking);
 
-  // Показуємо MainButton коли всі поля заповнені
   function checkMainButton(){
     const date  = document.getElementById('inputDate').value;
     const name  = document.getElementById('inputName').value.trim();
     const phone = document.getElementById('inputPhone').value.trim();
-    if(date && selectedSession && selectedSector && name && phone){
-      tg.MainButton.show();
-    } else {
-      tg.MainButton.hide();
-    }
+    if(date&&selectedSession&&selectedSector&&name&&phone) tg.MainButton.show();
+    else tg.MainButton.hide();
   }
-
   document.getElementById('inputName').addEventListener('input', checkMainButton);
   document.getElementById('inputPhone').addEventListener('input', checkMainButton);
-  // Також перевіряємо при зміні сектора і сесії — через існуючі функції
-  const _origUpdateSummary = updateSummary;
-  updateSummary = function(){
-    _origUpdateSummary();
-    checkMainButton();
-  };
+  const _orig=updateSummary;
+  updateSummary=function(){ _orig(); checkMainButton(); };
 
-  // BackButton — закрити аплікацію
   tg.BackButton.show();
-  tg.BackButton.onClick(()=> tg.close());
+  tg.BackButton.onClick(()=>tg.close());
 }
 </script>
 </body>
