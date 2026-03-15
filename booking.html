@@ -403,6 +403,21 @@ async function submitBooking(){
       createdAt: new Date().toISOString()
     });
 
+    // Надсилаємо повідомлення адміну
+    const [y2,m2,d2]=date.split('-');
+    const msg = `🎣 Нове бронювання!\n\n`+
+      `📅 Дата: ${d2}.${m2}.${y2}\n`+
+      `🕐 Сесія: ${SESSION_LABELS[selectedSession]}\n`+
+      `🎯 Сектор: ${selectedSector}\n`+
+      `💰 Сума: ${SESSION_PRICES[selectedSession]} грн\n`+
+      `👤 Імʼя: ${name}\n`+
+      `📞 Телефон: ${phone}`;
+    fetch(`https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: 8459515447, text: msg})
+    }).catch(()=>{}); // не блокуємо якщо не вдалось
+
     showLoading(false);
     const [y,m,d2]=date.split('-');
     document.getElementById('successDetails').textContent=
