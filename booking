@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Озеро Дідилів — Бронювання</title>
+
+<style>
+*{box-sizing:border-box}
+body{font-family:system-ui,sans-serif;margin:0;background:#f0f7f0;color:#222}
+header{background:#1a6b3a;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px}
+header img{height:56px;border-radius:8px}
+header h1{font-size:20px;margin:0}
+header p{margin:2px 0 0;font-size:13px;opacity:.85}
+.container{max-width:700px;margin:24px auto;padding:0 16px}
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px #0001}
+.card h2{margin:0 0 16px;font-size:17px;color:#1a6b3a}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#444}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#1a6b3a}
+.sessions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.session-btn{border:2px solid #ccc;border-radius:10px;padding:12px 8px;cursor:pointer;background:#fff;text-align:center;transition:.15s}
+.session-btn:hover{border-color:#1a6b3a;background:#f0f7f0}
+.session-btn.selected{border-color:#1a6b3a;background:#e8f5e9}
+.session-btn .icon{font-size:22px}
+.session-btn .name{font-size:13px;font-weight:600;margin:4px 0 2px}
+.session-btn .time{font-size:11px;color:#666}
+.session-btn .price{font-size:14px;font-weight:700;color:#1a6b3a}
+.sectors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.sector-btn{border:2px solid #ccc;border-radius:10px;padding:10px 4px;cursor:pointer;background:#fff;text-align:center;font-weight:700;font-size:15px;transition:.15s}
+.sector-btn.free{border-color:#2a7;color:#1a6b3a;background:#f1f8f1}
+.sector-btn.free:hover{background:#e8f5e9;border-color:#1a6b3a}
+.sector-btn.booked{border-color:#ddd;color:#bbb;background:#f5f5f5;cursor:not-allowed}
+.sector-btn.selected{border-color:#1a6b3a;background:#c8e6c9;color:#1a6b3a}
+.sector-label{font-size:10px;font-weight:400;color:#888;display:block}
+.btn-primary{width:100%;padding:14px;background:#1a6b3a;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-primary:hover{background:#155c30}
+.btn-primary:disabled{background:#aaa;cursor:not-allowed}
+.legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:#666}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+.dot.free{background:#c8e6c9;border:1.5px solid #2a7}
+.dot.booked{background:#f5f5f5;border:1.5px solid #ddd}
+.summary-box{background:#e8f5e9;border-radius:10px;padding:14px;margin-bottom:14px;font-size:14px;line-height:1.7}
+.summary-box strong{color:#1a6b3a}
+#successMsg{display:none;background:#1a6b3a;color:#fff;border-radius:14px;padding:28px 20px;text-align:center}
+#successMsg h2{margin:0 0 10px;font-size:22px}
+#successMsg p{margin:6px 0;opacity:.9}
+#successMsg .big{font-size:48px;margin-bottom:8px}
+#loadingOverlay{display:none;position:fixed;inset:0;background:#0006;z-index:99;align-items:center;justify-content:center}
+#loadingOverlay.show{display:flex}
+.spinner{width:48px;height:48px;border:5px solid #fff4;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{color:#c0392b;font-size:13px;margin-top:4px;display:none}
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay"><div class="spinner"></div></div>
+
+<header>
+  <img src="logo.png" alt="Озеро Дідилів">
+  <div>
+    <h1>Озеро Дідилів</h1>
+    <p>Онлайн-бронювання сектору — Поплавцеве озеро</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ФОРМА БРОНЮВАННЯ -->
+  <div id="bookingForm">
+
+    <!-- Крок 1: Дата -->
+    <div class="card">
+      <h2>📅 Крок 1 — Оберіть дату</h2>
+      <div class="form-group">
+        <label>Дата риболовлі</label>
+        <input type="date" id="inputDate" min="">
+      </div>
+    </div>
+
+    <!-- Крок 2: Сесія -->
+    <div class="card">
+      <h2>🕐 Крок 2 — Оберіть сесію</h2>
+      <div class="sessions">
+        <div class="session-btn" data-session="morning" data-price="500" onclick="selectSession(this)">
+          <div class="icon">🌅</div>
+          <div class="name">Ранкова</div>
+          <div class="time">6:00 – 13:00</div>
+          <div class="price">500 грн</div>
+        </div>
+        <div class="session-btn" data-session="evening" data-price="500" onclick="selectSession(this)">
+          <div class="icon">🌆</div>
+          <div class="name">Вечірня</div>
+          <div class="time">14:00 – 21:00</div>
+          <div class="price">500 грн</div>
+        </div>
+        <div class="session-btn" data-session="fullday" data-price="700" onclick="selectSession(this)">
+          <div class="icon">☀️</div>
+          <div class="name">Повний день</div>
+          <div class="time">6:00 – 21:00</div>
+          <div class="price">700 грн</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Крок 3: Сектор -->
+    <div class="card">
+      <h2>🎣 Крок 3 — Оберіть сектор</h2>
+      <div class="sectors-grid" id="sectorsGrid">
+        <!-- генерується JS -->
+      </div>
+      <div class="legend">
+        <span><span class="dot free"></span> Вільно</span>
+        <span><span class="dot booked"></span> Зайнято</span>
+      </div>
+      <p style="font-size:12px;color:#888;margin-top:8px">* Оновлюється в реальному часі</p>
+    </div>
+
+    <!-- Крок 4: Контакти -->
+    <div class="card">
+      <h2>👤 Крок 4 — Ваші дані</h2>
+      <div class="form-group">
+        <label>Імʼя та прізвище</label>
+        <input type="text" id="inputName" placeholder="Іван Петренко">
+        <div class="error-msg" id="errName">Введіть імʼя</div>
+      </div>
+      <div class="form-group">
+        <label>Номер телефону</label>
+        <input type="tel" id="inputPhone" placeholder="+380XXXXXXXXX">
+        <div class="error-msg" id="errPhone">Введіть телефон</div>
+      </div>
+    </div>
+
+    <!-- Підсумок -->
+    <div class="card">
+      <h2>📋 Підсумок</h2>
+      <div class="summary-box" id="summaryBox">
+        Оберіть дату, сесію та сектор
+      </div>
+      <div class="error-msg" id="errGeneral" style="display:none;margin-bottom:10px"></div>
+      <button class="btn-primary" id="bookBtn" onclick="submitBooking()">✅ Підтвердити бронювання</button>
+    </div>
+
+  </div>
+
+  <!-- УСПІХ -->
+  <div id="successMsg">
+    <div class="big">🎉</div>
+    <h2>Бронювання підтверджено!</h2>
+    <p id="successDetails"></p>
+    <p style="margin-top:16px;font-size:13px;opacity:.8">Адміністратор побачить ваше бронювання і підготує сектор.<br>До зустрічі на озері!</p>
+    <button onclick="resetForm()" style="margin-top:20px;padding:10px 24px;background:#fff;color:#1a6b3a;border:none;border-radius:8px;font-weight:700;cursor:pointer">Забронювати ще раз</button>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+  apiKey: "REMOVED",
+  authDomain: "didyliv-be39d.firebaseapp.com",
+  databaseURL: "https://didyliv-be39d-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "didyliv-be39d",
+  storageBucket: "didyliv-be39d.firebasestorage.app",
+  messagingSenderId: "507495924179",
+  appId: "1:507495924179:web:aa31425b25a024ba7def26"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+// ============================================================
+
+const SECTORS_COUNT = 11;
+const SESSION_LABELS = {
+  morning:  'Ранкова (6:00–13:00)',
+  evening:  'Вечірня (14:00–21:00)',
+  fullday:  'Повний день (6:00–21:00)'
+};
+const SESSION_PRICES = { morning:500, evening:500, fullday:700 };
+
+let selectedSession = null;
+let selectedSector  = null;
+let bookedSectors   = {}; // { sectorNum: true } для поточного фільтру
+let unsubscribe     = null;
+
+// Мінімальна дата — сьогодні
+const todayStr = new Date().toISOString().split('T')[0];
+document.getElementById('inputDate').min = todayStr;
+document.getElementById('inputDate').value = todayStr;
+document.getElementById('inputDate').onchange = () => { selectedSector=null; loadSectors(); updateSummary(); };
+
+function selectSession(el){
+  document.querySelectorAll('.session-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSession = el.dataset.session;
+  selectedSector  = null;
+  loadSectors();
+  updateSummary();
+}
+
+// ---- Сектори з Firebase ----
+function loadSectors(){
+  const date = document.getElementById('inputDate').value;
+  const session = selectedSession;
+  if(unsubscribe) unsubscribe();
+  bookedSectors = {};
+  if(!date || !session){ renderSectors({}); return; }
+  const ref = db.ref(`bookings/${date}/${session}`);
+  unsubscribe = ref.on('value', snap=>{
+    bookedSectors = {};
+    snap.forEach(child=>{
+      const d = child.val();
+      if(d && d.sector) bookedSectors[d.sector] = true;
+    });
+    renderSectors(bookedSectors);
+  });
+}
+
+function renderSectors(booked){
+  const grid = document.getElementById('sectorsGrid');
+  grid.innerHTML='';
+  for(let i=1;i<=SECTORS_COUNT;i++){
+    const btn=document.createElement('div');
+    const isBooked=!!booked[i];
+    const isSelected=selectedSector===i;
+    btn.className='sector-btn '+(isBooked?'booked':(isSelected?'selected':'free'));
+    btn.innerHTML=`${i}<span class="sector-label">${isBooked?'Зайнято':'Вільно'}</span>`;
+    if(!isBooked) btn.onclick=()=>{ selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
+    grid.appendChild(btn);
+  }
+}
+
+function updateSummary(){
+  const date  = document.getElementById('inputDate').value;
+  const box   = document.getElementById('summaryBox');
+  if(!date||!selectedSession||!selectedSector){
+    box.innerHTML='Оберіть дату, сесію та сектор';
+    return;
+  }
+  const price = SESSION_PRICES[selectedSession];
+  const [y,m,d] = date.split('-');
+  box.innerHTML=`
+    <strong>📅 Дата:</strong> ${d}.${m}.${y}<br>
+    <strong>🕐 Сесія:</strong> ${SESSION_LABELS[selectedSession]}<br>
+    <strong>🎣 Сектор:</strong> ${selectedSector}<br>
+    <strong>🐟 Включено:</strong> 2 кг риби<br>
+    <strong>💰 Сума:</strong> ${price} грн`;
+}
+
+// ---- Підтвердження ----
+async function submitBooking(){
+  const date  = document.getElementById('inputDate').value;
+  const name  = document.getElementById('inputName').value.trim();
+  const phone = document.getElementById('inputPhone').value.trim();
+  let ok=true;
+
+  document.getElementById('errName').style.display  = name  ? 'none':'block'; if(!name)  ok=false;
+  document.getElementById('errPhone').style.display = phone ? 'none':'block'; if(!phone) ok=false;
+  document.getElementById('errGeneral').style.display='none';
+
+  if(!date||!selectedSession||!selectedSector){
+    const eg=document.getElementById('errGeneral');
+    eg.textContent='Оберіть дату, сесію та сектор'; eg.style.display='block';
+    ok=false;
+  }
+  if(!ok) return;
+
+  showLoading(true);
+  try{
+    // Перевірка race condition
+    const checkRef = db.ref(`bookings/${date}/${selectedSession}`);
+    const snap = await checkRef.once('value');
+    let alreadyBooked=false;
+    snap.forEach(c=>{ if(c.val()&&c.val().sector===selectedSector) alreadyBooked=true; });
+    if(alreadyBooked){
+      showLoading(false);
+      const eg=document.getElementById('errGeneral');
+      eg.textContent='Цей сектор щойно зайняли. Оберіть інший.'; eg.style.display='block';
+      loadSectors();
+      return;
+    }
+
+    const newRef = db.ref(`bookings/${date}/${selectedSession}`).push();
+    await newRef.set({
+      sector: selectedSector,
+      name, phone,
+      session: selectedSession,
+      price: SESSION_PRICES[selectedSession],
+      date,
+      createdAt: new Date().toISOString()
+    });
+
+    showLoading(false);
+    const [y,m,d2]=date.split('-');
+    document.getElementById('successDetails').textContent=
+      `Сектор ${selectedSector} • ${SESSION_LABELS[selectedSession]} • ${d2}.${m}.${y}`;
+    document.getElementById('bookingForm').style.display='none';
+    document.getElementById('successMsg').style.display='block';
+  }catch(e){
+    showLoading(false);
+    const eg=document.getElementById('errGeneral');
+    eg.textContent='Помилка: '+e.message; eg.style.display='block';
+  }
+}
+
+function resetForm(){
+  selectedSession=null; selectedSector=null;
+  document.querySelectorAll('.session-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('inputName').value='';
+  document.getElementById('inputPhone').value='';
+  document.getElementById('inputDate').value=todayStr;
+  document.getElementById('bookingForm').style.display='block';
+  document.getElementById('successMsg').style.display='none';
+  loadSectors(); updateSummary();
+}
+
+function showLoading(v){ document.getElementById('loadingOverlay').classList.toggle('show',v); }
+
+// Ініціалізація
+renderSectors({});
+updateSummary();
+</script>
+</body>
+</html>
