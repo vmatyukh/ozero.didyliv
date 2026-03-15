@@ -84,7 +84,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
             Оберіть дату
           </div>
           <input type="date" id="inputDate" min=""
-            style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:0;pointer-events:none">
+            style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
         </div>
       </div>
     </div>
@@ -273,21 +273,18 @@ inputDate.onchange = e => {
   updateSummary();
 };
 
-// Клік по dateDisplay відкриває календар на всіх пристроях
-document.getElementById('dateDisplay').addEventListener('click', ()=>{
-  if(inputDate.showPicker){
-    try{ inputDate.showPicker(); return; }catch(e){}
-  }
-  // Fallback для старих браузерів і iOS
-  inputDate.style.pointerEvents='auto';
-  inputDate.style.zIndex='3';
-  inputDate.focus();
-  inputDate.click();
-  setTimeout(()=>{
-    inputDate.style.pointerEvents='none';
-    inputDate.style.zIndex='0';
-  }, 500);
-});
+// Блокуємо pinch-zoom на мобільному
+document.addEventListener('touchmove', e=>{
+  if(e.touches.length>1) e.preventDefault();
+},{passive:false});
+document.addEventListener('gesturestart', e=>e.preventDefault());
+document.addEventListener('gesturechange', e=>e.preventDefault()); (мобільний сам спрацює через прозорий інпут)
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+if(!isTouchDevice){
+  document.getElementById('dateDisplay').addEventListener('click', ()=>{
+    try{ inputDate.showPicker(); }catch(e){ inputDate.focus(); }
+  });
+}
 
 /* ===== Сесія ===== */
 function selectSession(el){
