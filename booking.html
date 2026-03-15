@@ -231,10 +231,9 @@ const SESSION_PRICES = { morning:500, evening:500, fullday:700 };
 
 let selectedSession = null;
 let selectedSector  = null;
-let bookedSectors   = {}; // { sectorNum: true } для поточного фільтру
+let bookedSectors   = {};
 let unsubscribe     = null;
 
-// Мінімальна дата — сьогодні
 const todayStr = new Date().toISOString().split('T')[0];
 document.getElementById('inputDate').min = todayStr;
 document.getElementById('inputDate').value = todayStr;
@@ -443,7 +442,6 @@ function resetForm(){
   document.getElementById('inputDate').value=todayStr;
   document.getElementById('bookingForm').style.display='block';
   document.getElementById('successMsg').style.display='none';
-  // Повертаємо кнопку (якщо не Telegram)
   const bookBtn = document.getElementById('bookBtn');
   if(bookBtn && !window.Telegram?.WebApp) bookBtn.style.display='block';
   loadSectors(); updateSummary();
