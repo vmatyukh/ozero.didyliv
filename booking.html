@@ -113,42 +113,55 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <!-- Крок 3: Сектор -->
     <div class="card" style="padding:16px 12px">
       <h2 style="margin-bottom:12px">🎣 Крок 3 — Оберіть сектор</h2>
-      <svg id="lakeMap" viewBox="0 0 680 480" style="display:block;width:100%;height:auto;touch-action:manipulation" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <g id="gc">
-            <path d="M0,0 C-1,-16 -2,-36  0,-52 C2,-36  1,-16  0,0Z" fill="#9ee030"/>
-            <path d="M0,0 C-5,-14 -9,-32 -12,-48 C-7,-32 -2,-14  0,0Z" fill="#72c216"/>
-            <path d="M0,0 C 5,-14  9,-32  12,-48 C  7,-32  2,-14  0,0Z" fill="#72c216"/>
-            <path d="M0,0 C-9,-12 -16,-28 -20,-44 C-13,-28 -5,-12  0,0Z" fill="#5aae10"/>
-            <path d="M0,0 C 9,-12  16,-28  20,-44 C 13,-28  5,-12  0,0Z" fill="#5aae10"/>
-          </g>
-        </defs>
-        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="#005356" opacity="0.22"/>
-        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="none" stroke="#007a7e" stroke-width="2.2" opacity="0.8"/>
-        <path d="M100 248 Q336 234 594 250" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".14"/>
-        <path d="M 86 295 Q330 280 596 296" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".12"/>
-        <path d="M 90 340 Q320 326 542 342" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".11"/>
-        <text x="334" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" fill="#005356" opacity=".55">Поплавцеве озеро</text>
-        <line x1="100" y1="376" x2="546" y2="376" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity=".5"/>
-        <text x="323" y="396" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#6b5a3e" opacity=".8">Дамба</text>
-        <use href="#gc" transform="translate(140,186)" opacity=".88"/>
-        <use href="#gc" transform="translate(181,163)" opacity=".88"/>
-        <use href="#gc" transform="translate(221,139)" opacity=".88"/>
-        <use href="#gc" transform="translate(262,115)" opacity=".88"/>
-        <use href="#gc" transform="translate(302,92)"  opacity=".88"/>
-        <use href="#gc" transform="translate(343,68)"  opacity=".88"/>
-        <use href="#gc" transform="translate(420,63)"  opacity=".88"/>
-        <use href="#gc" transform="translate(481,77)"  opacity=".88"/>
-        <use href="#gc" transform="translate(542,91)"  opacity=".88"/>
-        <use href="#gc" transform="translate(622,162)" opacity=".82"/>
-        <use href="#gc" transform="translate(626,220)" opacity=".82"/>
-        <use href="#gc" transform="translate(622,278)" opacity=".82"/>
-        <use href="#gc" transform="translate(618,334)" opacity=".82"/>
-        <use href="#gc" transform="translate(58,270)"  opacity=".82"/>
-        <use href="#gc" transform="translate(56,316)"  opacity=".82"/>
-        <use href="#gc" transform="translate(60,358)"  opacity=".82"/>
-        <g id="sectorRects" font-family="system-ui,sans-serif" font-size="13" font-weight="700" text-anchor="middle"></g>
-      </svg>
+
+      <!-- Zoom controls -->
+      <div style="position:relative">
+        <div style="position:absolute;top:8px;left:8px;z-index:10;display:flex;flex-direction:column;gap:4px">
+          <button onclick="zoomIn()" style="width:36px;height:36px;border:none;border-radius:8px;background:#005356;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0003">+</button>
+          <button onclick="zoomOut()" style="width:36px;height:36px;border:none;border-radius:8px;background:#005356;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px #0003">−</button>
+        </div>
+
+        <!-- SVG container with overflow hidden for zoom -->
+        <div id="lakeContainer" style="overflow:hidden;border-radius:10px;background:#e0f2f2;cursor:grab;touch-action:none">
+          <svg id="lakeMap" viewBox="0 0 680 480" style="display:block;width:100%;height:auto;transform-origin:0 0;transition:transform .2s" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <g id="gc">
+                <path d="M0,0 C-1,-16 -2,-36  0,-52 C2,-36  1,-16  0,0Z" fill="#9ee030"/>
+                <path d="M0,0 C-5,-14 -9,-32 -12,-48 C-7,-32 -2,-14  0,0Z" fill="#72c216"/>
+                <path d="M0,0 C 5,-14  9,-32  12,-48 C  7,-32  2,-14  0,0Z" fill="#72c216"/>
+                <path d="M0,0 C-9,-12 -16,-28 -20,-44 C-13,-28 -5,-12  0,0Z" fill="#5aae10"/>
+                <path d="M0,0 C 9,-12  16,-28  20,-44 C 13,-28  5,-12  0,0Z" fill="#5aae10"/>
+              </g>
+            </defs>
+            <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="#005356" opacity="0.22"/>
+            <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="none" stroke="#007a7e" stroke-width="2.2" opacity="0.8"/>
+            <path d="M100 248 Q336 234 594 250" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".14"/>
+            <path d="M 86 295 Q330 280 596 296" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".12"/>
+            <path d="M 90 340 Q320 326 542 342" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".11"/>
+            <text x="334" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" fill="#005356" opacity=".55">Поплавцеве озеро</text>
+            <line x1="100" y1="376" x2="546" y2="376" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity=".5"/>
+            <text x="323" y="396" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#6b5a3e" opacity=".8">Дамба</text>
+            <use href="#gc" transform="translate(140,186)" opacity=".88"/>
+            <use href="#gc" transform="translate(181,163)" opacity=".88"/>
+            <use href="#gc" transform="translate(221,139)" opacity=".88"/>
+            <use href="#gc" transform="translate(262,115)" opacity=".88"/>
+            <use href="#gc" transform="translate(302,92)"  opacity=".88"/>
+            <use href="#gc" transform="translate(343,68)"  opacity=".88"/>
+            <use href="#gc" transform="translate(420,63)"  opacity=".88"/>
+            <use href="#gc" transform="translate(481,77)"  opacity=".88"/>
+            <use href="#gc" transform="translate(542,91)"  opacity=".88"/>
+            <use href="#gc" transform="translate(622,162)" opacity=".82"/>
+            <use href="#gc" transform="translate(626,220)" opacity=".82"/>
+            <use href="#gc" transform="translate(622,278)" opacity=".82"/>
+            <use href="#gc" transform="translate(618,334)" opacity=".82"/>
+            <use href="#gc" transform="translate(58,270)"  opacity=".82"/>
+            <use href="#gc" transform="translate(56,316)"  opacity=".82"/>
+            <use href="#gc" transform="translate(60,358)"  opacity=".82"/>
+            <g id="sectorRects" font-family="system-ui,sans-serif" font-size="13" font-weight="700" text-anchor="middle"></g>
+          </svg>
+        </div>
+      </div>
+
       <div class="legend" style="margin-top:10px">
         <span><span class="dot free"></span> Вільно</span>
         <span><span class="dot booked"></span> Зайнято</span>
@@ -372,10 +385,13 @@ async function submitBooking(){
       `💰 Сума: ${SESSION_PRICES[selectedSession]} грн\n`+
       `👤 Імʼя: ${name}\n`+
       `📞 Телефон: ${phone}`;
-    fetch(`https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:'8459515447', text:msg})
-    }).catch(()=>{});
+    const sendNotification = (chat_id) => fetch(
+      `https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id, text:msg}) }
+    ).catch(()=>{});
+    sendNotification('8459515447');
+    sendNotification('592212598');
 
     showLoading(false);
     document.getElementById('successDetails').textContent=
@@ -407,7 +423,68 @@ function resetForm(){
 
 function showLoading(v){ document.getElementById('loadingOverlay').classList.toggle('show',v); }
 
-/* ===== Ініціалізація ===== */
+/* ===== Zoom & Pan для карти ===== */
+(function initZoom(){
+  const svg       = document.getElementById('lakeMap');
+  const container = document.getElementById('lakeContainer');
+  let scale=1, tx=0, ty=0;
+  const MIN=1, MAX=3, STEP=0.5;
+
+  function applyTransform(){
+    svg.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+  }
+  function clampTranslate(){
+    const cw=container.clientWidth, ch=container.clientHeight;
+    const sw=svg.clientWidth*scale, sh=svg.clientHeight*scale;
+    const maxTx=0, minTx=Math.min(0,cw-sw);
+    const maxTy=0, minTy=Math.min(0,ch-sh);
+    tx=Math.max(minTx,Math.min(maxTx,tx));
+    ty=Math.max(minTy,Math.min(maxTy,ty));
+  }
+
+  window.zoomIn=()=>{
+    if(scale>=MAX) return;
+    scale=Math.min(MAX,scale+STEP);
+    clampTranslate(); applyTransform();
+  };
+  window.zoomOut=()=>{
+    if(scale<=MIN) return;
+    scale=Math.max(MIN,scale-STEP);
+    if(scale===MIN){tx=0;ty=0;}
+    clampTranslate(); applyTransform();
+  };
+
+  // Touch pan
+  let lastX=0, lastY=0, dragging=false;
+  container.addEventListener('touchstart',e=>{
+    if(e.touches.length===1&&scale>1){
+      dragging=true;
+      lastX=e.touches[0].clientX;
+      lastY=e.touches[0].clientY;
+    }
+  },{passive:true});
+  container.addEventListener('touchmove',e=>{
+    if(!dragging||e.touches.length!==1) return;
+    tx+=e.touches[0].clientX-lastX;
+    ty+=e.touches[0].clientY-lastY;
+    lastX=e.touches[0].clientX;
+    lastY=e.touches[0].clientY;
+    clampTranslate(); applyTransform();
+  },{passive:true});
+  container.addEventListener('touchend',()=>{ dragging=false; });
+
+  // Mouse pan
+  container.addEventListener('mousedown',e=>{
+    if(scale>1){dragging=true;lastX=e.clientX;lastY=e.clientY;container.style.cursor='grabbing';}
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!dragging) return;
+    tx+=e.clientX-lastX; ty+=e.clientY-lastY;
+    lastX=e.clientX; lastY=e.clientY;
+    clampTranslate(); applyTransform();
+  });
+  window.addEventListener('mouseup',()=>{ dragging=false; container.style.cursor='grab'; });
+})();
 renderSectors({});
 updateSummary();
 
