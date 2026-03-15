@@ -153,23 +153,11 @@ button.danger{background:#fdd}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
 
 <script>
-// ============================================================
-// FIREBASE CONFIG
-// ============================================================
-const firebaseConfig = {
-  apiKey: "REMOVED",
-  authDomain: "didyliv-be39d.firebaseapp.com",
-  databaseURL: "https://didyliv-be39d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "didyliv-be39d",
-  storageBucket: "didyliv-be39d.firebasestorage.app",
-  messagingSenderId: "507495924179",
-  appId: "1:507495924179:web:aa31425b25a024ba7def26"
-};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-// ============================================================
 
 const $=id=>document.getElementById(id);
 const nowStr=()=>new Date().toLocaleString('uk-UA',{hour12:false}).replace(',','');
@@ -405,14 +393,15 @@ function selectFloatSession(el){
 
 function loadFloatBookings(){
   const date=$('floatDate').value;
-  if(floatUnsub){floatUnsub();floatUnsub=null;}
+  if(floatUnsub){floatUnsub.ref.off('value',floatUnsub.fn);floatUnsub=null;}
   floatBookings={};
   const ref=db.ref(`bookings/${date}/${floatSession}`);
-  floatUnsub=ref.on('value',snap=>{
+  const fn=ref.on('value',snap=>{
     floatBookings={};
     snap.forEach(child=>{floatBookings[child.key]=child.val();});
     renderFloatTable();
   });
+  floatUnsub={ref,fn};
   updateFloatLegend();
 }
 

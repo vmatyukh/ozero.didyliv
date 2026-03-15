@@ -159,23 +159,11 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
 
 <script>
-// ============================================================
-// FIREBASE CONFIG
-// ============================================================
-const firebaseConfig = {
-  apiKey: "REMOVED",
-  authDomain: "didyliv-be39d.firebaseapp.com",
-  databaseURL: "https://didyliv-be39d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "didyliv-be39d",
-  storageBucket: "didyliv-be39d.firebasestorage.app",
-  messagingSenderId: "507495924179",
-  appId: "1:507495924179:web:aa31425b25a024ba7def26"
-};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-// ============================================================
 
 const SECTORS_COUNT = 11;
 const SESSION_LABELS = {
