@@ -84,7 +84,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
             Оберіть дату
           </div>
           <input type="date" id="inputDate" min=""
-            style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+            style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:0;pointer-events:none">
         </div>
       </div>
     </div>
@@ -273,9 +273,20 @@ inputDate.onchange = e => {
   updateSummary();
 };
 
-// Десктоп — клік по dateDisplay відкриває календар
+// Клік по dateDisplay відкриває календар на всіх пристроях
 document.getElementById('dateDisplay').addEventListener('click', ()=>{
-  try{ inputDate.showPicker(); }catch(e){ inputDate.focus(); }
+  if(inputDate.showPicker){
+    try{ inputDate.showPicker(); return; }catch(e){}
+  }
+  // Fallback для старих браузерів і iOS
+  inputDate.style.pointerEvents='auto';
+  inputDate.style.zIndex='3';
+  inputDate.focus();
+  inputDate.click();
+  setTimeout(()=>{
+    inputDate.style.pointerEvents='none';
+    inputDate.style.zIndex='0';
+  }, 500);
 });
 
 /* ===== Сесія ===== */
