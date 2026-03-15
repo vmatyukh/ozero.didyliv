@@ -110,99 +110,57 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <!-- Крок 3: Сектор -->
     <div class="card" style="padding:16px 12px">
       <h2 style="margin-bottom:12px">🎣 Крок 3 — Оберіть сектор</h2>
-      <svg id="lakeMap" viewBox="0 0 680 420" style="display:block;width:100%;height:auto;touch-action:manipulation">
+      <svg id="lakeMap" viewBox="0 0 680 480" style="display:block;width:100%;height:auto;touch-action:manipulation" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <g id="gc">
+            <path d="M0,0 C-1,-16 -2,-36  0,-52 C2,-36  1,-16  0,0Z" fill="#9ee030"/>
+            <path d="M0,0 C-5,-14 -9,-32 -12,-48 C-7,-32 -2,-14  0,0Z" fill="#72c216"/>
+            <path d="M0,0 C 5,-14  9,-32  12,-48 C  7,-32  2,-14  0,0Z" fill="#72c216"/>
+            <path d="M0,0 C-9,-12 -16,-28 -20,-44 C-13,-28 -5,-12  0,0Z" fill="#5aae10"/>
+            <path d="M0,0 C 9,-12  16,-28  20,-44 C 13,-28  5,-12  0,0Z" fill="#5aae10"/>
+          </g>
+        </defs>
 
-        <!-- Lake fill -->
-        <polygon points="100,210 370,55 570,100 610,285 545,375 100,375 55,315" fill="#1a5c7a" opacity="0.2"/>
-        <polygon points="100,210 370,55 570,100 610,285 545,375 100,375 55,315" fill="none" stroke="#2a8aac" stroke-width="2" opacity="0.75"/>
+        <!-- lake -->
+        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="#1d6e8f" opacity="0.22"/>
+        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="none" stroke="#2a8aac" stroke-width="2.2" opacity="0.8"/>
 
-        <!-- Water ripples -->
-        <path d="M 105 250 Q 335 237 590 252" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.16"/>
-        <path d="M  92 295 Q 330 282 592 297" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.14"/>
-        <path d="M  95 338 Q 320 326 538 340" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.13"/>
+        <!-- ripples -->
+        <path d="M100 248 Q336 234 594 250" fill="none" stroke="#2a8aac" stroke-width=".7" opacity=".14"/>
+        <path d="M 86 295 Q330 280 596 296" fill="none" stroke="#2a8aac" stroke-width=".7" opacity=".12"/>
+        <path d="M 90 340 Q320 326 542 342" fill="none" stroke="#2a8aac" stroke-width=".7" opacity=".11"/>
 
-        <!-- Lake label -->
-        <text x="335" y="222" text-anchor="middle" font-size="14" fill="#1a5c7a" opacity="0.55" font-family="system-ui,sans-serif">Поплавцеве озеро</text>
+        <!-- label -->
+        <text x="334" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" fill="#1d6e8f" opacity=".55">Поплавцеве озеро</text>
 
-        <!-- Dam -->
-        <line x1="100" y1="375" x2="545" y2="375" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity="0.45"/>
-        <text x="322" y="393" text-anchor="middle" font-size="11" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.75">Дамба</text>
+        <!-- dam -->
+        <line x1="100" y1="376" x2="546" y2="376" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity=".5"/>
+        <text x="323" y="396" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#6b5a3e" opacity=".8">Дамба</text>
 
-        <!-- GRASS clumps — top bank -->
-        <!-- Each clump: blades fan out from base, wide at root, sharp tip -->
-        <g fill="#6abf1a" opacity="0.85">
-          <!-- clump 1 -->
-          <path d="M200,64 Q194,42 196,22 Q200,40 204,22 Q206,42 200,64Z" fill="#7dd620"/>
-          <path d="M200,64 Q188,48 182,30 Q194,44 200,64Z" fill="#6abf1a"/>
-          <path d="M200,64 Q212,48 218,30 Q206,44 200,64Z" fill="#6abf1a"/>
-          <path d="M200,64 Q178,52 170,38 Q190,50 200,64Z" fill="#5aae10"/>
-          <path d="M200,64 Q222,52 230,38 Q210,50 200,64Z" fill="#5aae10"/>
-          <!-- clump 2 -->
-          <path d="M270,60 Q264,38 266,18 Q270,36 274,18 Q276,38 270,60Z" fill="#7dd620"/>
-          <path d="M270,60 Q258,44 252,26 Q264,40 270,60Z" fill="#6abf1a"/>
-          <path d="M270,60 Q282,44 288,26 Q276,40 270,60Z" fill="#6abf1a"/>
-          <path d="M270,60 Q248,48 240,34 Q260,46 270,60Z" fill="#5aae10"/>
-          <path d="M270,60 Q292,48 300,34 Q280,46 270,60Z" fill="#5aae10"/>
-          <!-- clump 3 -->
-          <path d="M340,62 Q334,40 336,20 Q340,38 344,20 Q346,40 340,62Z" fill="#7dd620"/>
-          <path d="M340,62 Q328,46 322,28 Q334,42 340,62Z" fill="#6abf1a"/>
-          <path d="M340,62 Q352,46 358,28 Q346,42 340,62Z" fill="#6abf1a"/>
-          <path d="M340,62 Q318,50 310,36 Q330,48 340,62Z" fill="#5aae10"/>
-          <path d="M340,62 Q362,50 370,36 Q350,48 340,62Z" fill="#5aae10"/>
-          <!-- clump 4 -->
-          <path d="M410,68 Q404,46 406,26 Q410,44 414,26 Q416,46 410,68Z" fill="#7dd620"/>
-          <path d="M410,68 Q398,52 392,34 Q404,48 410,68Z" fill="#6abf1a"/>
-          <path d="M410,68 Q422,52 428,34 Q416,48 410,68Z" fill="#6abf1a"/>
-          <path d="M410,68 Q388,56 380,42 Q400,54 410,68Z" fill="#5aae10"/>
-          <path d="M410,68 Q432,56 440,42 Q420,54 410,68Z" fill="#5aae10"/>
-        </g>
+        <!-- top bank grass — along shore line -->
+        <use href="#gc" transform="translate(140,186)" opacity=".88"/>
+        <use href="#gc" transform="translate(181,163)" opacity=".88"/>
+        <use href="#gc" transform="translate(221,139)" opacity=".88"/>
+        <use href="#gc" transform="translate(262,115)" opacity=".88"/>
+        <use href="#gc" transform="translate(302,92)"  opacity=".88"/>
+        <use href="#gc" transform="translate(343,68)"  opacity=".88"/>
+        <use href="#gc" transform="translate(420,63)"  opacity=".88"/>
+        <use href="#gc" transform="translate(481,77)"  opacity=".88"/>
+        <use href="#gc" transform="translate(542,91)"  opacity=".88"/>
 
-        <!-- GRASS clumps — right bank (rotated, leaning left) -->
-        <g fill="#6abf1a" opacity="0.8">
-          <path d="M620,170 Q630,150 642,136 Q628,154 620,170Z" fill="#7dd620"/>
-          <path d="M620,170 Q636,158 648,148 Q630,160 620,170Z" fill="#6abf1a"/>
-          <path d="M620,170 Q626,148 624,130 Q622,150 620,170Z" fill="#5aae10"/>
-          <path d="M620,170 Q612,150 606,136 Q616,154 620,170Z" fill="#6abf1a"/>
+        <!-- right bank grass -->
+        <use href="#gc" transform="translate(622,162)" opacity=".82"/>
+        <use href="#gc" transform="translate(626,220)" opacity=".82"/>
+        <use href="#gc" transform="translate(622,278)" opacity=".82"/>
+        <use href="#gc" transform="translate(618,334)" opacity=".82"/>
 
-          <path d="M618,210 Q628,190 640,176 Q626,194 618,210Z" fill="#7dd620"/>
-          <path d="M618,210 Q634,198 646,188 Q628,200 618,210Z" fill="#6abf1a"/>
-          <path d="M618,210 Q622,188 620,170 Q618,190 618,210Z" fill="#5aae10"/>
-          <path d="M618,210 Q610,190 604,176 Q614,194 618,210Z" fill="#6abf1a"/>
+        <!-- left bank grass -->
+        <use href="#gc" transform="translate(58,270)"  opacity=".82"/>
+        <use href="#gc" transform="translate(56,316)"  opacity=".82"/>
+        <use href="#gc" transform="translate(60,358)"  opacity=".82"/>
 
-          <path d="M615,252 Q625,232 637,218 Q623,236 615,252Z" fill="#7dd620"/>
-          <path d="M615,252 Q631,240 643,230 Q625,242 615,252Z" fill="#6abf1a"/>
-          <path d="M615,252 Q619,230 617,212 Q615,232 615,252Z" fill="#5aae10"/>
-          <path d="M615,252 Q607,232 601,218 Q611,236 615,252Z" fill="#6abf1a"/>
-
-          <path d="M612,294 Q622,274 634,260 Q620,278 612,294Z" fill="#7dd620"/>
-          <path d="M612,294 Q628,282 640,272 Q622,284 612,294Z" fill="#6abf1a"/>
-          <path d="M612,294 Q616,272 614,254 Q612,274 612,294Z" fill="#5aae10"/>
-          <path d="M612,294 Q604,274 598,260 Q608,278 612,294Z" fill="#6abf1a"/>
-        </g>
-
-        <!-- GRASS clumps — left bank -->
-        <g fill="#6abf1a" opacity="0.8">
-          <path d="M62,282 Q52,262 40,248 Q54,266 62,282Z" fill="#7dd620"/>
-          <path d="M62,282 Q46,270 34,260 Q50,272 62,282Z" fill="#6abf1a"/>
-          <path d="M62,282 Q58,260 60,242 Q62,262 62,282Z" fill="#5aae10"/>
-          <path d="M62,282 Q70,262 76,248 Q66,266 62,282Z" fill="#6abf1a"/>
-
-          <path d="M65,318 Q55,298 43,284 Q57,302 65,318Z" fill="#7dd620"/>
-          <path d="M65,318 Q49,306 37,296 Q53,308 65,318Z" fill="#6abf1a"/>
-          <path d="M65,318 Q61,296 63,278 Q65,298 65,318Z" fill="#5aae10"/>
-          <path d="M65,318 Q73,298 79,284 Q69,302 65,318Z" fill="#6abf1a"/>
-
-          <path d="M70,352 Q60,332 48,318 Q62,336 70,352Z" fill="#7dd620"/>
-          <path d="M70,352 Q54,340 42,330 Q58,342 70,352Z" fill="#6abf1a"/>
-          <path d="M70,352 Q66,330 68,312 Q70,332 70,352Z" fill="#5aae10"/>
-          <path d="M70,352 Q78,332 84,318 Q74,336 70,352Z" fill="#6abf1a"/>
-        </g>
-
-        <!-- SECTORS — placed along the dam shore inside the lake -->
-        <!-- Dam runs x=100..545 at y=375. Place sectors just above dam. -->
-        <!-- 11 sectors, w=40, h=36, gap=2, total=11*40+10*2=460, startX=(645-460)/2=92 → but dam starts at 100, so startX=100+(445-460)/2 → fit in dam width 445: sector_w=38, gap=2, total=11*38+10*2=438, startX=100+3=103 -->
-        <g id="sectorRects" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle"></g>
-
+        <!-- sectors — generated by JS -->
+        <g id="sectorRects" font-family="system-ui,sans-serif" font-size="13" font-weight="700" text-anchor="middle"></g>
       </svg>
 
       <div class="legend" style="margin-top:10px">
@@ -335,11 +293,10 @@ function renderSectors(booked){
   // Dam: x=173..539 = 366px. 11*(44+2)-2 = 504 > 366, so place in dam center area
   // Use viewBox width 680, center sectors under lake
   // Two rows if needed — fit all 11 in one row: total=11*44+10*2=504, startX=(680-504)/2=88
-  // Dam: x=100..545 = 445px. Sectors inside lake just above dam.
-  // w=38, gap=2, total=11*38+10*2=438, startX=100+3=103
-  const w=38, h=38, gap=2;
-  const startX = 103;
-  const y = 328;
+  // dam x=100..546=446px, sectors w=36 h=38 gap=4.6, start=102, y=326
+  const w=36, h=38, gap=4;
+  const startX = 102;
+  const y = 326;
 
   for(let i=1;i<=SECTORS_COUNT;i++){
     const x = startX + (i-1)*(w+gap);
