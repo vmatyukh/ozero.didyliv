@@ -78,8 +78,13 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       <h2>📅 Крок 1 — Оберіть дату</h2>
       <div class="form-group">
         <label>Дата риболовлі</label>
-        <input type="date" id="inputDate" min=""
-          style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;box-sizing:border-box;background:#fff;color:#222;cursor:pointer;-webkit-appearance:none">
+        <div style="position:relative">
+          <input type="date" id="inputDate" min=""
+            style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;box-sizing:border-box;background:#fff;color:#222;-webkit-appearance:none">
+          <div id="dateOverlay"
+            style="display:none;position:absolute;inset:0;padding:10px 12px;font-size:15px;color:#222;background:#fff;border:1px solid #ccc;border-radius:8px;cursor:pointer;box-sizing:border-box;user-select:none;align-items:center">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -249,12 +254,40 @@ function formatDateUA(dateStr){
   return `${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}`;
 }
 
-function updateDateDisplay(val){} // збережено для сумісності
+function updateDateDisplay(val){
+  const overlay = document.getElementById('dateOverlay');
+  if(!overlay) return;
+  if(val){ overlay.textContent = formatDateUA(val); }
+  else   { overlay.textContent = 'Оберіть дату'; }
+}
 
 const inputDate = document.getElementById('inputDate');
+const dateOverlay = document.getElementById('dateOverlay');
 inputDate.min   = todayStr;
 inputDate.value = todayStr;
-updateDateDisplay(todayStr);
+
+// Визначаємо тип пристрою
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if(isMobile){
+  // Мобільний — показуємо overlay, при кліку ховаємо і тапаємо інпут
+  dateOverlay.style.display='flex';
+  updateDateDisplay(todayStr);
+  dateOverlay.addEventListener('click', ()=>{
+    dateOverlay.style.display='none';
+    inputDate.focus();
+    inputDate.click();
+  });
+  inputDate.addEventListener('blur', ()=>{
+    setTimeout(()=>{ dateOverlay.style.display='flex'; },100);
+  });
+} else {
+  // Десктоп — overlay прихований, інпут відкривається showPicker де завгодно
+  inputDate.addEventListener('click', ()=>{
+    try{ inputDate.showPicker(); }catch(e){}
+  });
+}
+
 inputDate.onchange = e => {
   selectedSector = null;
   updateDateDisplay(e.target.value);
@@ -430,6 +463,8 @@ function resetForm(){
   document.getElementById('inputName').value='';
   document.getElementById('inputPhone').value='';
   document.getElementById('inputDate').value=todayStr;
+  updateDateDisplay(todayStr);
+  if(isMobile) document.getElementById('dateOverlay').style.display='flex';
   updateDateDisplay(todayStr);
   document.getElementById('bookingForm').style.display='block';
   document.getElementById('successMsg').style.display='none';
