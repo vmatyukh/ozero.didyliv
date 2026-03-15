@@ -282,8 +282,11 @@ if(isMobile){
     setTimeout(()=>{ dateOverlay.style.display='flex'; },100);
   });
 } else {
-  // Десктоп — overlay прихований, інпут відкривається showPicker де завгодно
-  inputDate.addEventListener('click', ()=>{
+  // Десктоп — overlay поверх інпута, показує українську дату
+  dateOverlay.style.display='flex';
+  dateOverlay.style.paddingRight='36px'; // місце для іконки
+  updateDateDisplay(todayStr);
+  dateOverlay.addEventListener('click', ()=>{
     try{ inputDate.showPicker(); }catch(e){}
   });
 }
@@ -291,6 +294,7 @@ if(isMobile){
 inputDate.onchange = e => {
   selectedSector = null;
   updateDateDisplay(e.target.value);
+  if(isMobile) dateOverlay.style.display='flex';
   loadSectors();
   updateSummary();
 };
@@ -464,7 +468,7 @@ function resetForm(){
   document.getElementById('inputPhone').value='';
   document.getElementById('inputDate').value=todayStr;
   updateDateDisplay(todayStr);
-  if(isMobile) document.getElementById('dateOverlay').style.display='flex';
+  document.getElementById('dateOverlay').style.display='flex';
   updateDateDisplay(todayStr);
   document.getElementById('bookingForm').style.display='block';
   document.getElementById('successMsg').style.display='none';
