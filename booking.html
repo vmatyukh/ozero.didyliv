@@ -110,14 +110,34 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <!-- Крок 3: Сектор -->
     <div class="card">
       <h2>🎣 Крок 3 — Оберіть сектор</h2>
-      <div class="sectors-grid" id="sectorsGrid">
-        <!-- генерується JS -->
+      <div style="width:100%;overflow:hidden">
+        <svg id="lakeMap" viewBox="0 0 680 400" width="100%" style="display:block;max-width:100%">
+          <polygon points="173,211 411,87 573,126 607,288 539,364 173,364 131,313" fill="#1a5c7a" opacity="0.18"/>
+          <polygon points="173,211 411,87 573,126 607,288 539,364 173,364 131,313" fill="none" stroke="#2a8aac" stroke-width="2.5" opacity="0.75"/>
+          <path d="M 168 245 Q 370 232 585 248" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.18"/>
+          <path d="M 158 295 Q 368 282 588 298" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.18"/>
+          <path d="M 164 338 Q 358 325 528 340" fill="none" stroke="#2a8aac" stroke-width="0.6" opacity="0.18"/>
+          <text x="370" y="218" text-anchor="middle" font-size="13" fill="#1a5c7a" opacity="0.6" font-family="system-ui,sans-serif">Поплавцеве озеро</text>
+          <line x1="173" y1="364" x2="539" y2="364" stroke="#8B7355" stroke-width="2.5" stroke-dasharray="7 4" opacity="0.5"/>
+          <text x="356" y="382" text-anchor="middle" font-size="11" fill="#6b5a3e" font-family="system-ui,sans-serif" opacity="0.8">Дамба</text>
+          <circle cx="270" cy="70" r="10" fill="#2d6a2d" opacity="0.28"/>
+          <circle cx="315" cy="62" r="9"  fill="#2d6a2d" opacity="0.25"/>
+          <circle cx="355" cy="60" r="11" fill="#2d6a2d" opacity="0.28"/>
+          <circle cx="395" cy="66" r="9"  fill="#2d6a2d" opacity="0.25"/>
+          <circle cx="622" cy="200" r="10" fill="#2d6a2d" opacity="0.28"/>
+          <circle cx="626" cy="240" r="9"  fill="#2d6a2d" opacity="0.25"/>
+          <circle cx="619" cy="278" r="10" fill="#2d6a2d" opacity="0.28"/>
+          <circle cx="112" cy="288" r="9"  fill="#2d6a2d" opacity="0.25"/>
+          <circle cx="108" cy="323" r="10" fill="#2d6a2d" opacity="0.28"/>
+          <g id="sectorRects" font-family="system-ui,sans-serif" font-size="10" font-weight="600" text-anchor="middle"></g>
+        </svg>
       </div>
-      <div class="legend">
+      <div class="legend" style="margin-top:8px">
         <span><span class="dot free"></span> Вільно</span>
         <span><span class="dot booked"></span> Зайнято</span>
+        <span><span class="dot" style="background:#ccc;border:1.5px solid #aaa;display:inline-block;width:12px;height:12px;border-radius:3px"></span> Недоступно</span>
       </div>
-      <p style="font-size:12px;color:#888;margin-top:8px">* Оновлюється в реальному часі</p>
+      <p style="font-size:12px;color:#888;margin-top:6px">* Оновлюється в реальному часі. Натисни на сектор щоб обрати.</p>
     </div>
 
     <!-- Крок 4: Контакти -->
@@ -236,16 +256,42 @@ function loadSectors(){
 }
 
 function renderSectors(booked){
-  const grid = document.getElementById('sectorsGrid');
-  grid.innerHTML='';
+  const g = document.getElementById('sectorRects');
+  g.innerHTML = '';
+  const startX = 188, step = 31, w = 26, h = 22, y = 340;
   for(let i=1;i<=SECTORS_COUNT;i++){
-    const btn=document.createElement('div');
-    const isBooked=!!booked[i];
-    const isSelected=selectedSector===i;
-    btn.className='sector-btn '+(isBooked?'booked':(isSelected?'selected':'free'));
-    btn.innerHTML=`${i}<span class="sector-label">${isBooked?'Зайнято':'Вільно'}</span>`;
-    if(!isBooked) btn.onclick=()=>{ selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
-    grid.appendChild(btn);
+    const x = startX + (i-1)*step;
+    const isBooked = !!booked[i];
+    const isSelected = selectedSector === i;
+    let fill, stroke, cursor;
+    if(isBooked){
+      fill='#e67e00'; stroke='#b35900'; cursor='not-allowed';
+    } else if(isSelected){
+      fill='#c8e6c9'; stroke='#1a6b3a'; cursor='pointer';
+    } else {
+      fill='#1a6b3a'; stroke='#0d4a28'; cursor='pointer';
+    }
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y);
+    rect.setAttribute('width', w); rect.setAttribute('height', h);
+    rect.setAttribute('rx','3');
+    rect.setAttribute('fill', fill);
+    rect.setAttribute('stroke', stroke);
+    rect.setAttribute('stroke-width','0.5');
+    rect.style.cursor = cursor;
+    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x', x + w/2);
+    txt.setAttribute('y', y + h/2 + 1);
+    txt.setAttribute('dominant-baseline','central');
+    txt.setAttribute('fill', isSelected ? '#1a6b3a' : '#fff');
+    txt.textContent = i;
+    if(!isBooked){
+      rect.onclick = () => { selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
+      txt.onclick  = () => { selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
+      txt.style.cursor = 'pointer';
+    }
+    g.appendChild(rect);
+    g.appendChild(txt);
   }
 }
 
