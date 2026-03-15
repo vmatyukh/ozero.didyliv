@@ -80,7 +80,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
         <label>Дата риболовлі</label>
         <div class="date-wrap" style="position:relative">
           <div id="dateDisplay"
-            style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;color:#222;background:#fff;box-sizing:border-box;user-select:none">
+            style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;color:#222;background:#fff;box-sizing:border-box;user-select:none;cursor:pointer">
             Оберіть дату
           </div>
           <input type="date" id="inputDate" min=""
@@ -272,6 +272,11 @@ inputDate.onchange = e => {
   loadSectors();
   updateSummary();
 };
+
+// Десктоп — клік по dateDisplay відкриває календар
+document.getElementById('dateDisplay').addEventListener('click', ()=>{
+  try{ inputDate.showPicker(); }catch(e){ inputDate.focus(); }
+});
 
 /* ===== Сесія ===== */
 function selectSession(el){
