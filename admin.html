@@ -399,11 +399,6 @@ function conflictingSessions(session){
   return [session];
 }
 
-// floatBookings — бронювання поточної сесії {key->obj}
-// floatBlocked — сектори заблоковані через інші сесії {sectorNum->sessionName}
-let floatBlocked={};
-let floatUnsubs=[];
-
 function loadFloatBookings(){
   const date=$('floatDate').value;
   floatUnsubs.forEach(u=>u.ref.off('value',u.fn));
