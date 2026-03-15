@@ -7,45 +7,45 @@
 
 <style>
 *{box-sizing:border-box}
-body{font-family:system-ui,sans-serif;margin:0;background:#f0f7f0;color:#222}
-header{background:#1a6b3a;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px}
+body{font-family:system-ui,sans-serif;margin:0;background:#e0f2f2;color:#222}
+header{background:#005356;color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px}
 header img{height:56px;border-radius:8px}
 header h1{font-size:20px;margin:0}
 header p{margin:2px 0 0;font-size:13px;opacity:.85}
 .container{max-width:700px;margin:24px auto;padding:0 16px}
 .card{background:#fff;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px #0001}
-.card h2{margin:0 0 16px;font-size:17px;color:#1a6b3a}
+.card h2{margin:0 0 16px;font-size:17px;color:#005356}
 .form-group{margin-bottom:14px}
 .form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#444}
 .form-group input,.form-group select{width:100%;max-width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;box-sizing:border-box}
 .form-group input[type=date]{appearance:none;-webkit-appearance:none;min-width:0}
-.form-group input:focus,.form-group select:focus{outline:none;border-color:#1a6b3a}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#005356}
 .sessions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
 .session-btn{border:2px solid #ccc;border-radius:10px;padding:12px 8px;cursor:pointer;background:#fff;text-align:center;transition:.15s}
-.session-btn:hover{border-color:#1a6b3a;background:#f0f7f0}
-.session-btn.selected{border-color:#1a6b3a;background:#e8f5e9}
+.session-btn:hover{border-color:#005356;background:#e0f2f2}
+.session-btn.selected{border-color:#005356;background:#e0f0f0}
 .session-btn .icon{font-size:22px}
 .session-btn .name{font-size:13px;font-weight:600;margin:4px 0 2px}
 .session-btn .time{font-size:11px;color:#666}
-.session-btn .price{font-size:14px;font-weight:700;color:#1a6b3a}
+.session-btn .price{font-size:14px;font-weight:700;color:#005356}
 .sectors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
 .sector-btn{border:2px solid #ccc;border-radius:10px;padding:10px 4px;cursor:pointer;background:#fff;text-align:center;font-weight:700;font-size:15px;transition:.15s}
-.sector-btn.free{border-color:#2a7;color:#1a6b3a;background:#f1f8f1}
-.sector-btn.free:hover{background:#e8f5e9;border-color:#1a6b3a}
+.sector-btn.free{border-color:#005356;color:#005356;background:#e0f2f2}
+.sector-btn.free:hover{background:#e0f0f0;border-color:#005356}
 .sector-btn.booked{border-color:#ddd;color:#bbb;background:#f5f5f5;cursor:not-allowed}
-.sector-btn.selected{border-color:#1a6b3a;background:#c8e6c9;color:#1a6b3a}
+.sector-btn.selected{border-color:#005356;background:#b0dcdc;color:#005356}
 .sector-label{font-size:10px;font-weight:400;color:#888;display:block}
-.btn-primary{width:100%;padding:14px;background:#1a6b3a;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
-.btn-primary:hover{background:#155c30}
+.btn-primary{width:100%;padding:14px;background:#005356;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-primary:hover{background:#003a3c}
 .btn-primary:disabled{background:#aaa;cursor:not-allowed}
 .legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:#666}
 .legend span{display:flex;align-items:center;gap:5px}
 .dot{width:12px;height:12px;border-radius:3px;display:inline-block;flex-shrink:0}
-.dot.free{background:#1a6b3a;border:1.5px solid #0d4a28}
+.dot.free{background:#005356;border:1.5px solid #003a3c}
 .dot.booked{background:#e67e00;border:1.5px solid #b35900}
-.summary-box{background:#e8f5e9;border-radius:10px;padding:14px;margin-bottom:14px;font-size:14px;line-height:1.7}
-.summary-box strong{color:#1a6b3a}
-#successMsg{display:none;background:#1a6b3a;color:#fff;border-radius:14px;padding:28px 20px;text-align:center}
+.summary-box{background:#e0f0f0;border-radius:10px;padding:14px;margin-bottom:14px;font-size:14px;line-height:1.7}
+.summary-box strong{color:#005356}
+#successMsg{display:none;background:#005356;color:#fff;border-radius:14px;padding:28px 20px;text-align:center}
 #successMsg h2{margin:0 0 10px;font-size:22px}
 #successMsg p{margin:6px 0;opacity:.9}
 #successMsg .big{font-size:48px;margin-bottom:8px}
@@ -113,25 +113,25 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       <svg id="lakeMap" viewBox="0 0 680 480" style="display:block;width:100%;height:auto;touch-action:manipulation" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <g id="gc">
-            <path d="M0,0 C-1,-16 -2,-36  0,-52 C2,-36  1,-16  0,0Z" fill="#9ee030"/>
-            <path d="M0,0 C-5,-14 -9,-32 -12,-48 C-7,-32 -2,-14  0,0Z" fill="#72c216"/>
-            <path d="M0,0 C 5,-14  9,-32  12,-48 C  7,-32  2,-14  0,0Z" fill="#72c216"/>
-            <path d="M0,0 C-9,-12 -16,-28 -20,-44 C-13,-28 -5,-12  0,0Z" fill="#5aae10"/>
-            <path d="M0,0 C 9,-12  16,-28  20,-44 C 13,-28  5,-12  0,0Z" fill="#5aae10"/>
+            <path d="M0,0 C-1,-16 -2,-36  0,-52 C2,-36  1,-16  0,0Z" fill="#00b8bc"/>
+            <path d="M0,0 C-5,-14 -9,-32 -12,-48 C-7,-32 -2,-14  0,0Z" fill="#006668"/>
+            <path d="M0,0 C 5,-14  9,-32  12,-48 C  7,-32  2,-14  0,0Z" fill="#006668"/>
+            <path d="M0,0 C-9,-12 -16,-28 -20,-44 C-13,-28 -5,-12  0,0Z" fill="#005356"/>
+            <path d="M0,0 C 9,-12  16,-28  20,-44 C 13,-28  5,-12  0,0Z" fill="#005356"/>
           </g>
         </defs>
 
         <!-- lake -->
-        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="#1d6e8f" opacity="0.22"/>
-        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="none" stroke="#2a8aac" stroke-width="2.2" opacity="0.8"/>
+        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="#005356" opacity="0.22"/>
+        <polygon points="100,210 370,52 572,98 612,288 546,376 100,376 54,316" fill="none" stroke="#007a7e" stroke-width="2.2" opacity="0.8"/>
 
         <!-- ripples -->
-        <path d="M100 248 Q336 234 594 250" fill="none" stroke="#2a8aac" stroke-width=".7" opacity=".14"/>
-        <path d="M 86 295 Q330 280 596 296" fill="none" stroke="#2a8aac" stroke-width=".7" opacity=".12"/>
-        <path d="M 90 340 Q320 326 542 342" fill="none" stroke="#2a8aac" stroke-width=".7" opacity=".11"/>
+        <path d="M100 248 Q336 234 594 250" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".14"/>
+        <path d="M 86 295 Q330 280 596 296" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".12"/>
+        <path d="M 90 340 Q320 326 542 342" fill="none" stroke="#007a7e" stroke-width=".7" opacity=".11"/>
 
         <!-- label -->
-        <text x="334" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" fill="#1d6e8f" opacity=".55">Поплавцеве озеро</text>
+        <text x="334" y="230" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" fill="#005356" opacity=".55">Поплавцеве озеро</text>
 
         <!-- dam -->
         <line x1="100" y1="376" x2="546" y2="376" stroke="#8B7355" stroke-width="2" stroke-dasharray="6 4" opacity=".5"/>
@@ -204,7 +204,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <h2>Бронювання підтверджено!</h2>
     <p id="successDetails"></p>
     <p style="margin-top:16px;font-size:13px;opacity:.8">Адміністратор побачить ваше бронювання і підготує сектор.<br>До зустрічі на озері!</p>
-    <button onclick="resetForm()" style="margin-top:20px;padding:10px 24px;background:#fff;color:#1a6b3a;border:none;border-radius:8px;font-weight:700;cursor:pointer">Забронювати ще раз</button>
+    <button onclick="resetForm()" style="margin-top:20px;padding:10px 24px;background:#fff;color:#005356;border:none;border-radius:8px;font-weight:700;cursor:pointer">Забронювати ще раз</button>
   </div>
 
 </div>
@@ -306,9 +306,9 @@ function renderSectors(booked){
     if(isBooked){
       fill='#e67e00'; stroke='#b35900'; textFill='#fff'; cursor='not-allowed';
     } else if(isSelected){
-      fill='#c8e6c9'; stroke='#1a6b3a'; textFill='#1a6b3a'; cursor='pointer';
+      fill='#b0dcdc'; stroke='#005356'; textFill='#005356'; cursor='pointer';
     } else {
-      fill='#1a6b3a'; stroke='#0d4a28'; textFill='#fff'; cursor='pointer';
+      fill='#005356'; stroke='#003a3c'; textFill='#fff'; cursor='pointer';
     }
 
     const grp = document.createElementNS('http://www.w3.org/2000/svg','g');
