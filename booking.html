@@ -2,8 +2,10 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#005356">
 <title>Озеро Дідилів — Бронювання</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 *{box-sizing:border-box}
@@ -428,6 +430,50 @@ function showLoading(v){ document.getElementById('loadingOverlay').classList.tog
 // Ініціалізація
 renderSectors({});
 updateSummary();
+
+/* ===== Telegram Mini App ===== */
+const tg = window.Telegram?.WebApp;
+if(tg){
+  tg.ready();
+  tg.expand();
+  // Повноекранний режим (Telegram 8.0+)
+  if(tg.requestFullscreen) tg.requestFullscreen();
+
+  // Ховаємо звичайну кнопку — використовуємо нативну MainButton
+  const bookBtn = document.getElementById('bookBtn');
+  if(bookBtn) bookBtn.style.display = 'none';
+
+  tg.MainButton.setText('✅ Підтвердити бронювання');
+  tg.MainButton.color = '#005356';
+  tg.MainButton.textColor = '#ffffff';
+  tg.MainButton.hide();
+  tg.MainButton.onClick(submitBooking);
+
+  // Показуємо MainButton коли всі поля заповнені
+  function checkMainButton(){
+    const date  = document.getElementById('inputDate').value;
+    const name  = document.getElementById('inputName').value.trim();
+    const phone = document.getElementById('inputPhone').value.trim();
+    if(date && selectedSession && selectedSector && name && phone){
+      tg.MainButton.show();
+    } else {
+      tg.MainButton.hide();
+    }
+  }
+
+  document.getElementById('inputName').addEventListener('input', checkMainButton);
+  document.getElementById('inputPhone').addEventListener('input', checkMainButton);
+  // Також перевіряємо при зміні сектора і сесії — через існуючі функції
+  const _origUpdateSummary = updateSummary;
+  updateSummary = function(){
+    _origUpdateSummary();
+    checkMainButton();
+  };
+
+  // BackButton — закрити аплікацію
+  tg.BackButton.show();
+  tg.BackButton.onClick(()=> tg.close());
+}
 </script>
 </body>
 </html>
