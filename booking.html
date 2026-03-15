@@ -78,14 +78,8 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       <h2>📅 Крок 1 — Оберіть дату</h2>
       <div class="form-group">
         <label>Дата риболовлі</label>
-        <div class="date-wrap" style="position:relative">
-          <div id="dateDisplay"
-            style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;color:#222;background:#fff;box-sizing:border-box;user-select:none;cursor:pointer">
-            Оберіть дату
-          </div>
-          <input type="date" id="inputDate" min=""
-            style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
-        </div>
+        <input type="date" id="inputDate" min=""
+          style="width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;box-sizing:border-box;background:#fff;color:#222;cursor:pointer;-webkit-appearance:none">
       </div>
     </div>
 
@@ -255,12 +249,7 @@ function formatDateUA(dateStr){
   return `${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}`;
 }
 
-function updateDateDisplay(val){
-  const el = document.getElementById('dateDisplay');
-  if(!el) return;
-  if(val){ el.textContent = formatDateUA(val); el.style.color='#222'; }
-  else   { el.textContent = 'Оберіть дату';   el.style.color='#aaa'; }
-}
+function updateDateDisplay(val){} // збережено для сумісності
 
 const inputDate = document.getElementById('inputDate');
 inputDate.min   = todayStr;
@@ -279,13 +268,6 @@ document.addEventListener('touchmove', e=>{
 },{passive:false});
 document.addEventListener('gesturestart', e=>e.preventDefault());
 document.addEventListener('gesturechange', e=>e.preventDefault());
-// Десктоп — клік по dateDisplay викликає showPicker (мобільний сам спрацює через прозорий інпут)
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-if(!isTouchDevice){
-  document.getElementById('dateDisplay').addEventListener('click', ()=>{
-    try{ inputDate.showPicker(); }catch(e){ inputDate.focus(); }
-  });
-}
 
 /* ===== Сесія ===== */
 function selectSession(el){
