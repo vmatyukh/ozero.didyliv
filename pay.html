@@ -19,22 +19,20 @@ button.secondary{background:#eef}
 button.warn{background:#ffd966}
 button.danger{background:#fdd}
 #participantsList{margin-top:10px}
-.participant{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eee}
+.participant{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eee;flex-wrap:wrap}
 .participant label{white-space:nowrap}
 .participant .sum{min-width:90px;text-align:right;font-weight:600}
 #totalSum{font-weight:700;text-align:right;margin-top:8px}
-.previewWrap{display:grid;grid-template-columns: 220px 220px 220px 220px;gap:5px;margin-top:10px}
+.previewWrap{display:grid;grid-template-columns:220px 220px 220px 220px;gap:5px;margin-top:10px}
 .ticketPreview{border:1px dashed #ddd;border-radius:8px;padding:12px;background:#fafafa}
 .ticketPreview pre{margin:0;font-family:monospace;font-size:12px;white-space:pre-wrap}
 .ticketPreview .qr{margin-top:8px;text-align:center}
 .ticketPreview img.logo{display:block;margin:0 auto 6px auto;max-height:160px}
 #status{font-size:12px;color:#555;white-space:pre-wrap;margin-top:12px}
-.small{font-size:12px;color:#666}
 </style>
 </head>
 <body>
 <header>
-  <!-- Можеш поставити logo.png або logo.svg — обидва варіанти підтримані -->
   <img id="logo" src="logo.png" alt="Логотип Озеро Дідилів">
   <h2>Друк чеків — Озеро Дідилів</h2>
 </header>
@@ -54,7 +52,6 @@ button.danger{background:#fdd}
   <legend>Дії</legend>
   <div class="row">
     <button id="connectBtn" class="warn">🔌 Підключити принтер</button>
-    <!-- <button id="previewBtn" class="secondary">👁️ Оновити превʼю</button> -->
     <button id="testBtn" class="secondary">🧪 Тестовий чек</button>
     <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
   </div>
@@ -68,73 +65,103 @@ button.danger{background:#fdd}
 <script>
 /* ===== Утиліти та константи ===== */
 const $=id=>document.getElementById(id);
-const nowStr=()=>new Date().toLocaleString('uk-UA',{hour12:false}).replace(',', '');
-const LOGO_THRESHOLD = 190; // вище = світліше; нижче = темніше
-const PRINT_WIDTH = 384;    // ширина друку більшості 58/80мм головок
+const nowStr=()=>new Date().toLocaleString('uk-UA',{hour12:false}).replace(',','');
+const LOGO_THRESHOLD = 190;
+const PRINT_WIDTH = 384;
+
+/* ===== Ціни ===== */
+const PRICE_BASE       = 400;
+const PRICE_INVENTAR   = 200;
+const PRICE_PIDSAK     = 100;
+const PRICE_INSTRUMENT = 100;
 
 /* ===== Учасники ===== */
-let participants=[];
-function calcSum(p){let s=300; if(p.tools)s+=200; if(p.discount)s/=2; return Math.round(s);}
+let participants = [];
+
+function calcSum(p){
+  let s = PRICE_BASE;
+  if(p.inventar)   s += PRICE_INVENTAR;
+  if(p.pidsak)     s += PRICE_PIDSAK;
+  if(p.instrument) s += PRICE_INSTRUMENT;
+  if(p.discount)   s = Math.round(s / 2);
+  return s;
+}
+
 function addParticipant(){
-  const id=participants.length?participants[participants.length-1].id+1:1;
-  participants.push({id,discount:false,tools:false});
+  const id = participants.length ? participants[participants.length-1].id+1 : 1;
+  participants.push({id, discount:false, inventar:false, pidsak:false, instrument:false});
   renderList();
 }
-function removeParticipant(){
-  participants.pop();
-  renderList();
-}
-function clearParticipants(){
-  participants = [];
-  renderList();
-}
-function toggleField(id,field,val){
-  const p=participants.find(x=>x.id===id);
-  if(p)p[field]=val;
-  updateTotals();
-}
+function removeParticipant(){ participants.pop(); renderList(); }
+function clearParticipants(){ participants=[]; renderList(); }
+
 function renderList(){
-  const wrap=$('participantsList');wrap.innerHTML='';
+  const wrap=$('participantsList'); wrap.innerHTML='';
   participants.forEach(p=>{
-    const row=document.createElement('div');
-    row.className='participant';
+    const row=document.createElement('div'); row.className='participant';
     row.innerHTML=`
       <span>#${p.id}</span>
-      <label><input type="checkbox" ${p.discount?'checked':''}> Пільга −50%</label>
-      <label><input type="checkbox" ${p.tools?'checked':''}> Оренда інвентарю</label>
+      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
+      <label><input type="checkbox" data-field="inventar" ${p.inventar?'checked':''}> Інвентар (+${PRICE_INVENTAR} грн)</label>
+      <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
+      <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
       <span class="sum">${calcSum(p)} грн</span>`;
-    const [disc,tools]=row.querySelectorAll('input');
-    disc.onchange=e=>{toggleField(p.id,'discount',e.target.checked);row.querySelector('.sum').textContent=calcSum(p)+' грн';};
-    tools.onchange=e=>{toggleField(p.id,'tools',e.target.checked);row.querySelector('.sum').textContent=calcSum(p)+' грн';};
+    row.querySelectorAll('input').forEach(inp=>{
+      inp.onchange=e=>{
+        p[e.target.dataset.field]=e.target.checked;
+        row.querySelector('.sum').textContent=calcSum(p)+' грн';
+        updateTotals();
+      };
+    });
     wrap.appendChild(row);
   });
   updateTotals();
 }
+
 function updateTotals(){
   const t=participants.reduce((s,p)=>s+calcSum(p),0);
   $('totalSum').textContent=`Разом: ${t} грн`;
   renderPreview();
 }
+
 $('add').onclick=addParticipant;
 $('remove').onclick=removeParticipant;
 $('clear').onclick=clearParticipants;
 addParticipant();
 
 /* ===== Дані / текст / QR ===== */
-function buildPayload(p){return{lake:'Озеро Дідилів',type:'Спінінг (спортивна риболовля)',tools:p.tools,discount:p.discount,amount:calcSum(p),time:nowStr(),participantNo:p.id};}
+function buildPayload(p){
+  return{
+    lake:'Озеро Дідилів',
+    type:'Спінінг (спортивна риболовля)',
+    inventar:p.inventar,
+    pidsak:p.pidsak,
+    instrument:p.instrument,
+    discount:p.discount,
+    amount:calcSum(p),
+    time:nowStr(),
+    participantNo:p.id
+  };
+}
+
 function buildTextLines(d){
+  const rentParts=[];
+  if(d.inventar)   rentParts.push(`Інвентар (+${PRICE_INVENTAR} грн)`);
+  if(d.pidsak)     rentParts.push(`Підсак (+${PRICE_PIDSAK} грн)`);
+  if(d.instrument) rentParts.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
   return[
-    `Дата: ${d.time}`,  
+    `Дата: ${d.time}`,
     '—————————————————',
     'Квиток рибалки',
     `${d.type}`,
-    `Оренда інвентарю: ${d.tools?'так':'ні'}`,
+    `Оренда: ${rentParts.length ? rentParts.join(', ') : 'ні'}`,
     `Пільга: ${d.discount?'так (−50%)':'ні'}`,
     `Сума: ${d.amount} грн`,
     '—————————————————',
     'Гарного кльову!',
   ];
 }
+
 function buildQrText(){ return 'https://t.me/ozero_didyliv'; }
 
 /* ===== Превʼю ===== */
@@ -153,8 +180,6 @@ function renderPreview(){
   }
   setStatus('✅ Превʼю оновлено');
 }
-const prvBtn = $('previewBtn');
-if (prvBtn) prvBtn.onclick = renderPreview;
 
 /* ===== ESC/POS / WebUSB ===== */
 const ESC=0x1B, GS=0x1D;
@@ -165,55 +190,39 @@ const alignL=new Uint8Array([ESC,0x61,0]);
 const merge=(...a)=>{let l=0;for(const c of a)l+=c.length;const o=new Uint8Array(l);let i=0;for(const c of a){o.set(c,i);i+=c.length;}return o;};
 
 let device=null, iface=0, altNumber=0, epOut=1;
-async function connect(auto = false) {
-  try {
-    if (auto && device) return;
-
-    if (auto) {
-      const saved = await navigator.usb.getDevices();
-      if (saved.length) device = saved[0];
+async function connect(auto=false){
+  try{
+    if(auto && device) return;
+    if(auto){
+      const saved=await navigator.usb.getDevices();
+      if(saved.length) device=saved[0];
     }
-    if (!device) {
-      device = await navigator.usb.requestDevice({ filters: [{}] });
+    if(!device){
+      device=await navigator.usb.requestDevice({filters:[{}]});
     }
-
     await device.open();
-    if (!device.configuration) await device.selectConfiguration(1);
-
-    // ФІКС ДЛЯ ТВОГО ПРИНТЕРА:
-    iface = 0;
-    altNumber = 0;
-    epOut = 3;
-
-    try { await device.reset(); } catch {}
-
+    if(!device.configuration) await device.selectConfiguration(1);
+    iface=0; altNumber=0; epOut=3;
+    try{ await device.reset(); }catch{}
     await device.claimInterface(iface);
-    await device.selectAlternateInterface(iface, altNumber);
-    await device.transferOut(epOut, new Uint8Array([0x1B, 0x40])); // ESC @ init
-
+    await device.selectAlternateInterface(iface,altNumber);
+    await device.transferOut(epOut,new Uint8Array([0x1B,0x40]));
     setStatus(`✅ Підключено (iface=${iface}, alt=${altNumber}, epOut=${epOut})`);
-  } catch (e) {
-    setStatus('Помилка підключення: ' + e.message + '\n(спробуй перепідключити принтер і оновити сторінку)');
+  }catch(e){
+    setStatus('Помилка підключення: '+e.message+'\n(спробуй перепідключити принтер і оновити сторінку)');
   }
 }
-
-
 $('connectBtn').onclick=connect;
-
 async function send(b){ if(!device){await connect(); if(!device) return;} await device.transferOut(epOut,b); }
 function setStatus(t){$('status').textContent=t;}
 
 /* ===== Растровий друк ===== */
-
-// Canvas -> ESC/POS raster
-function rasterFromCanvas(canvas, threshold=160){
-  const w = canvas.width, h = canvas.height;
-  const ctx = canvas.getContext('2d', { willReadFrequently:true });
-  const data = ctx.getImageData(0,0,w,h).data;
-
-  const bytesPerRow = Math.ceil(w/8);
-  const raster = new Uint8Array(bytesPerRow*h);
-
+function rasterFromCanvas(canvas,threshold=160){
+  const w=canvas.width,h=canvas.height;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  const data=ctx.getImageData(0,0,w,h).data;
+  const bytesPerRow=Math.ceil(w/8);
+  const raster=new Uint8Array(bytesPerRow*h);
   for(let y=0;y<h;y++){
     for(let x=0;x<w;x++){
       const i=(y*w+x)*4;
@@ -221,116 +230,79 @@ function rasterFromCanvas(canvas, threshold=160){
       if(avg<threshold) raster[y*bytesPerRow+(x>>3)]|=(0x80>>(x&7));
     }
   }
-  const xL=bytesPerRow&0xFF, xH=bytesPerRow>>8, yL=h&0xFF, yH=h>>8;
+  const xL=bytesPerRow&0xFF,xH=bytesPerRow>>8,yL=h&0xFF,yH=h>>8;
   const header=new Uint8Array([GS,0x76,0x30,0x00,xL,xH,yL,yH]);
-  return merge(header, raster);
+  return merge(header,raster);
 }
 
-// Логотип -> Canvas -> Raster (білий фон + поріг)
 async function logoRaster(){
-  const imgTag = $('logo');
+  const imgTag=$('logo');
   if(!imgTag) throw new Error('<img id="logo"> не знайдено');
-  const src = imgTag.getAttribute('src') || '';
-  const isSVG = /\.svg($|\?)/i.test(src);
-
+  const src=imgTag.getAttribute('src')||'';
+  const isSVG=/\.svg($|\?)/i.test(src);
   let img;
   if(isSVG){
-    // Безпечна конвертація SVG у Bitmap через Blob (краще через http://)
-    const resp = await fetch(src);
-    const svgText = await resp.text();
-    const blob = new Blob([svgText], { type:'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    img = new Image(); img.crossOrigin='anonymous'; img.src=url;
-    await new Promise((res,rej)=>{ img.onload=res; img.onerror=()=>rej(new Error('SVG не завантажився')); });
+    const resp=await fetch(src);
+    const svgText=await resp.text();
+    const blob=new Blob([svgText],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    img=new Image(); img.crossOrigin='anonymous'; img.src=url;
+    await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('SVG не завантажився'));});
     URL.revokeObjectURL(url);
   }else{
-    img = imgTag;
-    if(!img.complete){ await new Promise((res,rej)=>{ img.onload=res; img.onerror=()=>rej(new Error('Лого не завантажилось')); }); }
+    img=imgTag;
+    if(!img.complete){await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('Лого не завантажилось'));});}
   }
-
-  const naturalW = img.naturalWidth || img.width;
-  const naturalH = img.naturalHeight || img.height;
-  if(!naturalW || !naturalH) throw new Error('Лого має нульовий розмір');
-
-  const scale = Math.min(1, PRINT_WIDTH / naturalW);
-  const w = Math.round(naturalW * scale);
-  const h = Math.round(naturalH * scale);
-
-  const c = document.createElement('canvas'); c.width = w; c.height = h;
-  const ctx = c.getContext('2d', { willReadFrequently:true });
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+  const naturalW=img.naturalWidth||img.width;
+  const naturalH=img.naturalHeight||img.height;
+  if(!naturalW||!naturalH) throw new Error('Лого має нульовий розмір');
+  const scale=Math.min(1,PRINT_WIDTH/naturalW);
+  const w=Math.round(naturalW*scale),h=Math.round(naturalH*scale);
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
   ctx.drawImage(img,0,0,w,h);
-
-  return rasterFromCanvas(c, LOGO_THRESHOLD);
+  return rasterFromCanvas(c,LOGO_THRESHOLD);
 }
 
-// Текст -> Canvas -> Raster (контроль великих шрифтів)
-function textBlockRaster(lines, opts = {}) {
-  const {
-    width = PRINT_WIDTH,
-    regularFont = '24px Arial',   // <-- збільшений розмір звичайного тексту
-    boldFont = '30px Arial',      // <-- збільшений заголовок (перший рядок)
-    lineHeight = 36,              // <-- збільшений міжрядковий інтервал
-    center = false,
-    padding = 8
-  } = opts;
-
-  const height = padding * 2 + lineHeight * lines.length;
-  const dpr = 1; // 1:1 для термодруку
-
-  const c = document.createElement('canvas');
-  c.width = width * dpr;
-  c.height = height * dpr;
-
-  const ctx = c.getContext('2d', { willReadFrequently: true });
-  ctx.scale(dpr, dpr);
-
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.textBaseline = 'top';
-  ctx.fillStyle = '#000';
-  ctx.textAlign = center ? 'center' : 'left';
-
-  lines.forEach((t, idx) => {
-    ctx.font = (idx === 0 ? boldFont : regularFont);
-    const x = center ? Math.floor(width / 2) : padding;
-    const y = padding + idx * lineHeight;
-    ctx.fillText(t, x, y);
+function textBlockRaster(lines,opts={}){
+  const{width=PRINT_WIDTH,regularFont='24px Arial',boldFont='30px Arial',lineHeight=36,center=false,padding=8}=opts;
+  const height=padding*2+lineHeight*lines.length;
+  const c=document.createElement('canvas'); c.width=width; c.height=height;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,width,height);
+  ctx.textBaseline='top'; ctx.fillStyle='#000';
+  ctx.textAlign=center?'center':'left';
+  lines.forEach((t,idx)=>{
+    ctx.font=(idx===0?boldFont:regularFont);
+    const x=center?Math.floor(width/2):padding;
+    const y=padding+idx*lineHeight;
+    ctx.fillText(t,x,y);
   });
-
-  return rasterFromCanvas(c, 160);
+  return rasterFromCanvas(c,160);
 }
 
-// QR -> Canvas -> Raster
 async function qrRaster(){
   const holder=document.createElement('div');
-  const text = buildQrText();
-  new QRCode(holder,{text, width:256, height:256, correctLevel:QRCode.CorrectLevel.M});
+  new QRCode(holder,{text:buildQrText(),width:256,height:256,correctLevel:QRCode.CorrectLevel.M});
   await new Promise(r=>requestAnimationFrame(r));
-  const qrCanvas = holder.querySelector('canvas');
-  const scale = Math.min(1, PRINT_WIDTH / qrCanvas.width);
-  const w = Math.round(qrCanvas.width * scale);
-  const h = Math.round(qrCanvas.height * scale);
-  const c = document.createElement('canvas'); c.width=w; c.height=h;
-  const ctx = c.getContext('2d', { willReadFrequently:true });
+  const qrCanvas=holder.querySelector('canvas');
+  const scale=Math.min(1,PRINT_WIDTH/qrCanvas.width);
+  const w=Math.round(qrCanvas.width*scale),h=Math.round(qrCanvas.height*scale);
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
   ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
   ctx.drawImage(qrCanvas,0,0,w,h);
-  return rasterFromCanvas(c, 160);
+  return rasterFromCanvas(c,160);
 }
 
 /* ===== Кнопки друку ===== */
 $('testBtn').onclick=async()=>{
   try{
     await connect();
-    const logo = await logoRaster();
-    const text = textBlockRaster(['ОЗЕРО ДІДИЛІВ','Тестовий друк'], {
-      center:true,
-      regularFont:'26px Arial',
-      boldFont:'34px Arial',
-      lineHeight:38
-    });
-    const packet=merge(new Uint8Array([ESC,0x40]), alignC, logo, lf, text, lf, cut);
+    const logo=await logoRaster();
+    const text=textBlockRaster(['ОЗЕРО ДІДИЛІВ','Тестовий друк'],{center:true,regularFont:'26px Arial',boldFont:'34px Arial',lineHeight:38});
+    const packet=merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut);
     await send(packet);
     setStatus('✅ Тестовий чек відправлено');
   }catch(e){ setStatus('Помилка тест-друку: '+e.message); }
@@ -343,22 +315,16 @@ $('printBtn').onclick=async()=>{
     const logoBytes=await logoRaster();
     for(const p of participants){
       const d=buildPayload(p);
-      const textLines = buildTextLines(d);
-      const textRaster = textBlockRaster(textLines, {
-        center:false,
-        regularFont:'24px Arial',
-        boldFont:'30px Arial',
-        lineHeight:36
-      });
-      const line = textBlockRaster(['——————————————'], { center: true });
-      const qrImg = await qrRaster();
-
+      const textLines=buildTextLines(d);
+      const textRaster=textBlockRaster(textLines,{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+      const line=textBlockRaster(['——————————————'],{center:true});
+      const qrImg=await qrRaster();
       const packet=merge(
         new Uint8Array([ESC,0x40]),
-        alignC, logoBytes, lf,
-        alignL, textRaster, lf,
-        alignC, qrImg, lf,
-        lf, line, lf, lf,
+        alignC,logoBytes,lf,
+        alignL,textRaster,lf,
+        alignC,qrImg,lf,
+        lf,line,lf,lf,
         cut
       );
       await send(packet);
@@ -367,7 +333,6 @@ $('printBtn').onclick=async()=>{
     clearParticipants();
   }catch(e){ setStatus('Помилка друку: '+e.message); }
 };
-
 </script>
 </body>
 </html>
