@@ -122,7 +122,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
         </div>
 
         <!-- SVG container with overflow hidden for zoom -->
-        <div id="lakeContainer" style="overflow:hidden;border-radius:10px;background:#e0f2f2;cursor:grab;touch-action:none">
+        <div id="lakeContainer" style="overflow:hidden;border-radius:10px;background:#e0f2f2;cursor:grab;touch-action:pan-y">
           <svg id="lakeMap" viewBox="0 0 680 480" style="display:block;width:100%;height:auto;transform-origin:0 0;transition:transform .2s" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <g id="gc">
@@ -460,12 +460,13 @@ function showLoading(v){ document.getElementById('loadingOverlay').classList.tog
   window.zoomIn=()=>{
     if(scale>=MAX) return;
     scale=Math.min(MAX,scale+STEP);
+    container.style.touchAction='none';
     clampTranslate(); applyTransform();
   };
   window.zoomOut=()=>{
     if(scale<=MIN) return;
     scale=Math.max(MIN,scale-STEP);
-    if(scale===MIN){tx=0;ty=0;}
+    if(scale===MIN){tx=0;ty=0;container.style.touchAction='pan-y';}
     clampTranslate(); applyTransform();
   };
 
