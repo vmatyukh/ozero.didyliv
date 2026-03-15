@@ -3,97 +3,207 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Озеро Дідилів — чеки</title>
+<title>Озеро Дідилів — Адмінка</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
-body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}
+*{box-sizing:border-box}
+body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:960px;margin:24px auto;padding:0 16px}
 header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 header img{height:70px}
 fieldset{border:1px solid #ccc;border-radius:10px;padding:12px 16px;margin-bottom:20px}
 legend{font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:12px}
-.row>div{flex:1;min-width:200px}
-button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer}
+button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;font-size:14px}
 button.primary{background:#2a7;color:#fff}
 button.secondary{background:#eef}
 button.warn{background:#ffd966}
 button.danger{background:#fdd}
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid #2a7}
+.tab-btn{padding:10px 24px;border:1px solid #ccc;border-bottom:none;border-radius:8px 8px 0 0;cursor:pointer;background:#f5f5f5;font-size:15px;font-weight:600;margin-right:4px}
+.tab-btn.active{background:#fff;border-color:#2a7;border-bottom:2px solid #fff;color:#2a7;margin-bottom:-2px}
+.tab-content{display:none;padding-top:18px}
+.tab-content.active{display:block}
+/* Спінінг */
 #participantsList{margin-top:10px}
 .participant{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eee;flex-wrap:wrap}
 .participant label{white-space:nowrap}
 .participant .sum{min-width:90px;text-align:right;font-weight:600}
 #totalSum{font-weight:700;text-align:right;margin-top:8px}
-.previewWrap{display:grid;grid-template-columns:220px 220px 220px 220px;gap:5px;margin-top:10px}
+.previewWrap{display:grid;grid-template-columns:repeat(4,220px);gap:5px;margin-top:10px}
 .ticketPreview{border:1px dashed #ddd;border-radius:8px;padding:12px;background:#fafafa}
 .ticketPreview pre{margin:0;font-family:monospace;font-size:12px;white-space:pre-wrap}
 .ticketPreview .qr{margin-top:8px;text-align:center}
-.ticketPreview img.logo{display:block;margin:0 auto 6px auto;max-height:160px}
-#status{font-size:12px;color:#555;white-space:pre-wrap;margin-top:12px}
+.ticketPreview img.logo{display:block;margin:0 auto 6px;max-height:160px}
+/* Поплавцеве — фільтр дати */
+.float-filter{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.float-filter input[type=date]{padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
+.session-tabs{display:flex;gap:6px;margin-bottom:12px}
+.stab{padding:7px 16px;border:2px solid #ccc;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;background:#fff}
+.stab.active{border-color:#2a7;background:#e8f5e9;color:#2a7}
+/* Таблиця секторів */
+.sectors-table{width:100%;border-collapse:collapse}
+.sectors-table th,.sectors-table td{border:1px solid #ddd;padding:8px 10px;font-size:13px;text-align:left;vertical-align:middle}
+.sectors-table th{background:#e8f5e9;font-weight:600}
+.sectors-table tr.booked-row td{background:#fff8e1}
+.sectors-table tr.free-row td{background:#f9fdf9}
+.status-badge{font-weight:700;font-size:12px;padding:3px 8px;border-radius:12px}
+.status-badge.free{background:#e8f5e9;color:#2a7}
+.status-badge.booked{background:#fff3e0;color:#e67e00}
+.act-btns{display:flex;gap:6px;flex-wrap:wrap}
+.act-btns button{padding:5px 10px;font-size:12px}
+/* Manual booking form */
+.manual-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.manual-form input{padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px}
+.manual-form input[type=text]{width:160px}
+.manual-form input[type=tel]{width:140px}
+/* Status */
+#status,#statusFloat{font-size:12px;color:#555;white-space:pre-wrap;margin-top:12px}
+/* Stats */
+.stats-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.stat-card{background:#e8f5e9;border-radius:10px;padding:10px 18px;font-size:13px;text-align:center}
+.stat-card strong{display:block;font-size:22px;color:#1a6b3a}
 </style>
 </head>
 <body>
 <header>
   <img id="logo" src="logo.png" alt="Логотип Озеро Дідилів">
-  <h2>Друк чеків — Озеро Дідилів</h2>
+  <div><h2 style="margin:0">Адмінка — Озеро Дідилів</h2><p style="margin:2px 0 0;color:#666;font-size:13px">Система друку чеків та бронювання</p></div>
 </header>
 
-<fieldset>
-  <legend>Список учасників</legend>
-  <div class="row" style="justify-content:flex-end">
-    <button id="add" class="secondary">➕ Додати учасника</button>
-    <button id="remove" class="danger">❌ Видалити останнього</button>
-    <button id="clear" class="danger">❌ Видалити всіх</button>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="spinning">🎣 Спінінг</button>
+  <button class="tab-btn" data-tab="float">🪣 Поплавцеве</button>
+</div>
+
+<!-- ===== СПІНІНГ ===== -->
+<div id="tab-spinning" class="tab-content active">
+  <fieldset>
+    <legend>Список учасників (Спінінг — 400 грн)</legend>
+    <div class="row" style="justify-content:flex-end">
+      <button id="add" class="secondary">➕ Додати</button>
+      <button id="remove" class="danger">❌ Видалити останнього</button>
+      <button id="clear" class="danger">❌ Видалити всіх</button>
+    </div>
+    <div id="participantsList"></div>
+    <div id="totalSum">Разом: 0 грн</div>
+  </fieldset>
+  <fieldset>
+    <legend>Дії</legend>
+    <div class="row">
+      <button id="connectBtn" class="warn">🔌 Підключити принтер</button>
+      <button id="testBtn" class="secondary">🧪 Тестовий чек</button>
+      <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
+    </div>
+  </fieldset>
+  <h3>Превʼю чеків</h3>
+  <div id="preview" class="previewWrap"></div>
+  <pre id="status"></pre>
+</div>
+
+<!-- ===== ПОПЛАВЦЕВЕ ===== -->
+<div id="tab-float" class="tab-content">
+
+  <div class="float-filter">
+    <strong>📅 Дата:</strong>
+    <input type="date" id="floatDate">
+    <button class="secondary" onclick="setFloatDate(-1)">◀ Вчора</button>
+    <button class="secondary" onclick="setFloatDate(0)">Сьогодні</button>
+    <button class="secondary" onclick="setFloatDate(1)">Завтра ▶</button>
   </div>
-  <div id="participantsList"></div>
-  <div id="totalSum">Разом: 0 грн</div>
-</fieldset>
 
-<fieldset>
-  <legend>Дії</legend>
-  <div class="row">
-    <button id="connectBtn" class="warn">🔌 Підключити принтер</button>
-    <button id="testBtn" class="secondary">🧪 Тестовий чек</button>
-    <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
+  <div class="session-tabs">
+    <div class="stab active" data-session="morning" onclick="selectFloatSession(this)">🌅 Ранкова (6:00–13:00) — 500 грн</div>
+    <div class="stab" data-session="evening" onclick="selectFloatSession(this)">🌆 Вечірня (14:00–21:00) — 500 грн</div>
+    <div class="stab" data-session="fullday" onclick="selectFloatSession(this)">☀️ Повний день (6:00–21:00) — 700 грн</div>
   </div>
-</fieldset>
 
-<h3>Превʼю чеків</h3>
-<div id="preview" class="previewWrap"></div>
+  <div class="stats-bar" id="floatStats"></div>
 
-<pre id="status"></pre>
+  <fieldset>
+    <legend id="floatLegend">Сектори — Ранкова — сьогодні</legend>
+    <table class="sectors-table">
+      <thead>
+        <tr>
+          <th>Сектор</th>
+          <th>Статус</th>
+          <th>Імʼя</th>
+          <th>Телефон</th>
+          <th>Час бронювання</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody id="floatTbody"></tbody>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>Дії</legend>
+    <div class="row">
+      <button id="connectBtnF" class="warn">🔌 Підключити принтер</button>
+      <button id="testBtnF" class="secondary">🧪 Тестовий чек</button>
+    </div>
+  </fieldset>
+
+  <h3>Превʼю чеків поплавцевого</h3>
+  <div id="previewFloat" class="previewWrap"></div>
+  <pre id="statusFloat"></pre>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-/* ===== Утиліти та константи ===== */
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+  apiKey: "REMOVED",
+  authDomain: "didyliv-be39d.firebaseapp.com",
+  databaseURL: "https://didyliv-be39d-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "didyliv-be39d",
+  storageBucket: "didyliv-be39d.firebasestorage.app",
+  messagingSenderId: "507495924179",
+  appId: "1:507495924179:web:aa31425b25a024ba7def26"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+// ============================================================
+
 const $=id=>document.getElementById(id);
 const nowStr=()=>new Date().toLocaleString('uk-UA',{hour12:false}).replace(',','');
-const LOGO_THRESHOLD = 190;
-const PRINT_WIDTH = 384;
+const LOGO_THRESHOLD=190, PRINT_WIDTH=384;
 
-/* ===== Ціни ===== */
-const PRICE_BASE       = 400;
-const PRICE_INVENTAR   = 200;
-const PRICE_PIDSAK     = 100;
-const PRICE_INSTRUMENT = 100;
+/* ===== ВКЛАДКИ ===== */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-'+btn.dataset.tab).classList.add('active');
+  };
+});
 
-/* ===== Учасники ===== */
-let participants = [];
+/* ===== СПІНІНГ ===== */
+const PRICE_BASE=400, PRICE_INVENTAR=200, PRICE_PIDSAK=100, PRICE_INSTRUMENT=100;
+let participants=[];
 
 function calcSum(p){
-  let s = PRICE_BASE;
-  if(p.inventar)   s += PRICE_INVENTAR;
-  if(p.pidsak)     s += PRICE_PIDSAK;
-  if(p.instrument) s += PRICE_INSTRUMENT;
-  if(p.discount)   s = Math.round(s / 2);
+  let s=PRICE_BASE;
+  if(p.inventar) s+=PRICE_INVENTAR;
+  if(p.pidsak)   s+=PRICE_PIDSAK;
+  if(p.instrument) s+=PRICE_INSTRUMENT;
+  if(p.discount) s=Math.round(s/2);
   return s;
 }
-
 function addParticipant(){
-  const id = participants.length ? participants[participants.length-1].id+1 : 1;
-  participants.push({id, discount:false, inventar:false, pidsak:false, instrument:false});
+  const id=participants.length?participants[participants.length-1].id+1:1;
+  participants.push({id,discount:false,inventar:false,pidsak:false,instrument:false});
   renderList();
 }
-function removeParticipant(){ participants.pop(); renderList(); }
-function clearParticipants(){ participants=[]; renderList(); }
+function removeParticipant(){participants.pop();renderList();}
+function clearParticipants(){participants=[];renderList();}
 
 function renderList(){
   const wrap=$('participantsList'); wrap.innerHTML='';
@@ -101,10 +211,10 @@ function renderList(){
     const row=document.createElement('div'); row.className='participant';
     row.innerHTML=`
       <span>#${p.id}</span>
+      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="inventar" ${p.inventar?'checked':''}> Інвентар (+${PRICE_INVENTAR} грн)</label>
       <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
       <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
-      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <span class="sum">${calcSum(p)} грн</span>`;
     row.querySelectorAll('input').forEach(inp=>{
       inp.onchange=e=>{
@@ -117,54 +227,32 @@ function renderList(){
   });
   updateTotals();
 }
-
 function updateTotals(){
   const t=participants.reduce((s,p)=>s+calcSum(p),0);
   $('totalSum').textContent=`Разом: ${t} грн`;
   renderPreview();
 }
-
 $('add').onclick=addParticipant;
 $('remove').onclick=removeParticipant;
 $('clear').onclick=clearParticipants;
 addParticipant();
 
-/* ===== Дані / текст / QR ===== */
 function buildPayload(p){
-  return{
-    lake:'Озеро Дідилів',
-    type:'Спінінг (спортивна риболовля)',
-    inventar:p.inventar,
-    pidsak:p.pidsak,
-    instrument:p.instrument,
-    discount:p.discount,
-    amount:calcSum(p),
-    time:nowStr(),
-    participantNo:p.id
-  };
+  return{lake:'Озеро Дідилів',type:'Спінінг (спортивна риболовля)',
+    inventar:p.inventar,pidsak:p.pidsak,instrument:p.instrument,
+    discount:p.discount,amount:calcSum(p),time:nowStr(),participantNo:p.id};
 }
-
 function buildTextLines(d){
-  const rentParts=[];
-  if(d.inventar)   rentParts.push(`Інвентар (+${PRICE_INVENTAR} грн)`);
-  if(d.pidsak)     rentParts.push(`Підсак (+${PRICE_PIDSAK} грн)`);
-  if(d.instrument) rentParts.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
-  return[
-    `Дата: ${d.time}`,
-    '—————————————————',
-    'Квиток рибалки',
-    `${d.type}`,
-    `Оренда: ${rentParts.length ? rentParts.join(', ') : 'ні'}`,
-    `Пільга: ${d.discount?'так (−50%)':'ні'}`,
-    `Сума: ${d.amount} грн`,
-    '—————————————————',
-    'Гарного кльову!',
-  ];
+  const r=[];
+  if(d.inventar) r.push(`Інвентар (+${PRICE_INVENTAR} грн)`);
+  if(d.pidsak)   r.push(`Підсак (+${PRICE_PIDSAK} грн)`);
+  if(d.instrument) r.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
+  return[`Дата: ${d.time}`,'—————————————————','Квиток рибалки',`${d.type}`,
+    `Оренда: ${r.length?r.join(', '):'ні'}`,`Пільга: ${d.discount?'так (−50%)':'ні'}`,
+    `Сума: ${d.amount} грн`,'—————————————————','Гарного кльову!'];
 }
+function buildQrText(){return 'https://t.me/ozero_didyliv';}
 
-function buildQrText(){ return 'https://t.me/ozero_didyliv'; }
-
-/* ===== Превʼю ===== */
 function renderPreview(){
   const box=$('preview'); box.innerHTML='';
   const logoSrc=$('logo').src;
@@ -178,136 +266,103 @@ function renderPreview(){
     card.appendChild(logo); card.appendChild(pre); card.appendChild(qrDiv);
     box.appendChild(card);
   }
-  setStatus('✅ Превʼю оновлено');
 }
 
-/* ===== ESC/POS / WebUSB ===== */
-const ESC=0x1B, GS=0x1D;
+/* ===== ESC/POS ===== */
+const ESC=0x1B,GS=0x1D;
 const lf=new Uint8Array([0x0A]);
 const cut=new Uint8Array([GS,0x56,0x00]);
 const alignC=new Uint8Array([ESC,0x61,1]);
 const alignL=new Uint8Array([ESC,0x61,0]);
 const merge=(...a)=>{let l=0;for(const c of a)l+=c.length;const o=new Uint8Array(l);let i=0;for(const c of a){o.set(c,i);i+=c.length;}return o;};
 
-let device=null, iface=0, altNumber=0, epOut=1;
+let device=null,iface=0,altNumber=0,epOut=3;
 async function connect(auto=false){
   try{
-    if(auto && device) return;
-    if(auto){
-      const saved=await navigator.usb.getDevices();
-      if(saved.length) device=saved[0];
-    }
-    if(!device){
-      device=await navigator.usb.requestDevice({filters:[{}]});
-    }
+    if(auto&&device)return;
+    if(auto){const s=await navigator.usb.getDevices();if(s.length)device=s[0];}
+    if(!device)device=await navigator.usb.requestDevice({filters:[{}]});
     await device.open();
-    if(!device.configuration) await device.selectConfiguration(1);
-    iface=0; altNumber=0; epOut=3;
-    try{ await device.reset(); }catch{}
+    if(!device.configuration)await device.selectConfiguration(1);
+    try{await device.reset();}catch{}
     await device.claimInterface(iface);
     await device.selectAlternateInterface(iface,altNumber);
     await device.transferOut(epOut,new Uint8Array([0x1B,0x40]));
-    setStatus(`✅ Підключено (iface=${iface}, alt=${altNumber}, epOut=${epOut})`);
-  }catch(e){
-    setStatus('Помилка підключення: '+e.message+'\n(спробуй перепідключити принтер і оновити сторінку)');
-  }
+    setStatus(`✅ Підключено`);
+  }catch(e){setStatus('Помилка: '+e.message);}
 }
 $('connectBtn').onclick=connect;
-async function send(b){ if(!device){await connect(); if(!device) return;} await device.transferOut(epOut,b); }
+$('connectBtnF').onclick=connect;
+async function send(b){if(!device){await connect();if(!device)return;}await device.transferOut(epOut,b);}
 function setStatus(t){$('status').textContent=t;}
+function setStatusFloat(t){$('statusFloat').textContent=t;}
 
-/* ===== Растровий друк ===== */
 function rasterFromCanvas(canvas,threshold=160){
   const w=canvas.width,h=canvas.height;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
   const data=ctx.getImageData(0,0,w,h).data;
-  const bytesPerRow=Math.ceil(w/8);
-  const raster=new Uint8Array(bytesPerRow*h);
-  for(let y=0;y<h;y++){
-    for(let x=0;x<w;x++){
-      const i=(y*w+x)*4;
-      const avg=(data[i]+data[i+1]+data[i+2])/3;
-      if(avg<threshold) raster[y*bytesPerRow+(x>>3)]|=(0x80>>(x&7));
-    }
+  const bpr=Math.ceil(w/8);
+  const raster=new Uint8Array(bpr*h);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4,avg=(data[i]+data[i+1]+data[i+2])/3;
+    if(avg<threshold)raster[y*bpr+(x>>3)]|=(0x80>>(x&7));
   }
-  const xL=bytesPerRow&0xFF,xH=bytesPerRow>>8,yL=h&0xFF,yH=h>>8;
-  const header=new Uint8Array([GS,0x76,0x30,0x00,xL,xH,yL,yH]);
-  return merge(header,raster);
+  const xL=bpr&0xFF,xH=bpr>>8,yL=h&0xFF,yH=h>>8;
+  return merge(new Uint8Array([GS,0x76,0x30,0x00,xL,xH,yL,yH]),raster);
 }
-
 async function logoRaster(){
-  const imgTag=$('logo');
-  if(!imgTag) throw new Error('<img id="logo"> не знайдено');
-  const src=imgTag.getAttribute('src')||'';
-  const isSVG=/\.svg($|\?)/i.test(src);
-  let img;
-  if(isSVG){
-    const resp=await fetch(src);
-    const svgText=await resp.text();
-    const blob=new Blob([svgText],{type:'image/svg+xml'});
-    const url=URL.createObjectURL(blob);
-    img=new Image(); img.crossOrigin='anonymous'; img.src=url;
-    await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('SVG не завантажився'));});
-    URL.revokeObjectURL(url);
-  }else{
-    img=imgTag;
-    if(!img.complete){await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('Лого не завантажилось'));});}
-  }
-  const naturalW=img.naturalWidth||img.width;
-  const naturalH=img.naturalHeight||img.height;
-  if(!naturalW||!naturalH) throw new Error('Лого має нульовий розмір');
-  const scale=Math.min(1,PRINT_WIDTH/naturalW);
-  const w=Math.round(naturalW*scale),h=Math.round(naturalH*scale);
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const img=$('logo');
+  if(!img.complete)await new Promise((r,j)=>{img.onload=r;img.onerror=()=>j(new Error('Лого'));});
+  const nw=img.naturalWidth,nh=img.naturalHeight;
+  const sc=Math.min(1,PRINT_WIDTH/nw),w=Math.round(nw*sc),h=Math.round(nh*sc);
+  const c=document.createElement('canvas');c.width=w;c.height=h;
   const ctx=c.getContext('2d',{willReadFrequently:true});
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
-  ctx.drawImage(img,0,0,w,h);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
   return rasterFromCanvas(c,LOGO_THRESHOLD);
 }
-
 function textBlockRaster(lines,opts={}){
   const{width=PRINT_WIDTH,regularFont='24px Arial',boldFont='30px Arial',lineHeight=36,center=false,padding=8}=opts;
-  const height=padding*2+lineHeight*lines.length;
-  const c=document.createElement('canvas'); c.width=width; c.height=height;
+  const h=padding*2+lineHeight*lines.length;
+  const c=document.createElement('canvas');c.width=width;c.height=h;
   const ctx=c.getContext('2d',{willReadFrequently:true});
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,width,height);
-  ctx.textBaseline='top'; ctx.fillStyle='#000';
-  ctx.textAlign=center?'center':'left';
-  lines.forEach((t,idx)=>{
-    ctx.font=(idx===0?boldFont:regularFont);
-    const x=center?Math.floor(width/2):padding;
-    const y=padding+idx*lineHeight;
-    ctx.fillText(t,x,y);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,width,h);
+  ctx.textBaseline='top';ctx.fillStyle='#000';ctx.textAlign=center?'center':'left';
+  lines.forEach((t,i)=>{
+    ctx.font=i===0?boldFont:regularFont;
+    ctx.fillText(t,center?Math.floor(width/2):padding,padding+i*lineHeight);
   });
   return rasterFromCanvas(c,160);
 }
-
 async function qrRaster(){
-  const holder=document.createElement('div');
-  new QRCode(holder,{text:buildQrText(),width:256,height:256,correctLevel:QRCode.CorrectLevel.M});
+  const h=document.createElement('div');
+  new QRCode(h,{text:buildQrText(),width:256,height:256,correctLevel:QRCode.CorrectLevel.M});
   await new Promise(r=>requestAnimationFrame(r));
-  const qrCanvas=holder.querySelector('canvas');
-  const scale=Math.min(1,PRINT_WIDTH/qrCanvas.width);
-  const w=Math.round(qrCanvas.width*scale),h=Math.round(qrCanvas.height*scale);
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const qc=h.querySelector('canvas');
+  const sc=Math.min(1,PRINT_WIDTH/qc.width),w=Math.round(qc.width*sc),hh=Math.round(qc.height*sc);
+  const c=document.createElement('canvas');c.width=w;c.height=hh;
   const ctx=c.getContext('2d',{willReadFrequently:true});
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
-  ctx.drawImage(qrCanvas,0,0,w,h);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,w,hh);ctx.drawImage(qc,0,0,w,hh);
   return rasterFromCanvas(c,160);
 }
 
-/* ===== Кнопки друку ===== */
 $('testBtn').onclick=async()=>{
   try{
     await connect();
     const logo=await logoRaster();
     const text=textBlockRaster(['ОЗЕРО ДІДИЛІВ','Тестовий друк'],{center:true,regularFont:'26px Arial',boldFont:'34px Arial',lineHeight:38});
-    const packet=merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut);
-    await send(packet);
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut));
     setStatus('✅ Тестовий чек відправлено');
-  }catch(e){ setStatus('Помилка тест-друку: '+e.message); }
+  }catch(e){setStatus('Помилка: '+e.message);}
 };
-
+$('testBtnF').onclick=async()=>{
+  try{
+    await connect();
+    const logo=await logoRaster();
+    const text=textBlockRaster(['ОЗЕРО ДІДИЛІВ','Поплавцеве — тест'],{center:true,regularFont:'26px Arial',boldFont:'34px Arial',lineHeight:38});
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut));
+    setStatusFloat('✅ Тестовий чек відправлено');
+  }catch(e){setStatusFloat('Помилка: '+e.message);}
+};
 $('printBtn').onclick=async()=>{
   try{
     if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
@@ -315,24 +370,199 @@ $('printBtn').onclick=async()=>{
     const logoBytes=await logoRaster();
     for(const p of participants){
       const d=buildPayload(p);
-      const textLines=buildTextLines(d);
-      const textRaster=textBlockRaster(textLines,{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
-      const line=textBlockRaster(['——————————————'],{center:true});
-      const qrImg=await qrRaster();
-      const packet=merge(
-        new Uint8Array([ESC,0x40]),
-        alignC,logoBytes,lf,
-        alignL,textRaster,lf,
-        alignC,qrImg,lf,
-        lf,line,lf,lf,
-        cut
-      );
-      await send(packet);
+      const tr=textBlockRaster(buildTextLines(d),{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+      const li=textBlockRaster(['——————————————'],{center:true});
+      const qr=await qrRaster();
+      await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
     }
     setStatus('✅ Надруковано: '+participants.length+' чек(и)');
     clearParticipants();
-  }catch(e){ setStatus('Помилка друку: '+e.message); }
+  }catch(e){setStatus('Помилка: '+e.message);}
 };
+
+/* ===== ПОПЛАВЦЕВЕ — Firebase ===== */
+const SESSION_LABELS={morning:'Ранкова (6:00–13:00)',evening:'Вечірня (14:00–21:00)',fullday:'Повний день (6:00–21:00)'};
+const SESSION_PRICES={morning:500,evening:500,fullday:700};
+let floatSession='morning';
+let floatBookings={}; // key -> booking obj
+let floatUnsub=null;
+
+const todayStr=new Date().toISOString().split('T')[0];
+$('floatDate').value=todayStr;
+$('floatDate').onchange=()=>loadFloatBookings();
+
+function setFloatDate(offset){
+  const d=new Date();d.setDate(d.getDate()+offset);
+  $('floatDate').value=d.toISOString().split('T')[0];
+  loadFloatBookings();
+}
+function selectFloatSession(el){
+  document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  floatSession=el.dataset.session;
+  loadFloatBookings();
+}
+
+function loadFloatBookings(){
+  const date=$('floatDate').value;
+  if(floatUnsub){floatUnsub();floatUnsub=null;}
+  floatBookings={};
+  const ref=db.ref(`bookings/${date}/${floatSession}`);
+  floatUnsub=ref.on('value',snap=>{
+    floatBookings={};
+    snap.forEach(child=>{floatBookings[child.key]=child.val();});
+    renderFloatTable();
+  });
+  updateFloatLegend();
+}
+
+function updateFloatLegend(){
+  const date=$('floatDate').value;
+  const [y,m,d]=date.split('-');
+  $('floatLegend').textContent=`Сектори — ${SESSION_LABELS[floatSession]} — ${d}.${m}.${y}`;
+}
+
+function renderFloatTable(){
+  const tbody=$('floatTbody'); tbody.innerHTML='';
+  // Map sector -> booking
+  const sectorMap={};
+  Object.entries(floatBookings).forEach(([key,val])=>{
+    if(val&&val.sector) sectorMap[val.sector]={key,...val};
+  });
+
+  let bookedCount=0;
+  for(let i=1;i<=11;i++){
+    const b=sectorMap[i];
+    const isBooked=!!b;
+    if(isBooked)bookedCount++;
+    const tr=document.createElement('tr');
+    tr.className=isBooked?'booked-row':'free-row';
+    const createdAt=b?new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}):'—';
+    tr.innerHTML=`
+      <td><strong>Сектор ${i}</strong></td>
+      <td><span class="status-badge ${isBooked?'booked':'free'}">${isBooked?'🔴 Зайнято':'🟢 Вільно'}</span></td>
+      <td>${isBooked?(b.name||'—'):'—'}</td>
+      <td>${isBooked?(b.phone||'—'):'—'}</td>
+      <td>${isBooked?createdAt:'—'}</td>
+      <td class="act-btns">
+        ${isBooked
+          ? `<button class="danger" onclick="adminCancel('${b.key}',${i})">❌ Скасувати</button>
+             <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`
+          : `<button class="secondary" onclick="showManualBook(${i})">➕ Бронювати</button>`
+        }
+      </td>`;
+    tbody.appendChild(tr);
+
+    // Inline manual booking form
+    if(!isBooked){
+      const formRow=document.createElement('tr');
+      formRow.id=`manualRow_${i}`;
+      formRow.style.display='none';
+      formRow.innerHTML=`<td colspan="6" style="background:#f0f7f0;padding:8px 10px">
+        <div class="manual-form">
+          <input type="text" id="mname_${i}" placeholder="Імʼя">
+          <input type="tel" id="mphone_${i}" placeholder="Телефон">
+          <button class="primary" onclick="adminBook(${i})">✅ Підтвердити</button>
+          <button class="secondary" onclick="hideManualBook(${i})">Скасувати</button>
+        </div>
+      </td>`;
+      tbody.appendChild(formRow);
+    }
+  }
+
+  // Stats
+  $('floatStats').innerHTML=`
+    <div class="stat-card"><strong>${11-bookedCount}</strong>Вільних</div>
+    <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
+    <div class="stat-card"><strong>${bookedCount*SESSION_PRICES[floatSession]} грн</strong>Виручка</div>`;
+
+  renderFloatPreview(sectorMap);
+}
+
+function showManualBook(i){$(`manualRow_${i}`).style.display='';}
+function hideManualBook(i){$(`manualRow_${i}`).style.display='none';}
+
+async function adminBook(i){
+  const date=$('floatDate').value;
+  const name=($(`mname_${i}`)?.value||'').trim()||'Адмін';
+  const phone=($(`mphone_${i}`)?.value||'').trim()||'—';
+  try{
+    await db.ref(`bookings/${date}/${floatSession}`).push({
+      sector:i,name,phone,session:floatSession,
+      price:SESSION_PRICES[floatSession],date,
+      createdAt:new Date().toISOString()
+    });
+    setStatusFloat(`✅ Сектор ${i} заброньовано`);
+  }catch(e){setStatusFloat('Помилка: '+e.message);}
+}
+
+async function adminCancel(key,sectorNum){
+  if(!confirm(`Скасувати бронювання сектору ${sectorNum}?`))return;
+  const date=$('floatDate').value;
+  try{
+    await db.ref(`bookings/${date}/${floatSession}/${key}`).remove();
+    setStatusFloat(`Сектор ${sectorNum} звільнено`);
+  }catch(e){setStatusFloat('Помилка: '+e.message);}
+}
+
+async function adminPrint(sectorNum){
+  const date=$('floatDate').value;
+  const [y,m,d]=date.split('-');
+  try{
+    await connect(true);
+    const logoBytes=await logoRaster();
+    const lines=[
+      `Дата: ${nowStr()}`,
+      '—————————————————',
+      'Квиток рибалки',
+      'Поплавцеве озеро',
+      `Сесія: ${SESSION_LABELS[floatSession]}`,
+      `Сектор: ${sectorNum}`,
+      `День: ${d}.${m}.${y}`,
+      'Включено: 2 кг риби',
+      `Сума: ${SESSION_PRICES[floatSession]} грн`,
+      '—————————————————',
+      'Гарного кльову!',
+    ];
+    const tr=textBlockRaster(lines,{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+    const li=textBlockRaster(['——————————————'],{center:true});
+    const qr=await qrRaster();
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
+    setStatusFloat(`✅ Чек сектору ${sectorNum} надруковано`);
+  }catch(e){setStatusFloat('Помилка: '+e.message);}
+}
+
+function renderFloatPreview(sectorMap){
+  const box=$('previewFloat'); box.innerHTML='';
+  const logoSrc=$('logo').src;
+  const date=$('floatDate').value;
+  const [y,m,d]=date.split('-');
+  Object.values(sectorMap).forEach(b=>{
+    const card=document.createElement('div'); card.className='ticketPreview';
+    const logo=document.createElement('img'); logo.src=logoSrc; logo.className='logo';
+    const pre=document.createElement('pre');
+    pre.textContent=[
+      `Дата: ${d}.${m}.${y}`,
+      '—————————————————',
+      'Квиток рибалки',
+      'Поплавцеве озеро',
+      `Сесія: ${SESSION_LABELS[floatSession]}`,
+      `Сектор: ${b.sector}`,
+      `Імʼя: ${b.name||'—'}`,
+      'Включено: 2 кг риби',
+      `Сума: ${SESSION_PRICES[floatSession]} грн`,
+      '—————————————————',
+      'Гарного кльову!',
+    ].join('\n');
+    const qrDiv=document.createElement('div'); qrDiv.className='qr';
+    new QRCode(qrDiv,{text:buildQrText(),width:192,height:192,correctLevel:QRCode.CorrectLevel.M});
+    card.appendChild(logo);card.appendChild(pre);card.appendChild(qrDiv);
+    box.appendChild(card);
+  });
+}
+
+// Ініціалізація
+loadFloatBookings();
 </script>
 </body>
 </html>
