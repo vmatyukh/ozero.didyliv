@@ -101,10 +101,10 @@ function renderList(){
     const row=document.createElement('div'); row.className='participant';
     row.innerHTML=`
       <span>#${p.id}</span>
-      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="inventar" ${p.inventar?'checked':''}> Інвентар (+${PRICE_INVENTAR} грн)</label>
       <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
       <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
+      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <span class="sum">${calcSum(p)} грн</span>`;
     row.querySelectorAll('input').forEach(inp=>{
       inp.onchange=e=>{
