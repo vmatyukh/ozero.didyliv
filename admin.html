@@ -186,10 +186,6 @@ button.danger{background:#fdd}
   <pre id="statusFloat"></pre>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="config.js"></script>
-
 <script>
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -671,7 +667,7 @@ async function doLogin(){
   errEl.style.display='none';
   try{
     await auth.signInWithEmailAndPassword(email, password);
-  } catch (e){
+  }catch(e){
     errEl.style.display='block';
   }
 }
