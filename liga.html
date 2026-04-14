@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Хижа Ліга Дідилів 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
 <style>
@@ -26,9 +26,35 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
   /* HOME */
-  .poster { max-width: 480px; margin: 0 auto; padding: 16px 16px 0; }
+  .home-wrap {
+    max-width: 960px; margin: 0 auto; padding: 32px 24px;
+    display: flex; gap: 32px; align-items: flex-start;
+  }
+  .poster { flex: 0 0 420px; }
   .poster img { width: 100%; display: block; border-radius: 14px; }
+  .home-right { flex: 1; display: flex; flex-direction: column; padding-top: 8px; }
+  .home-title { font-family: var(--font-display); font-size: 30px; font-weight: 600; line-height: 1.2; margin-bottom: 6px; }
+  .home-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .info-card .i-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .info-card .i-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .prize-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; gap: 24px; margin-bottom: 16px; }
+  .prize-block .p-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .prize-block .p-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--green-mid); }
+  .zsu-line { font-size: 12px; color: var(--text-muted); padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
   .home-footer { max-width: 480px; margin: 0 auto; padding: 16px 16px 32px; }
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 680px) {
+    .home-wrap { flex-direction: column; padding: 16px 16px 0; gap: 0; }
+    .poster { flex: none; width: 100%; }
+    .home-right { display: none; }
+    .home-footer { display: block; }
+  }
+  @media (min-width: 681px) {
+    .home-footer { display: none; }
+  }
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .btn-outline {
     height: 52px; border-radius: 10px; font-size: 16px; font-weight: 500;
@@ -126,8 +152,30 @@
 
 <!-- HOME -->
 <div id="page-home" class="page active">
-  <div class="poster">
-    <img src="afisha.jpg" alt="Хижа Ліга Дідилів 2026" />
+  <div class="home-wrap">
+    <div class="poster">
+      <img src="Афіша_2.jpg" alt="Хижа Ліга Дідилів 2026" />
+    </div>
+    <div class="home-right">
+      <div class="home-title">Хижа Ліга Дідилів 2026</div>
+      <div class="home-sub">Раунд I — 25 квітня, Озеро Дідилів</div>
+      <div class="prize-block">
+        <div><div class="p-label">Призовий фонд раунду</div><div class="p-value">12 000 грн</div></div>
+        <div style="width:1px;background:var(--border);flex-shrink:0;"></div>
+        <div><div class="p-label">Призовий фонд фіналу</div><div class="p-value">60 000 грн</div></div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="i-label">Формат</div><div class="i-value">Індивідуальний залік</div></div>
+        <div class="info-card"><div class="i-label">Тури</div><div class="i-value">4 × 75 хвилин</div></div>
+        <div class="info-card"><div class="i-label">Залікова риба</div><div class="i-value">Щука, окунь</div></div>
+        <div class="info-card"><div class="i-label">Топ-10</div><div class="i-value">Подарунки + Big Fish</div></div>
+      </div>
+      <div class="zsu-line">Частина внесків кожного етапу спрямовується на підтримку ЗСУ</div>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
+        <button class="btn-fill" onclick="navigate('reg')">Реєстрація</button>
+      </div>
+    </div>
   </div>
   <div class="home-footer">
     <div class="btn-row">
@@ -251,7 +299,7 @@
       <div class="success">
         <div class="success-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
         <h2>Готово, ${first}!</h2>
-        <p>Твою заявку на <strong>Хижа Ліга Дідилів - Раунд 1</strong><br>прийнято. Організатор зв'яжеться<br>для підтвердження.</p>
+        <p>Твою заявку на <br><strong>Хижа Ліга Дідилів - Раунд 1</strong><br>прийнято. Організатор зв'яжеться для підтвердження.</p>
       </div>`;
   }
 </script>
