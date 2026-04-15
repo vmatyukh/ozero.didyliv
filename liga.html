@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Хижа Ліга Дідилів 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -43,8 +46,8 @@
   .prize-block .p-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
   .prize-block .p-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--green-mid); }
   .zsu-line { font-size: 12px; color: var(--text-muted); padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .home-footer { max-width: 480px; margin: 0 auto; padding: 16px 16px 32px; }
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .home-footer { max-width: 480px; margin: 0 auto; padding: 16px 16px 0; }
 
   @media (max-width: 680px) {
     .home-wrap { flex-direction: column; padding: 16px 16px 0; gap: 0; }
@@ -55,7 +58,7 @@
   @media (min-width: 681px) {
     .home-footer { display: none; }
   }
-  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
   .btn-outline {
     height: 52px; border-radius: 10px; font-size: 16px; font-weight: 500;
     border: 1.5px solid var(--green); background: transparent; color: var(--green);
@@ -73,7 +76,37 @@
   .btn-fill:active { transform: scale(0.98); }
   .btn-fill:disabled { background: #013a3c; cursor: not-allowed; }
 
-  /* INNER */
+  /* PARTICIPANTS TABLE */
+  .participants-wrap { max-width: 960px; margin: 0 auto; padding: 24px 24px 40px; }
+  .participants-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .participants-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text); }
+  .participants-count {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; font-size: 13px; color: var(--green-mid);
+  }
+  .participants-table { width: 100%; border-collapse: collapse; }
+  .participants-table th {
+    text-align: left; font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 0 12px 10px; font-weight: 500;
+  }
+  .participants-table td {
+    padding: 10px 12px; font-size: 14px; color: var(--text);
+    border-top: 1px solid var(--border);
+  }
+  .participants-table tr:hover td { background: rgba(0,83,86,0.08); }
+  .participants-table .num { color: var(--text-muted); font-size: 13px; width: 32px; }
+  .p-loading { text-align: center; padding: 24px; font-size: 14px; color: var(--text-muted); }
+  .p-empty { text-align: center; padding: 32px 16px; font-size: 14px; color: var(--text-muted); }
+
+  @media (max-width: 680px) {
+    .participants-wrap { padding: 24px 16px 40px; }
+  }
+
+  /* INNER PAGES */
   .inner { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
   .top-bar { display: flex; align-items: center; gap: 10px; padding: 16px 0 20px; }
   .back-btn {
@@ -110,7 +143,7 @@
     border-radius: 8px; color: var(--text); font-size: 15px; font-family: var(--font-body);
     outline: none; transition: border-color 0.15s, box-shadow 0.15s;
   }
-  input::placeholder { color: #044446; }
+  input::placeholder { color: #1a5558; }
   input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,83,86,0.2); }
   input.err { border-color: #e24b4a; }
   .err-msg { font-size: 12px; color: #f09595; margin-top: 4px; display: none; }
@@ -140,12 +173,6 @@
   .success-circle svg { width: 28px; height: 28px; stroke: var(--green-mid); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   .success h2 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin-bottom: 10px; }
   .success p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
-  .config-note {
-    margin-top: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--text-muted); line-height: 1.6;
-  }
-  .config-note strong { color: var(--text); }
-  code { font-family: monospace; background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -177,11 +204,36 @@
       </div>
     </div>
   </div>
+
   <div class="home-footer">
     <div class="btn-row">
       <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
       <button class="btn-fill" onclick="navigate('reg')">Реєстрація</button>
     </div>
+  </div>
+
+  <!-- PARTICIPANTS -->
+  <div class="participants-wrap">
+    <div class="participants-header">
+      <div class="participants-title">Зареєстровані учасники</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="participants-count" id="pCount">0 учасників</div>
+        <button onclick="loadParticipants()" style="background:none;border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Оновити">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+    </div>
+    <table class="participants-table">
+      <thead>
+        <tr>
+          <th class="num">#</th>
+          <th>Ім'я</th>
+        </tr>
+      </thead>
+      <tbody id="pList">
+        <tr><td colspan="2" class="p-loading">Завантаження...</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -247,16 +299,50 @@
 </div>
 
 <script>
-  const SHEETS_URL   = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
-  const TG_BOT_TOKEN = '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
-  const TG_CHAT_ID   = '8459515447';
+  const TG_CHATS  = ['8459515447', '592212598'];
+  const ROUND_KEY = 'hyzha_liga_2026_round_1';
+  const API_URL   = 'https://script.google.com/macros/s/AKfycbx4s_MzFxv0yPiOQ_LDxtauXhu5zhAGlgtR5XFPoFtLE_eKoY4wrTZfgNdyvdYDUkGf/exec';
 
+  firebase.initializeApp(firebaseConfig);
+
+  /* ── Навігація ── */
   function navigate(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
     window.scrollTo(0, 0);
   }
 
+  /* ── Таблиця учасників (Google Sheets) ── */
+  async function loadParticipants() {
+    try {
+      const res = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${ROUND_KEY}`);
+      const data = await res.json();
+      const names = (data.ok && data.names) ? data.names : [];
+      const count = names.length;
+
+      document.getElementById('pCount').textContent =
+        count === 0 ? 'ще немає' :
+        count === 1 ? '1 учасник' :
+        count < 5  ? `${count} учасники` : `${count} учасників`;
+
+      const tbody = document.getElementById('pList');
+      if (!count) {
+        tbody.innerHTML = '<tr><td colspan="2" class="p-empty">Поки що ніхто не зареєструвався.<br>Будь першим!</td></tr>';
+        return;
+      }
+      tbody.innerHTML = names.map((name, i) => `<tr>
+        <td class="num">${i + 1}</td>
+        <td>${name}</td>
+      </tr>`).join('');
+    } catch(e) {
+      document.getElementById('pList').innerHTML =
+        '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
+    }
+  }
+
+  loadParticipants();
+
+  /* ── Валідація ── */
   function validatePhone(v) {
     return /^(\+380|380|0)\d{9}$/.test(v.replace(/[\s\-\(\)]/g, ''));
   }
@@ -265,6 +351,7 @@
     document.getElementById(id + '-err').classList.toggle('show', show);
   }
 
+  /* ── Відправка ── */
   async function handleSubmit() {
     const name  = document.getElementById('fullname').value.trim();
     const phone = document.getElementById('phone').value.trim();
@@ -277,29 +364,46 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Надсилаємо...';
 
-    const payload = { name, phone, competition: 'Хижа Ліга Дідилів — Раунд 1', date: '25.04.2026', timestamp: new Date().toLocaleString('uk-UA') };
-    await Promise.allSettled([sendSheets(payload), sendTelegram(payload)]);
-    showSuccess(name);
-  }
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'register',
+          roundKey: ROUND_KEY,
+          name, phone
+        })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Помилка');
 
-  async function sendSheets(d) {
-    if (SHEETS_URL.includes('YOUR')) return;
-    try { await fetch(SHEETS_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) }); } catch(e) {}
-  }
+      const timestamp = new Date().toLocaleString('uk-UA', { hour12: false });
+      const text = `🎣 *Нова реєстрація — Хижа Ліга Дідилів*\n\n👤 ${name}\n📞 ${phone}\n📅 25.04.2026\n🕐 ${timestamp}`;
+      TG_CHATS.forEach(chat_id =>
+        fetch(`https://api.telegram.org/bot${window.TG_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id, text, parse_mode: 'Markdown' })
+        }).catch(() => {})
+      );
 
-  async function sendTelegram(d) {
-    if (TG_BOT_TOKEN.includes('YOUR')) return;
-    const text = `🎣 *Нова реєстрація — Хижа Ліга Дідилів*\n\n👤 ${d.name}\n📞 ${d.phone}\n📅 ${d.date}\n🕐 ${d.timestamp}`;
-    try { await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: TG_CHAT_ID, text, parse_mode:'Markdown' }) }); } catch(e) {}
+      showSuccess(name);
+      loadParticipants();
+    } catch(e) {
+      btn.disabled = false;
+      btn.innerHTML = 'Зареєструватись';
+      alert('Помилка збереження. Спробуйте ще раз.');
+    }
   }
 
   function showSuccess(name) {
     const first = name.split(' ')[0];
     document.getElementById('regCard').innerHTML = `
       <div class="success">
-        <div class="success-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="success-circle">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
         <h2>Готово, ${first}!</h2>
-        <p>Твою заявку на <br><strong>Хижа Ліга Дідилів - Раунд 1</strong><br>прийнято. Організатор зв'яжеться для підтвердження.</p>
+        <p>Твою заявку на<br><strong>Хижу Лігу Дідилів — Раунд 1</strong><br>прийнято.<br>Організатор зв'яжеться для підтвердження.</p>
       </div>`;
   }
 </script>
