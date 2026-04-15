@@ -299,6 +299,7 @@
 </div>
 
 <script>
+  const TG_BOT_TOKEN = '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
   const TG_CHATS  = ['8459515447', '592212598'];
   const ROUND_KEY = 'hyzha_liga_2026_round_1';
   const API_URL   = 'https://script.google.com/macros/s/AKfycbx4s_MzFxv0yPiOQ_LDxtauXhu5zhAGlgtR5XFPoFtLE_eKoY4wrTZfgNdyvdYDUkGf/exec';
@@ -379,9 +380,8 @@
       const timestamp = new Date().toLocaleString('uk-UA', { hour12: false });
       const text = `🎣 *Нова реєстрація — Хижа Ліга Дідилів*\n\n👤 ${name}\n📞 ${phone}\n📅 25.04.2026\n🕐 ${timestamp}`;
       TG_CHATS.forEach(chat_id =>
-        fetch(`https://api.telegram.org/bot${window.TG_BOT_TOKEN}/sendMessage`, {
+        fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chat_id, text, parse_mode: 'Markdown' })
         }).catch(() => {})
       );
