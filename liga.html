@@ -28,11 +28,8 @@
   .page.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* HOME */
-  .home-wrap {
-    max-width: 960px; margin: 0 auto; padding: 32px 24px;
-    display: flex; gap: 32px; align-items: flex-start;
-  }
+  /* ── HOME ── */
+  .home-wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px; display: flex; gap: 32px; align-items: flex-start; }
   .poster { flex: 0 0 420px; }
   .poster img { width: 100%; display: block; border-radius: 14px; }
   .home-right { flex: 1; display: flex; flex-direction: column; padding-top: 8px; }
@@ -48,128 +45,126 @@
   .zsu-line { font-size: 12px; color: var(--text-muted); padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .home-footer { max-width: 480px; margin: 0 auto; padding: 16px 16px 0; }
-
   @media (max-width: 680px) {
     .home-wrap { flex-direction: column; padding: 16px 16px 0; gap: 0; }
     .poster { flex: none; width: 100%; }
     .home-right { display: none; }
     .home-footer { display: block; }
   }
-  @media (min-width: 681px) {
-    .home-footer { display: none; }
-  }
+  @media (min-width: 681px) { .home-footer { display: none; } }
 
-  .btn-outline {
-    height: 52px; border-radius: 10px; font-size: 16px; font-weight: 500;
-    border: 1.5px solid var(--green); background: transparent; color: var(--green);
-    cursor: pointer; font-family: var(--font-display); letter-spacing: 0.03em;
-    transition: background 0.15s;
-  }
+  .btn-outline { height: 52px; border-radius: 10px; font-size: 16px; font-weight: 500; border: 1.5px solid var(--green); background: transparent; color: var(--green); cursor: pointer; font-family: var(--font-display); letter-spacing: 0.03em; transition: background 0.15s; }
   .btn-outline:hover { background: rgba(0,83,86,0.12); }
-  .btn-fill {
-    height: 52px; border-radius: 10px; font-size: 16px; font-weight: 600;
-    border: none; background: var(--green); color: #fff;
-    cursor: pointer; font-family: var(--font-display); letter-spacing: 0.04em;
-    transition: background 0.15s, transform 0.1s;
-  }
+  .btn-fill { height: 52px; border-radius: 10px; font-size: 16px; font-weight: 600; border: none; background: var(--green); color: #fff; cursor: pointer; font-family: var(--font-display); letter-spacing: 0.04em; transition: background 0.15s, transform 0.1s; }
   .btn-fill:hover { background: var(--green-dark); }
   .btn-fill:active { transform: scale(0.98); }
   .btn-fill:disabled { background: #013a3c; cursor: not-allowed; }
 
-  /* PARTICIPANTS TABLE */
+  /* ── PARTICIPANTS ── */
   .participants-wrap { max-width: 960px; margin: 0 auto; padding: 24px 24px 40px; }
-  .participants-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
-  }
+  .participants-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .participants-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text); }
-  .participants-count {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 20px; padding: 4px 12px; font-size: 13px; color: var(--green-mid);
-  }
+  .participants-count { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 13px; color: var(--green-mid); }
   .participants-table { width: 100%; border-collapse: collapse; }
-  .participants-table th {
-    text-align: left; font-size: 11px; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.05em;
-    padding: 0 12px 10px; font-weight: 500;
-  }
-  .participants-table td {
-    padding: 10px 12px; font-size: 14px; color: var(--text);
-    border-top: 1px solid var(--border);
-  }
+  .participants-table th { text-align: left; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 0 12px 10px; font-weight: 500; }
+  .participants-table td { padding: 10px 12px; font-size: 14px; color: var(--text); border-top: 1px solid var(--border); }
   .participants-table tr:hover td { background: rgba(0,83,86,0.08); }
   .participants-table .num { color: var(--text-muted); font-size: 13px; width: 32px; }
   .p-loading { text-align: center; padding: 24px; font-size: 14px; color: var(--text-muted); }
   .p-empty { text-align: center; padding: 32px 16px; font-size: 14px; color: var(--text-muted); }
+  @media (max-width: 680px) { .participants-wrap { padding: 24px 16px 40px; } }
 
-  @media (max-width: 680px) {
-    .participants-wrap { padding: 24px 16px 40px; }
-  }
-
-  /* INNER PAGES */
-  .inner { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
-  .top-bar { display: flex; align-items: center; gap: 10px; padding: 16px 0 20px; }
-  .back-btn {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; width: 36px; height: 36px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; flex-shrink: 0;
-  }
+  /* ── SHARED INNER ── */
+  .top-bar { display: flex; align-items: center; gap: 10px; padding: 16px 0 20px; max-width: 860px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+  .back-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
   .back-btn svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .page-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text); }
 
-  /* Rules */
-  .rules-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
-  .rule-item {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px 16px;
-    display: flex; gap: 14px; align-items: flex-start;
-  }
-  .rule-ico {
-    width: 36px; height: 36px; border-radius: 8px; background: rgba(0,83,86,0.2);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .rule-ico svg { width: 18px; height: 18px; stroke: var(--green-mid); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .rule-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
-  .rule-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  /* ── RULES PAGE ── */
+  .rules-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
 
-  /* Registration */
+  .r-hero { text-align: center; padding: 0 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+  .r-hero-title { font-family: var(--font-display); font-size: 32px; font-weight: 600; color: var(--green-mid); letter-spacing: 0.02em; margin-bottom: 6px; }
+  .r-hero-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
+  .r-hero-badge { display: inline-block; background: rgba(220,185,50,0.1); border: 1px solid rgba(220,185,50,0.3); color: #d4b84a; font-size: 13px; padding: 5px 16px; border-radius: 20px; }
+
+  .r-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
+  .r-nav a { font-size: 12px; color: var(--text-muted); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; cursor: pointer; background: var(--surface); transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+  .r-nav a:hover { background: var(--green); color: #fff; border-color: var(--green); }
+
+  /* two-column layout on desktop */
+  .r-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+  .r-body .r-section:nth-child(1),
+  .r-body .r-section:nth-child(2),
+  .r-body .r-section:nth-child(3) { grid-column: 1 / -1; }
+  @media (max-width: 680px) { .r-body { grid-template-columns: 1fr; } }
+
+  .r-section { margin-bottom: 28px; }
+  .r-sec-title {
+    font-family: var(--font-display); font-size: 13px; font-weight: 500;
+    color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.09em;
+    border-left: 3px solid var(--green); padding-left: 10px; margin-bottom: 12px;
+  }
+
+  .r-list { list-style: none; border-top: 1px solid var(--border); }
+  .r-list li { font-size: 14px; color: var(--text); line-height: 1.6; padding: 9px 4px 9px 20px; border-bottom: 1px solid var(--border); position: relative; }
+  .r-list li:last-child { border-bottom: none; }
+  .r-list li::before { content: ""; position: absolute; left: 4px; top: 17px; width: 6px; height: 6px; border-radius: 50%; background: var(--green-mid); }
+
+  .r-subhead { font-size: 11px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.07em; margin: 10px 0 2px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+
+  /* Schedule table */
+  .r-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .r-table { width: 100%; border-collapse: collapse; }
+  .r-table thead tr { background: var(--green); }
+  .r-table thead td { font-family: var(--font-display); font-size: 13px; color: #fff; padding: 10px 14px; letter-spacing: 0.05em; }
+  .r-table tbody tr { border-bottom: 1px solid var(--border); }
+  .r-table tbody tr:last-child { border-bottom: none; }
+  .r-table tbody tr:nth-child(even) { background: rgba(0,83,86,0.07); }
+  .r-table tbody td { padding: 9px 14px; font-size: 13px; color: var(--text); vertical-align: top; }
+  .r-table tbody td:first-child { font-family: var(--font-display); color: var(--green-mid); white-space: nowrap; }
+  .r-table tbody td.muted { color: var(--text-muted); }
+
+  /* Fish pills */
+  .fish-pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; }
+  .fish-pill { background: rgba(0,83,86,0.2); border: 1px solid var(--border); color: var(--green-mid); font-size: 12px; font-weight: 500; padding: 3px 12px; border-radius: 20px; }
+
+  /* Awards */
+  .award-list { border-top: 1px solid var(--border); }
+  .award-row { display: flex; gap: 12px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+  .award-row:last-child { border-bottom: none; }
+  .medal { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+  .m1 { background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.35); color: #FFD700; }
+  .m2 { background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.25); color: #C0C0C0; }
+  .m3 { background: rgba(205,127,50,0.12); border: 1px solid rgba(205,127,50,0.3); color: #CD7F32; }
+  .award-text { font-size: 14px; color: var(--text); }
+
+  .r-note { background: rgba(0,83,86,0.1); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-top: 10px; }
+
+  .r-footer { text-align: center; padding: 24px 0 32px; border-top: 1px solid var(--border); margin-top: 8px; }
+  .r-footer-slava { font-family: var(--font-display); font-size: 16px; color: var(--green-mid); letter-spacing: 0.05em; margin-bottom: 16px; }
+  .r-footer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 400px; margin: 0 auto; }
+
+  /* ── REGISTRATION ── */
+  .inner { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
   .reg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 20px; }
   .field-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; margin-top: 16px; }
   .field-label:first-child { margin-top: 0; }
-  input[type=text], input[type=tel] {
-    width: 100%; height: 44px; padding: 0 14px;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text); font-size: 15px; font-family: var(--font-body);
-    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-  }
+  input[type=text], input[type=tel] { width: 100%; height: 44px; padding: 0 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; font-family: var(--font-body); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
   input::placeholder { color: #1a5558; }
   input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,83,86,0.2); }
   input.err { border-color: #e24b4a; }
   .err-msg { font-size: 12px; color: #f09595; margin-top: 4px; display: none; }
   .err-msg.show { display: block; }
   .field-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; opacity: 0.7; }
-  .btn-submit {
-    width: 100%; margin-top: 20px; height: 48px;
-    background: var(--green); color: #fff; border: none; border-radius: 10px;
-    font-size: 16px; font-weight: 600; font-family: var(--font-display); letter-spacing: 0.04em;
-    cursor: pointer; transition: background 0.15s, transform 0.1s;
-  }
+  .btn-submit { width: 100%; margin-top: 20px; height: 48px; background: var(--green); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; font-family: var(--font-display); letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; }
   .btn-submit:hover { background: var(--green-dark); }
   .btn-submit:active { transform: scale(0.98); }
   .btn-submit:disabled { background: #013a3c; cursor: not-allowed; }
-  .spinner {
-    display: inline-block; width: 15px; height: 15px;
-    border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-    border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px;
-  }
+  .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .success { text-align: center; padding: 32px 16px; }
-  .success-circle {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: rgba(0,83,86,0.2); border: 1.5px solid var(--green);
-    display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
-  }
+  .success-circle { width: 64px; height: 64px; border-radius: 50%; background: rgba(0,83,86,0.2); border: 1.5px solid var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
   .success-circle svg { width: 28px; height: 28px; stroke: var(--green-mid); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   .success h2 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin-bottom: 10px; }
   .success p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
@@ -204,15 +199,12 @@
       </div>
     </div>
   </div>
-
   <div class="home-footer">
     <div class="btn-row">
       <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
       <button class="btn-fill" onclick="navigate('reg')">Реєстрація</button>
     </div>
   </div>
-
-  <!-- PARTICIPANTS -->
   <div class="participants-wrap">
     <div class="participants-header">
       <div class="participants-title">Зареєстровані учасники</div>
@@ -224,62 +216,251 @@
       </div>
     </div>
     <table class="participants-table">
-      <thead>
-        <tr>
-          <th class="num">#</th>
-          <th>Ім'я</th>
-        </tr>
-      </thead>
-      <tbody id="pList">
-        <tr><td colspan="2" class="p-loading">Завантаження...</td></tr>
-      </tbody>
+      <thead><tr><th class="num">#</th><th>Ім'я</th></tr></thead>
+      <tbody id="pList"><tr><td colspan="2" class="p-loading">Завантаження...</td></tr></tbody>
     </table>
   </div>
 </div>
 
 <!-- RULES -->
 <div id="page-rules" class="page">
-  <div class="inner">
-    <div class="top-bar">
-      <button class="back-btn" onclick="navigate('home')">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="page-title">Регламент — Раунд I</div>
+  <div class="top-bar">
+    <button class="back-btn" onclick="navigate('home')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="page-title">Регламент</div>
+  </div>
+
+  <div class="rules-wrap">
+    <div class="r-hero">
+      <div class="r-hero-title">Хижа Ліга Дідилів 2026</div>
+      <div class="r-hero-sub">Регламент змагань зі спінінгової ловлі · Озеро Дідилів · Індивідуальний залік</div>
+      <div class="r-hero-badge">Благодійний турнір на підтримку ЗСУ</div>
     </div>
-    <div class="rules-list">
-      <div class="rule-item">
-        <div class="rule-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-        <div><div class="rule-title">Дата та місце</div><div class="rule-desc">25 квітня 2026 р. — Озеро Дідилів</div></div>
+
+    <nav class="r-nav">
+      <a onclick="document.getElementById('r1').scrollIntoView({behavior:'smooth'})">1. Загальні положення</a>
+      <a onclick="document.getElementById('r2').scrollIntoView({behavior:'smooth'})">2. Місце і час</a>
+      <a onclick="document.getElementById('r3').scrollIntoView({behavior:'smooth'})">3. Розклад</a>
+      <a onclick="document.getElementById('r4').scrollIntoView({behavior:'smooth'})">4. Учасники</a>
+      <a onclick="document.getElementById('r5').scrollIntoView({behavior:'smooth'})">5. Снасті</a>
+      <a onclick="document.getElementById('r6').scrollIntoView({behavior:'smooth'})">6. Правила туру</a>
+      <a onclick="document.getElementById('r7').scrollIntoView({behavior:'smooth'})">7. Залік та бали</a>
+      <a onclick="document.getElementById('r8').scrollIntoView({behavior:'smooth'})">8. Фіксація</a>
+      <a onclick="document.getElementById('r9').scrollIntoView({behavior:'smooth'})">9. Безпека</a>
+      <a onclick="document.getElementById('r10').scrollIntoView({behavior:'smooth'})">10. Суддівство</a>
+      <a onclick="document.getElementById('r11').scrollIntoView({behavior:'smooth'})">11. Нагородження</a>
+      <a onclick="document.getElementById('r12').scrollIntoView({behavior:'smooth'})">12. Заключне</a>
+    </nav>
+
+    <div class="r-body">
+
+      <!-- 1 — full width -->
+      <div class="r-section" id="r1">
+        <div class="r-sec-title">1. Загальні положення</div>
+        <ul class="r-list">
+          <li>Хижа Ліга Дідилів 2026 — відкритий турнір зі спінінгової ловлі хижої риби.</li>
+          <li>Організатор — Озеро Дідилів.</li>
+          <li>Формат — індивідуальний залік.</li>
+          <li>Кількість турів — 4 (чотири) по 75 хвилин.</li>
+          <li>Принцип — «Спіймав — Зважив — Відпустив» (Catch & Release).</li>
+          <li>Частина коштів від внесків спрямовується на підтримку Збройних Сил України. Звіт про збір надається після заходу.</li>
+        </ul>
       </div>
-      <div class="rule-item">
-        <div class="rule-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <div><div class="rule-title">Структура змагань</div><div class="rule-desc">4 тури по 75 хвилин. Між турами — коротка перерва.</div></div>
+
+      <!-- 2 — full width -->
+      <div class="r-section" id="r2">
+        <div class="r-sec-title">2. Місце та час проведення</div>
+        <ul class="r-list">
+          <li>Місце проведення — Озеро Дідилів.</li>
+          <li>Тривалість одного туру — 75 хвилин.</li>
+          <li>Загальна тривалість заходу — орієнтовно 8 годин.</li>
+          <li>Акваторія ділиться на зони, розподіл — за жеребкуванням.</li>
+          <li>Зміна зони між турами дозволена (якщо передбачена форматом — оголошується на інструктажі).</li>
+        </ul>
       </div>
-      <div class="rule-item">
-        <div class="rule-ico"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
-        <div><div class="rule-title">Залікова риба</div><div class="rule-desc">Щука та окунь. Зараховується загальна вага за кожен тур.</div></div>
+
+      <!-- 3 — full width -->
+      <div class="r-section" id="r3">
+        <div class="r-sec-title">3. Розклад змагань</div>
+        <div class="r-table-wrap">
+          <table class="r-table">
+            <thead><tr><td style="width:70px">Час</td><td>Подія</td></tr></thead>
+            <tbody>
+              <tr><td>07:30</td><td>Реєстрація учасників</td></tr>
+              <tr><td>07:45</td><td>Інструктаж та жеребкування зон</td></tr>
+              <tr><td>08:00</td><td>Старт 1-го туру (75 хв)</td></tr>
+              <tr><td>09:30</td><td>Фініш 1-го туру. Зважування. Перерва (15 хв)</td></tr>
+              <tr><td>09:45</td><td>Старт 2-го туру (75 хв)</td></tr>
+              <tr><td>11:00</td><td>Фініш 2-го туру. Зважування. Перерва (15 хв)</td></tr>
+              <tr><td>11:15</td><td>Старт 3-го туру (75 хв)</td></tr>
+              <tr><td>12:30</td><td>Фініш 3-го туру. Зважування. Перерва (15 хв)</td></tr>
+              <tr><td>12:45</td><td>Старт 4-го туру (75 хв)</td></tr>
+              <tr><td>14:00</td><td>Фініш 4-го туру. Фінальне зважування</td></tr>
+              <tr><td>14:15</td><td>Підбиття підсумків та оголошення результатів</td></tr>
+              <tr><td>14:30</td><td>Нагородження призерів та номінантів</td></tr>
+              <tr><td>15:00</td><td>Спільне частування, спілкування</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="r-note">Розклад може коригуватися організатором. Актуальний час оголошується на інструктажі.</div>
       </div>
-      <div class="rule-item">
-        <div class="rule-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <div><div class="rule-title">Нагородження</div><div class="rule-desc">Призовий фонд раунду — 12 000 грн. Подарунки топ-10. Окремий приз Big Fish.</div></div>
+
+      <!-- 4 -->
+      <div class="r-section" id="r4">
+        <div class="r-sec-title">4. Учасники</div>
+        <ul class="r-list">
+          <li>До участі допускаються особи, які попередньо зареєструвались через офіційний канал організатора.</li>
+          <li>Учасник вважається зареєстрованим після підтвердження організатором та сплати внеску.</li>
+          <li>Неповнолітні допускаються лише у супроводі дорослих (батьків або офіційних представників).</li>
+          <li>Кожен учасник несе особисту відповідальність за власну безпеку.</li>
+        </ul>
       </div>
-      <div class="rule-item">
-        <div class="rule-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <div><div class="rule-title">Формат</div><div class="rule-desc">Індивідуальний залік. Партнер ліги — UPSTREAM</div></div>
+
+      <!-- 5 -->
+      <div class="r-section" id="r5">
+        <div class="r-sec-title">5. Снасті та обладнання</div>
+        <div class="r-subhead">Дозволено</div>
+        <ul class="r-list">
+          <li>Спінінгове або кастингове вудилище — одне в активній ловлі.</li>
+          <li>Виключно штучні приманки: блешні, воблери, силікон, джигові монтажі тощо.</li>
+          <li>Монтажі — спортивні. Максимум три потрійні гачки (для воблерів).</li>
+          <li>Запасні вудилища — без обмежень (але лише одне в активному використанні).</li>
+          <li>Підсак для безпечного поводження з рибою — рекомендовано, але не обов'язковий.</li>
+        </ul>
+        <div class="r-subhead">Заборонено</div>
+        <ul class="r-list">
+          <li>Живець, донні снасті, жерлиці, сітки та інші пасивні методи ловлі.</li>
+          <li>Рознесені монтажі (Carolina rig, drop shot тощо).</li>
+          <li>Заходити у воду — ловля лише з берега або зі штатних вимостків.</li>
+          <li>Будь-яка допомога сторонніх осіб під час туру.</li>
+        </ul>
       </div>
-      <div class="rule-item">
-        <div class="rule-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div><div class="rule-title">Підтримка ЗСУ</div><div class="rule-desc">Частина внесків кожного етапу спрямовується на підтримку Збройних Сил України.</div></div>
+
+      <!-- 6 -->
+      <div class="r-section" id="r6">
+        <div class="r-sec-title">6. Правила проведення туру</div>
+        <ul class="r-list">
+          <li>До сигналу «Старт» ловля заборонена.</li>
+          <li>Після сигналу «Фініш» ловля припиняється негайно. Риба, підсічена до сигналу, може бути зважена.</li>
+          <li>Мінімальна дистанція між учасниками — 10 метрів (якщо інше не погоджено обома сторонами).</li>
+          <li>Передача риби між учасниками — заборонена.</li>
+          <li>Навмисне перешкоджання іншим учасникам — заборонено.</li>
+          <li>Між турами учасники можуть вільно переміщуватись у межах відведеної зони або змінювати зону (за оголошеним форматом).</li>
+        </ul>
+      </div>
+
+      <!-- 7 -->
+      <div class="r-section" id="r7">
+        <div class="r-sec-title">7. Залік улову та підрахунок балів</div>
+        <div class="r-subhead">Залікова риба</div>
+        <div class="fish-pills">
+          <span class="fish-pill">Щука</span>
+          <span class="fish-pill">Окунь</span>
+          <span class="fish-pill">Судак</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">Мінімальний розмір та вага риби не встановлюються.</div>
+        <div class="r-subhead">Система підрахунку балів</div>
+        <div class="r-table-wrap">
+          <table class="r-table">
+            <thead><tr><td>Ситуація</td><td>Правило</td></tr></thead>
+            <tbody>
+              <tr><td class="muted">Загальна вага улову за тур (г)</td><td>Основний бал (менше = краще)</td></tr>
+              <tr><td class="muted">Нульовий результат у турі</td><td>К-сть учасників + 1 бал (штраф)</td></tr>
+              <tr><td class="muted">Однаковий результат</td><td>Перевага учаснику з більшою к-стю риб</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="r-note">Переможець — учасник з найменшою сумою балів за всі 4 тури. Риба зберігається в тканинному садку та відпускається після зважування суддею.</div>
+      </div>
+
+      <!-- 8 -->
+      <div class="r-section" id="r8">
+        <div class="r-sec-title">8. Фіксація результатів</div>
+        <ul class="r-list">
+          <li>Спіймана риба одразу пред'являється судді для зважування.</li>
+          <li>Зважування проводиться суддею, результат фіксується у протоколі.</li>
+          <li>Після зважування риба відпускається у водойму.</li>
+          <li>За фальсифікацію ваги, передачу риби або неналежне поводження — дискваліфікація.</li>
+          <li>Допомога суперників або сторонніх осіб при зважуванні — заборонена.</li>
+        </ul>
+      </div>
+
+      <!-- 9 -->
+      <div class="r-section" id="r9">
+        <div class="r-sec-title">9. Безпека та поведінка</div>
+        <div class="r-subhead">Обов'язки учасників</div>
+        <ul class="r-list">
+          <li>Дотримуватися правил техніки безпеки біля води.</li>
+          <li>Не заходити у воду без необхідності та без відповідного спорядження.</li>
+          <li>При виникненні нещасного випадку — негайно повідомити організатора або суддю.</li>
+        </ul>
+        <div class="r-subhead">Заборонено</div>
+        <ul class="r-list">
+          <li>Вживання алкоголю або наркотичних речовин під час туру.</li>
+          <li>Смітити, пошкоджувати природне середовище або угіддя.</li>
+        </ul>
+        <div class="r-note">Організатор не несе відповідальності за шкоду, завдану здоров'ю чи майну учасників.</div>
+      </div>
+
+      <!-- 10 -->
+      <div class="r-section" id="r10">
+        <div class="r-sec-title">10. Суддівство</div>
+        <ul class="r-list">
+          <li>Контроль за дотриманням Регламенту здійснює суддівська колегія.</li>
+          <li>Суддя має право винести попередження або дискваліфікувати учасника без апеляції.</li>
+          <li>У спірних ситуаціях рішення може прийматися колегіально — шляхом голосування суддівської колегії.</li>
+          <li>Рішення головного судді є остаточним.</li>
+        </ul>
+      </div>
+
+      <!-- 11 -->
+      <div class="r-section" id="r11">
+        <div class="r-sec-title">11. Нагородження та номінації</div>
+        <div class="r-subhead">Основний залік</div>
+        <div class="award-list">
+          <div class="award-row"><div class="medal m1">1</div><div class="award-text">Кубок, медаль, грошовий приз та призи від партнерів</div></div>
+          <div class="award-row"><div class="medal m2">2</div><div class="award-text">Кубок, медаль, грошовий приз та призи від партнерів</div></div>
+          <div class="award-row"><div class="medal m3">3</div><div class="award-text">Кубок, медаль, грошовий приз та призи від партнерів</div></div>
+        </div>
+        <div class="r-subhead">Додаткові номінації</div>
+        <ul class="r-list">
+          <li>Big Fish — найбільша риба турніру.</li>
+        </ul>
+        <div class="r-subhead">Усім учасникам</div>
+        <ul class="r-list">
+          <li>Гарячий бограч, чай та кава — включено в програму заходу.</li>
+        </ul>
+      </div>
+
+      <!-- 12 -->
+      <div class="r-section" id="r12">
+        <div class="r-sec-title">12. Заключні положення</div>
+        <ul class="r-list">
+          <li>Участь у турнірі означає повну згоду з цим Регламентом.</li>
+          <li>Учасник погоджується на фото- та відеозйомку під час заходу та використання матеріалів організатором.</li>
+          <li>Організатор залишає за собою право вносити зміни до Регламенту та повідомляти учасників завчасно.</li>
+          <li>У разі форс-мажорних обставин (погода, безпека, надзвичайні події) захід може бути перенесений або скасований.</li>
+          <li>Звіт про благодійні кошти надається учасникам після проведення заходу.</li>
+        </ul>
+      </div>
+
+    </div><!-- /.r-body -->
+
+    <div class="r-footer">
+      <div class="r-footer-slava">Слава Україні! 🇺🇦</div>
+      <div class="r-footer-btns">
+        <button class="btn-outline" onclick="navigate('home')">На головну</button>
+        <button class="btn-fill" onclick="navigate('reg')">Зареєструватись</button>
       </div>
     </div>
-    <button class="btn-fill" style="width:100%;" onclick="navigate('reg')">Зареєструватись</button>
   </div>
 </div>
 
 <!-- REGISTRATION -->
 <div id="page-reg" class="page">
   <div class="inner">
-    <div class="top-bar">
+    <div class="top-bar" style="max-width:480px;padding-left:0;padding-right:0;">
       <button class="back-btn" onclick="navigate('home')">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
@@ -316,44 +497,35 @@
     btn.disabled = false;
   }
 
-  /* ── Навігація ── */
   function navigate(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
     window.scrollTo(0, 0);
   }
 
-  /* ── Таблиця учасників (Google Sheets) ── */
   async function loadParticipants() {
     try {
       const res = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${ROUND_KEY}`);
       const data = await res.json();
       const names = (data.ok && data.names) ? data.names : [];
       const count = names.length;
-
       document.getElementById('pCount').textContent =
         count === 0 ? 'ще немає' :
         count === 1 ? '1 учасник' :
         count < 5  ? `${count} учасники` : `${count} учасників`;
-
       const tbody = document.getElementById('pList');
       if (!count) {
         tbody.innerHTML = '<tr><td colspan="2" class="p-empty">Поки що ніхто не зареєструвався.<br>Будь першим!</td></tr>';
         return;
       }
-      tbody.innerHTML = names.map((name, i) => `<tr>
-        <td class="num">${i + 1}</td>
-        <td>${name}</td>
-      </tr>`).join('');
+      tbody.innerHTML = names.map((name, i) => `<tr><td class="num">${i+1}</td><td>${name}</td></tr>`).join('');
     } catch(e) {
-      document.getElementById('pList').innerHTML =
-        '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
+      document.getElementById('pList').innerHTML = '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
     }
   }
 
   loadParticipants();
 
-  /* ── Валідація ── */
   function validatePhone(v) {
     return /^(\+380|380|0)\d{9}$/.test(v.replace(/[\s\-\(\)]/g, ''));
   }
@@ -362,7 +534,6 @@
     document.getElementById(id + '-err').classList.toggle('show', show);
   }
 
-  /* ── Відправка ── */
   async function handleSubmit() {
     const name  = document.getElementById('fullname').value.trim();
     const phone = document.getElementById('phone').value.trim();
@@ -378,11 +549,7 @@
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify({
-          action: 'register',
-          roundKey: ROUND_KEY,
-          name, phone
-        })
+        body: JSON.stringify({ action: 'register', roundKey: ROUND_KEY, name, phone })
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Помилка');
