@@ -711,6 +711,7 @@ async function abonAdd(){
 }
 
 async function abonVisit(key,name,visits){
+  if(!confirm(`Відзначити відвідування для ${name}?\nЗалишиться: ${visits-1} візитів`)) return;
   const newVisits=visits-1;
   try{
     if(newVisits<=0){
