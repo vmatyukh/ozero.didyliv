@@ -197,16 +197,20 @@ button.danger{background:#fdd}
 <div id="tab-abonements" class="tab-content">
   <fieldset>
     <legend>➕ Додати людину</legend>
-    <div class="row" style="align-items:flex-end;gap:10px">
-      <div style="flex:2">
+    <div class="row" style="align-items:flex-end;gap:10px;flex-wrap:wrap">
+      <div style="flex:2;min-width:160px">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Імʼя</label>
         <input type="text" id="abonName" placeholder="Іван Петренко" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
       </div>
-      <div style="flex:1">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Безкоштовних візитів</label>
-        <input type="number" id="abonVisits" min="1" max="99" value="1" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      <div style="flex:1;min-width:120px">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Разові візити</label>
+        <input type="number" id="abonVisits" min="0" max="99" value="0" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
       </div>
-      <button class="primary" onclick="abonAdd()" style="white-space:nowrap">➕ Додати</button>
+      <div style="flex:1;min-width:120px">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Місячний ліміт</label>
+        <input type="number" id="abonMonthly" min="0" max="99" value="0" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      </div>
+      <button class="primary" onclick="abonAdd()" style="white-space:nowrap;padding:9px 16px">➕ Додати</button>
     </div>
   </fieldset>
 
@@ -674,6 +678,18 @@ function renderFloatPreview(sectorMap){
 /* ===== АБОНЕМЕНТИ ===== */
 function setStatusAbon(t){const el=$('statusAbon');if(el)el.textContent=t;}
 
+const currentMonth=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })();
+
+// Автоматичний скид місячного лічильника
+async function checkMonthlyReset(key, val){
+  if(val.monthlyLimit>0 && val.lastReset !== currentMonth){
+    await db.ref(`abonements/${key}`).update({
+      monthlyUsed: 0,
+      lastReset: currentMonth
+    });
+  }
+}
+
 function renderAbonList(data){
   const wrap=$('abonList');
   if(!wrap) return;
@@ -685,44 +701,87 @@ function renderAbonList(data){
   Object.entries(data)
     .sort((a,b)=>a[1].name.localeCompare(b[1].name,'uk'))
     .forEach(([key,val])=>{
-      const v=val.visits||0;
+      const visits       = val.visits||0;
+      const monthlyLimit = val.monthlyLimit||0;
+      const monthlyUsed  = val.monthlyUsed||0;
+      const monthlyLeft  = Math.max(0, monthlyLimit - monthlyUsed);
+      const hasVisits    = visits>0 || monthlyLeft>0;
+
       const div=document.createElement('div');
       div.className='abon-item';
+
+      let badges='';
+      // Разові
+      if(visits>0){
+        badges+=`<span style="display:inline-flex;align-items:center;gap:4px;background:#e0f0f0;border-radius:8px;padding:4px 10px;font-size:13px">
+          🎫 Разові: <strong style="color:#005356">${visits}</strong>
+        </span>`;
+      }
+      // Місячні
+      if(monthlyLimit>0){
+        const pct=Math.round((monthlyUsed/monthlyLimit)*100);
+        const color=monthlyLeft===0?'#c0392b':monthlyLeft===1?'#e67e00':'#005356';
+        badges+=`<span style="display:inline-flex;align-items:center;gap:4px;background:#f5f0ff;border-radius:8px;padding:4px 10px;font-size:13px">
+          📅 Місяць: <strong style="color:${color}">${monthlyLeft}/${monthlyLimit}</strong>
+        </span>`;
+      }
+
       div.innerHTML=`
         <span class="abon-name">${val.name}</span>
-        <span class="abon-visits ${v<=1?'low':''} ${v===0?'zero':''}">${v}</span>
-        <span style="font-size:12px;color:#888">візит${v===1?'':'ів'}</span>
-        <button class="primary" style="padding:6px 14px;font-size:13px" onclick="abonVisit('${key}','${val.name}',${v})">✅ Відвідав</button>
-        <button class="danger" style="padding:6px 10px;font-size:13px" onclick="abonDelete('${key}','${val.name}')">🗑</button>`;
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${badges}</div>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          ${hasVisits?`<button class="primary" style="padding:6px 14px;font-size:13px" onclick="abonVisit('${key}','${val.name}',${visits},${monthlyLeft},${monthlyLimit})">✅ Відвідав</button>`:''}
+          <button class="danger" style="padding:6px 10px;font-size:13px" onclick="abonDelete('${key}','${val.name}')">🗑</button>
+        </div>`;
       wrap.appendChild(div);
     });
 }
 
 async function abonAdd(){
-  const name=($('abonName')?.value||'').trim();
-  const visits=parseInt($('abonVisits')?.value)||1;
+  const name    = ($('abonName')?.value||'').trim();
+  const visits  = parseInt($('abonVisits')?.value)||0;
+  const monthly = parseInt($('abonMonthly')?.value)||0;
   if(!name){setStatusAbon('Введіть імʼя');return;}
+  if(visits===0&&monthly===0){setStatusAbon('Введіть хоча б один тип візитів');return;}
   try{
-    await db.ref('abonements').push({name,visits});
+    await db.ref('abonements').push({
+      name, visits,
+      monthlyLimit: monthly,
+      monthlyUsed: 0,
+      lastReset: currentMonth
+    });
     $('abonName').value='';
-    $('abonVisits').value=1;
-    setStatusAbon(`✅ ${name} додано (${visits} візитів)`);
+    $('abonVisits').value=0;
+    $('abonMonthly').value=0;
+    setStatusAbon(`✅ ${name} додано`);
   }catch(e){setStatusAbon('Помилка: '+e.message);}
 }
 
-async function abonVisit(key,name,visits){
-  if(!confirm(`Відзначити відвідування для ${name}?\nЗалишиться: ${visits-1} візитів`)) return;
-  const newVisits=visits-1;
+async function abonVisit(key, name, visits, monthlyLeft, monthlyLimit){
+  // Визначаємо що використовувати — спочатку місячні, потім разові
+  const useMonthly = monthlyLeft>0;
+  const remaining  = useMonthly ? monthlyLeft-1 : visits-1;
+  const type       = useMonthly ? `місячних (залишиться ${remaining}/${monthlyLimit})` : `разових (залишиться ${remaining})`;
+
+  if(!confirm(`Відзначити відвідування для ${name}?\nВикористати: ${type}`)) return;
+
   try{
-    if(newVisits<=0){
-      if(confirm(`${name} використав останній візит. Видалити зі списку?`)){
-        await db.ref(`abonements/${key}`).remove();
-        setStatusAbon(`${name} видалено — всі візити використано`);
-      }
+    if(useMonthly){
+      const newUsed = (await db.ref(`abonements/${key}/monthlyUsed`).once('value')).val()||0;
+      await db.ref(`abonements/${key}`).update({monthlyUsed: newUsed+1});
     } else {
-      await db.ref(`abonements/${key}`).update({visits:newVisits});
-      setStatusAbon(`✅ ${name} — залишилось ${newVisits} візитів`);
+      const newVisits = visits-1;
+      if(newVisits<=0 && monthlyLimit===0){
+        if(confirm(`${name} використав останній разовий візит. Видалити зі списку?`)){
+          await db.ref(`abonements/${key}`).remove();
+          setStatusAbon(`${name} видалено — всі візити використано`);
+          return;
+        }
+      } else {
+        await db.ref(`abonements/${key}`).update({visits: newVisits});
+      }
     }
+    setStatusAbon(`✅ ${name} — відвідування відзначено`);
   }catch(e){setStatusAbon('Помилка: '+e.message);}
 }
 
@@ -734,9 +793,13 @@ async function abonDelete(key,name){
   }catch(e){setStatusAbon('Помилка: '+e.message);}
 }
 
-// Слухаємо зміни в Firebase
+// Слухаємо зміни + перевіряємо скид місяця
 db.ref('abonements').on('value', snap=>{
-  renderAbonList(snap.val());
+  const data = snap.val();
+  if(data){
+    Object.entries(data).forEach(([key,val])=>checkMonthlyReset(key,val));
+  }
+  renderAbonList(data);
 });
 
 // Ініціалізація — запускається після логіну
