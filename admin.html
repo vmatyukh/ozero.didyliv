@@ -141,6 +141,7 @@ button.danger{background:#fdd}
       <button id="connectBtn" class="warn">🔌 Підключити принтер</button>
       <button id="testBtn" class="secondary">🧪 Тестовий чек</button>
       <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
+      <button onclick="sendDailyReport()" class="secondary">📊 Звіт за день</button>
     </div>
   </fieldset>
   <h3>Превʼю чеків</h3>
@@ -429,6 +430,8 @@ $('printBtn').onclick=async()=>{
       await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
     }
     setStatus('✅ Надруковано: '+participants.length+' чек(и)');
+    // Зберігаємо статистику
+    await saveStats(participants);
     clearParticipants();
   }catch(e){setStatus('Помилка: '+e.message);}
 };
@@ -674,6 +677,81 @@ function renderFloatPreview(sectorMap){
     box.appendChild(card);
   });
 }
+
+/* ===== СТАТИСТИКА / ДЕННИЙ ЗВІТ ===== */
+const TGBOT = '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
+const TGADMINS = ['8459515447','592212598'];
+
+function tgDateStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+async function saveStats(pList){
+  const date=tgDateStr();
+  for(const p of pList){
+    await db.ref(`stats/${date}/spinning`).push({
+      amount: calcSum(p),
+      discount: p.discount,
+      inventar: p.inventar,
+      pidsak: p.pidsak,
+      instrument: p.instrument,
+      time: nowStr()
+    });
+  }
+}
+
+async function sendDailyReport(){
+  const date=tgDateStr();
+  const snap=await db.ref(`stats/${date}/spinning`).once('value');
+  const data=snap.val();
+  if(!data){
+    setStatus('📊 Сьогодні ще не було квитків');
+    return;
+  }
+  const entries=Object.values(data);
+  const count=entries.length;
+  const total=entries.reduce((s,e)=>s+e.amount,0);
+  const discounts=entries.filter(e=>e.discount).length;
+  const inventars=entries.filter(e=>e.inventar).length;
+  const pidsaks=entries.filter(e=>e.pidsak).length;
+  const instruments=entries.filter(e=>e.instrument).length;
+
+  const [y,m,d]=date.split('-');
+  const msg=`📊 Звіт за ${d}.${m}.${y} — Спінінг\n\n`+
+    `👥 Людей: ${count}\n`+
+    `💰 Сума: ${total} грн\n`+
+    (discounts?`🎫 Пільга: ${discounts}\n`:'')+
+    (inventars?`🎣 Інвентар: ${inventars}\n`:'')+
+    (pidsaks?`🪣 Підсак: ${pidsaks}\n`:'')+
+    (instruments?`🔧 Інструмент: ${instruments}\n`:'');
+
+  for(const chat_id of TGADMINS){
+    await fetch(`https://api.telegram.org/bot${TGBOT}/sendMessage`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id, text:msg})
+    }).catch(()=>{});
+  }
+  setStatus('📊 Звіт надіслано в Telegram');
+}
+
+// Автоматичний звіт о 20:00
+(function scheduleReport(){
+  function msUntil20(){
+    const now=new Date();
+    const target=new Date(now);
+    target.setHours(20,0,0,0);
+    if(target<=now) target.setDate(target.getDate()+1);
+    return target-now;
+  }
+  function schedule(){
+    setTimeout(async()=>{
+      await sendDailyReport();
+      schedule(); // плануємо наступний день
+    }, msUntil20());
+  }
+  schedule();
+})();
 
 /* ===== АБОНЕМЕНТИ ===== */
 function setStatusAbon(t){const el=$('statusAbon');if(el)el.textContent=t;}
