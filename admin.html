@@ -81,6 +81,12 @@ button.danger{background:#fdd}
 .stats-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .stat-card{background:#e0f0f0;border-radius:10px;padding:10px 18px;font-size:13px;text-align:center}
 .stat-card strong{display:block;font-size:22px;color:#005356}
+/* Абонементи */
+.abon-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #eee;flex-wrap:wrap}
+.abon-name{flex:1;font-weight:600;font-size:15px}
+.abon-visits{font-size:22px;font-weight:700;color:#005356;min-width:32px;text-align:center}
+.abon-visits.low{color:#e67e00}
+.abon-visits.zero{color:#c0392b}
 </style>
 </head>
 <body>
@@ -114,6 +120,7 @@ button.danger{background:#fdd}
 <div class="tabs">
   <button class="tab-btn active" data-tab="spinning">🎣 Спінінг</button>
   <button class="tab-btn" data-tab="float">🪣 Поплавцеве</button>
+  <button class="tab-btn" data-tab="abonements">🎫 Абонементи</button>
 </div>
 
 <!-- ===== СПІНІНГ ===== -->
@@ -184,6 +191,30 @@ button.danger{background:#fdd}
   <h3>Превʼю чеків поплавцевого</h3>
   <div id="previewFloat" class="previewWrap"></div>
   <pre id="statusFloat"></pre>
+</div>
+
+<!-- ===== АБОНЕМЕНТИ ===== -->
+<div id="tab-abonements" class="tab-content">
+  <fieldset>
+    <legend>➕ Додати людину</legend>
+    <div class="row" style="align-items:flex-end;gap:10px">
+      <div style="flex:2">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Імʼя</label>
+        <input type="text" id="abonName" placeholder="Іван Петренко" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      </div>
+      <div style="flex:1">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Безкоштовних візитів</label>
+        <input type="number" id="abonVisits" min="1" max="99" value="1" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      </div>
+      <button class="primary" onclick="abonAdd()" style="white-space:nowrap">➕ Додати</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>🎫 Список абонементів</legend>
+    <div id="abonList"></div>
+  </fieldset>
+  <pre id="statusAbon"></pre>
 </div>
 
 <script>
@@ -639,6 +670,73 @@ function renderFloatPreview(sectorMap){
     box.appendChild(card);
   });
 }
+
+/* ===== АБОНЕМЕНТИ ===== */
+function setStatusAbon(t){const el=$('statusAbon');if(el)el.textContent=t;}
+
+function renderAbonList(data){
+  const wrap=$('abonList');
+  if(!wrap) return;
+  if(!data||Object.keys(data).length===0){
+    wrap.innerHTML='<p style="color:#888;font-size:13px;padding:8px 0">Список порожній</p>';
+    return;
+  }
+  wrap.innerHTML='';
+  Object.entries(data)
+    .sort((a,b)=>a[1].name.localeCompare(b[1].name,'uk'))
+    .forEach(([key,val])=>{
+      const v=val.visits||0;
+      const div=document.createElement('div');
+      div.className='abon-item';
+      div.innerHTML=`
+        <span class="abon-name">${val.name}</span>
+        <span class="abon-visits ${v<=1?'low':''} ${v===0?'zero':''}">${v}</span>
+        <span style="font-size:12px;color:#888">візит${v===1?'':'ів'}</span>
+        <button class="primary" style="padding:6px 14px;font-size:13px" onclick="abonVisit('${key}','${val.name}',${v})">✅ Відвідав</button>
+        <button class="danger" style="padding:6px 10px;font-size:13px" onclick="abonDelete('${key}','${val.name}')">🗑</button>`;
+      wrap.appendChild(div);
+    });
+}
+
+async function abonAdd(){
+  const name=($('abonName')?.value||'').trim();
+  const visits=parseInt($('abonVisits')?.value)||1;
+  if(!name){setStatusAbon('Введіть імʼя');return;}
+  try{
+    await db.ref('abonements').push({name,visits});
+    $('abonName').value='';
+    $('abonVisits').value=1;
+    setStatusAbon(`✅ ${name} додано (${visits} візитів)`);
+  }catch(e){setStatusAbon('Помилка: '+e.message);}
+}
+
+async function abonVisit(key,name,visits){
+  const newVisits=visits-1;
+  try{
+    if(newVisits<=0){
+      if(confirm(`${name} використав останній візит. Видалити зі списку?`)){
+        await db.ref(`abonements/${key}`).remove();
+        setStatusAbon(`${name} видалено — всі візити використано`);
+      }
+    } else {
+      await db.ref(`abonements/${key}`).update({visits:newVisits});
+      setStatusAbon(`✅ ${name} — залишилось ${newVisits} візитів`);
+    }
+  }catch(e){setStatusAbon('Помилка: '+e.message);}
+}
+
+async function abonDelete(key,name){
+  if(!confirm(`Видалити ${name} зі списку?`)) return;
+  try{
+    await db.ref(`abonements/${key}`).remove();
+    setStatusAbon(`${name} видалено`);
+  }catch(e){setStatusAbon('Помилка: '+e.message);}
+}
+
+// Слухаємо зміни в Firebase
+db.ref('abonements').on('value', snap=>{
+  renderAbonList(snap.val());
+});
 
 // Ініціалізація — запускається після логіну
 function initAdmin(){
