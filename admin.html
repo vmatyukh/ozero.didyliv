@@ -418,8 +418,10 @@ $('testBtnF').onclick=async()=>{
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 };
 $('printBtn').onclick=async()=>{
+  if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
+  // Зберігаємо статистику одразу
+  await saveStats(participants).catch(()=>{});
   try{
-    if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
     await connect(true);
     const logoBytes=await logoRaster();
     for(const p of participants){
@@ -430,10 +432,11 @@ $('printBtn').onclick=async()=>{
       await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
     }
     setStatus('✅ Надруковано: '+participants.length+' чек(и)');
-    // Зберігаємо статистику
-    await saveStats(participants);
     clearParticipants();
-  }catch(e){setStatus('Помилка: '+e.message);}
+  }catch(e){
+    setStatus('⚠️ Статистику збережено, але помилка друку: '+e.message);
+    // Не очищаємо список — адмін може спробувати ще раз
+  }
 };
 
 /* ===== ПОПЛАВЦЕВЕ — Firebase ===== */
