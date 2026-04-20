@@ -701,12 +701,34 @@ async function saveStats(pList){
   }
 }
 
-async function sendDailyReport(){
-  const date=tgDateStr();
-  const snap=await db.ref(`stats/${date}/spinning`).once('value');
+async function sendDailyReport(dateStr){
+  if(!dateStr){
+    // Показуємо інпут з датою
+    const el = document.getElementById('reportDateInput');
+    if(el){ el.style.display = el.style.display==='none'?'flex':'none'; return; }
+    // Створюємо якщо немає
+    const wrap = document.createElement('div');
+    wrap.id='reportDateInput';
+    wrap.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap';
+    wrap.innerHTML=`
+      <input type="date" id="reportDate" value="${tgDateStr()}"
+        style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      <button class="primary" style="padding:8px 14px;font-size:13px" onclick="sendDailyReport(document.getElementById('reportDate').value)">
+        📤 Надіслати
+      </button>
+      <button class="secondary" style="padding:8px 14px;font-size:13px" onclick="document.getElementById('reportDateInput').style.display='none'">
+        Скасувати
+      </button>`;
+    document.getElementById('status').after(wrap);
+    return;
+  }
+  // Ховаємо інпут після відправки
+  const el=document.getElementById('reportDateInput');
+  if(el) el.style.display='none';
+  const snap=await db.ref(`stats/${dateStr}/spinning`).once('value');
   const data=snap.val();
   if(!data){
-    setStatus('📊 Сьогодні ще не було квитків');
+    setStatus(`📊 За ${dateStr} квитків не було`);
     return;
   }
   const entries=Object.values(data);
@@ -717,7 +739,7 @@ async function sendDailyReport(){
   const pidsaks=entries.filter(e=>e.pidsak).length;
   const instruments=entries.filter(e=>e.instrument).length;
 
-  const [y,m,d]=date.split('-');
+  const [y,m,d]=dateStr.split('-');
   const msg=`📊 Звіт за ${d}.${m}.${y} — Спінінг\n\n`+
     `👥 Людей: ${count}\n`+
     `💰 Сума: ${total} грн\n`+
@@ -732,26 +754,8 @@ async function sendDailyReport(){
       body:JSON.stringify({chat_id, text:msg})
     }).catch(()=>{});
   }
-  setStatus('📊 Звіт надіслано в Telegram');
+  setStatus(`📊 Звіт за ${d}.${m}.${y} надіслано в Telegram`);
 }
-
-// Автоматичний звіт о 20:00
-(function scheduleReport(){
-  function msUntil20(){
-    const now=new Date();
-    const target=new Date(now);
-    target.setHours(20,0,0,0);
-    if(target<=now) target.setDate(target.getDate()+1);
-    return target-now;
-  }
-  function schedule(){
-    setTimeout(async()=>{
-      await sendDailyReport();
-      schedule(); // плануємо наступний день
-    }, msUntil20());
-  }
-  schedule();
-})();
 
 /* ===== АБОНЕМЕНТИ ===== */
 function setStatusAbon(t){const el=$('statusAbon');if(el)el.textContent=t;}
