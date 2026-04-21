@@ -2,7 +2,7 @@ name: Daily Spinning Report
 
 on:
   schedule:
-    - cron: '0 18 * * *'  # 18:00 UTC = 20:00 Київ (UTC+2)
+    - cron: '0 18 * * *'  # 18:00 UTC = 20:00 Київ (UTC+2, літо UTC+3)
   workflow_dispatch:       # також можна запустити вручну
 
 jobs:
@@ -52,32 +52,47 @@ jobs:
           }
 
           async function main(){
-            // Читаємо статистику з Firebase
             const dbUrl = process.env.FIREBASE_DB_URL.replace(/\/$/, '');
-            const snap = await httpsGet(`${dbUrl}/stats/${dateStr}/spinning.json?auth=${process.env.FIREBASE_API_KEY}`);
+            const snap     = await httpsGet(`${dbUrl}/stats/${dateStr}/spinning.json`);
+            const snapAbon = await httpsGet(`${dbUrl}/stats/${dateStr}/abonements.json`);
 
             const botToken = process.env.TELEGRAM_BOT_TOKEN;
             const adminIds = process.env.TELEGRAM_ADMIN_IDS.split(',');
 
-            let msg;
-            if(!snap || snap.error){
-              msg = `📊 Звіт за ${d}.${m}.${y} — Спінінг\n\n😴 Сьогодні квитків не було`;
-            } else {
-              const entries = Object.values(snap);
-              const count = entries.length;
-              const total = entries.reduce((s,e)=>s+(e.amount||0), 0);
+            const entries     = (snap&&!snap.error)         ? Object.values(snap)     : [];
+            const abonEntries = (snapAbon&&!snapAbon.error) ? Object.values(snapAbon) : [];
+
+            let msg = `📊 Звіт за ${d}.${m}.${y}\n\n`;
+
+            if(entries.length>0){
+              const count      = entries.length;
+              const total      = entries.reduce((s,e)=>s+(e.amount||0),0);
               const discounts  = entries.filter(e=>e.discount).length;
               const inventars  = entries.filter(e=>e.inventar).length;
               const pidsaks    = entries.filter(e=>e.pidsak).length;
               const instruments= entries.filter(e=>e.instrument).length;
-
-              msg = `📊 Звіт за ${d}.${m}.${y} — Спінінг\n\n`+
+              msg+=`🎣 Спінінг\n`+
                 `👥 Людей: ${count}\n`+
                 `💰 Сума: ${total} грн\n`+
-                (discounts  ? `🎫 Пільга: ${discounts}\n`   : '')+
-                (inventars  ? `🎣 Інвентар: ${inventars}\n` : '')+
-                (pidsaks    ? `🪣 Підсак: ${pidsaks}\n`     : '')+
-                (instruments? `🔧 Інструмент: ${instruments}\n`: '');
+                (discounts  ?`🎫 Пільга: ${discounts}\n`  :'')+
+                (inventars  ?`🎣 Інвентар: ${inventars}\n`:'')+
+                (pidsaks    ?`🪣 Підсак: ${pidsaks}\n`    :'')+
+                (instruments?`🔧 Інструмент: ${instruments}\n`:'')+'\n';
+            } else {
+              msg+=`🎣 Спінінг: не було\n\n`;
+            }
+
+            if(abonEntries.length>0){
+              const abonMonthly = abonEntries.filter(e=>e.type==='monthly').length;
+              const abonSingle  = abonEntries.filter(e=>e.type==='single').length;
+              const names = [...new Set(abonEntries.map(e=>e.name))].join(', ');
+              msg+=`🎫 Абонементи\n`+
+                `👥 Відвідали: ${abonEntries.length}\n`+
+                (abonMonthly?`📅 Місячних: ${abonMonthly}\n`:'')+
+                (abonSingle ?`🎟 Разових: ${abonSingle}\n` :'')+
+                `👤 ${names}`;
+            } else {
+              msg+=`🎫 Абонементи: не було`;
             }
 
             for(const chat_id of adminIds){

@@ -729,12 +729,15 @@ async function sendDailyReport(dateStr){
   const el=document.getElementById('reportDateInput');
   if(el) el.style.display='none';
   const snap=await db.ref(`stats/${dateStr}/spinning`).once('value');
+  const snapAbon=await db.ref(`stats/${dateStr}/abonements`).once('value');
   const data=snap.val();
-  if(!data){
-    setStatus(`📊 За ${dateStr} квитків не було`);
+  const dataAbon=snapAbon.val();
+
+  if(!data && !dataAbon){
+    setStatus(`📊 За ${dateStr} відвідувань не було`);
     return;
   }
-  const entries=Object.values(data);
+  const entries=data?Object.values(data):[];
   const count=entries.length;
   const total=entries.reduce((s,e)=>s+e.amount,0);
   const discounts=entries.filter(e=>e.discount).length;
@@ -742,14 +745,37 @@ async function sendDailyReport(dateStr){
   const pidsaks=entries.filter(e=>e.pidsak).length;
   const instruments=entries.filter(e=>e.instrument).length;
 
+  const abonEntries=dataAbon?Object.values(dataAbon):[];
+  const abonCount=abonEntries.length;
+  const abonMonthly=abonEntries.filter(e=>e.type==='monthly').length;
+  const abonSingle=abonEntries.filter(e=>e.type==='single').length;
+
   const [y,m,d]=dateStr.split('-');
-  const msg=`📊 Звіт за ${d}.${m}.${y} — Спінінг\n\n`+
-    `👥 Людей: ${count}\n`+
-    `💰 Сума: ${total} грн\n`+
-    (discounts?`🎫 Пільга: ${discounts}\n`:'')+
-    (inventars?`🎣 Інвентар: ${inventars}\n`:'')+
-    (pidsaks?`🪣 Підсак: ${pidsaks}\n`:'')+
-    (instruments?`🔧 Інструмент: ${instruments}\n`:'');
+  let msg=`📊 Звіт за ${d}.${m}.${y}\n\n`;
+
+  if(count>0){
+    msg+=`🎣 Спінінг\n`+
+      `👥 Людей: ${count}\n`+
+      `💰 Сума: ${total} грн\n`+
+      (discounts  ? `🎫 Пільга: ${discounts}\n`   : '')+
+      (inventars  ? `🎣 Інвентар: ${inventars}\n` : '')+
+      (pidsaks    ? `🪣 Підсак: ${pidsaks}\n`     : '')+
+      (instruments? `🔧 Інструмент: ${instruments}\n`: '')+'\n';
+  } else {
+    msg+=`🎣 Спінінг: не було\n\n`;
+  }
+
+  if(abonCount>0){
+    msg+=`🎫 Абонементи\n`+
+      `👥 Відвідали: ${abonCount}\n`+
+      (abonMonthly? `📅 Місячних: ${abonMonthly}\n`:'')+
+      (abonSingle ? `🎟 Разових: ${abonSingle}\n` :'');
+    // Список імен
+    const names=[...new Set(abonEntries.map(e=>e.name))].join(', ');
+    msg+=`👤 ${names}\n`;
+  } else {
+    msg+=`🎫 Абонементи: не було`;
+  }
 
   for(const chat_id of TGADMINS){
     await fetch(`https://api.telegram.org/bot${TGBOT}/sendMessage`,{
@@ -843,7 +869,6 @@ async function abonAdd(){
 }
 
 async function abonVisit(key, name, visits, monthlyLeft, monthlyLimit){
-  // Визначаємо що використовувати — спочатку місячні, потім разові
   const useMonthly = monthlyLeft>0;
   const remaining  = useMonthly ? monthlyLeft-1 : visits-1;
   const type       = useMonthly ? `місячних (залишиться ${remaining}/${monthlyLimit})` : `разових (залишиться ${remaining})`;
@@ -851,6 +876,11 @@ async function abonVisit(key, name, visits, monthlyLeft, monthlyLimit){
   if(!confirm(`Відзначити відвідування для ${name}?\nВикористати: ${type}`)) return;
 
   try{
+    // Зберігаємо статистику
+    await db.ref(`stats/${tgDateStr()}/abonements`).push({
+      name, type: useMonthly ? 'monthly' : 'single', time: nowStr()
+    });
+
     if(useMonthly){
       const newUsed = (await db.ref(`abonements/${key}/monthlyUsed`).once('value')).val()||0;
       await db.ref(`abonements/${key}`).update({monthlyUsed: newUsed+1});
@@ -860,14 +890,39 @@ async function abonVisit(key, name, visits, monthlyLeft, monthlyLimit){
         if(confirm(`${name} використав останній разовий візит. Видалити зі списку?`)){
           await db.ref(`abonements/${key}`).remove();
           setStatusAbon(`${name} видалено — всі візити використано`);
-          return;
         }
       } else {
         await db.ref(`abonements/${key}`).update({visits: newVisits});
       }
     }
+
+    // Друкуємо чек
+    await printAbonTicket(name, useMonthly ? 'Місячний абонемент' : 'Разовий абонемент', remaining, useMonthly ? monthlyLimit : null);
     setStatusAbon(`✅ ${name} — відвідування відзначено`);
   }catch(e){setStatusAbon('Помилка: '+e.message);}
+}
+
+async function printAbonTicket(name, type, remaining, limit){
+  try{
+    await connect(true);
+    const logoBytes = await logoRaster();
+    const lines = [
+      `Дата: ${nowStr()}`,
+      '—————————————————',
+      'Абонемент — Спінінг',
+      `${type}`,
+      `Рибалка: ${name}`,
+      `Залишилось: ${remaining}${limit?'/'+limit:''}`,
+      '—————————————————',
+      'Гарного кльову!',
+    ];
+    const tr = textBlockRaster(lines,{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+    const li = textBlockRaster(['——————————————'],{center:true});
+    const qr = await qrRaster();
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
+  }catch(e){
+    setStatusAbon('⚠️ Відвідування збережено, але помилка друку: '+e.message);
+  }
 }
 
 async function abonDelete(key,name){
