@@ -81,6 +81,12 @@ button.danger{background:#fdd}
 .stats-bar{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .stat-card{background:#e0f0f0;border-radius:10px;padding:10px 18px;font-size:13px;text-align:center}
 .stat-card strong{display:block;font-size:22px;color:#005356}
+/* Таблиця статистики спінінгу */
+.spinning-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.spinning-table th{background:#e0f0f0;padding:7px 10px;text-align:left;font-weight:600;border-bottom:2px solid #ccc}
+.spinning-table td{padding:7px 10px;border-bottom:1px solid #eee}
+.spinning-table tr:last-child td{border-bottom:none}
+.spinning-table .total-row td{font-weight:700;background:#f5f5f5;border-top:2px solid #ccc}
 /* Абонементи */
 .abon-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #eee;flex-wrap:wrap}
 .abon-name{flex:1;font-weight:600;font-size:15px}
@@ -147,6 +153,17 @@ button.danger{background:#fdd}
   <h3>Превʼю чеків</h3>
   <div id="preview" class="previewWrap"></div>
   <pre id="status"></pre>
+
+  <!-- Таблиця за сьогодні -->
+  <fieldset style="margin-top:16px">
+    <legend id="spinningStatsLegend">📋 Сьогодні надруковано</legend>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <input type="date" id="statsDate" style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      <button onclick="loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">🔍 Показати</button>
+      <button onclick="document.getElementById('statsDate').value=tgDateStr();loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">Сьогодні</button>
+    </div>
+    <div id="spinningStatsTable"></div>
+  </fieldset>
 </div>
 
 <!-- ===== ПОПЛАВЦЕВЕ ===== -->
@@ -786,6 +803,138 @@ async function sendDailyReport(dateStr){
   setStatus(`📊 Звіт за ${d}.${m}.${y} надіслано в Telegram`);
 }
 
+/* ===== ТАБЛИЦЯ СТАТИСТИКИ СПІНІНГУ ===== */
+function renderSpinningStats(data, date){
+  const wrap = document.getElementById('spinningStatsTable');
+  const legend = document.getElementById('spinningStatsLegend');
+  if(!wrap) return;
+
+  const d = date || tgDateStr();
+  const [y,m,day] = d.split('-');
+  if(legend) legend.textContent=`📋 Надруковано за ${day}.${m}.${y}`;
+
+  if(!data||Object.keys(data).length===0){
+    wrap.innerHTML='<p style="color:#888;font-size:13px;padding:8px 0">Сьогодні ще нічого не надруковано</p>';
+    return;
+  }
+
+  const entries = Object.entries(data);
+  const total = entries.reduce((s,[,e])=>s+(e.amount||0),0);
+
+  const table = document.createElement('table');
+  table.className='spinning-table';
+  table.innerHTML=`<thead><tr>
+    <th>#</th><th>Час</th><th>Сума</th>
+    <th>Пільга</th><th>Інвентар</th><th>Підсак</th><th>Інстр.</th><th></th>
+  </tr></thead>`;
+
+  const tbody = document.createElement('tbody');
+  entries.forEach(([key,e],i)=>{
+    const tr = document.createElement('tr');
+    tr.id = `srow_${key}`;
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td>${e.time||'—'}</td>
+      <td>${e.amount||0} грн</td>
+      <td>${e.discount?'✅':'—'}</td>
+      <td>${e.inventar?'✅':'—'}</td>
+      <td>${e.pidsak?'✅':'—'}</td>
+      <td>${e.instrument?'✅':'—'}</td>
+      <td style="white-space:nowrap">
+        <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#eef;cursor:pointer">✏️</button>
+        <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">🗑</button>
+      </td>`;
+    const [editBtn, delBtn] = tr.querySelectorAll('button');
+    editBtn.onclick = ()=> editStatRow(key, e);
+    delBtn.onclick  = ()=> deleteStatRow(key);
+    tbody.appendChild(tr);
+  });
+
+  // Підсумковий рядок
+  const tfoot = document.createElement('tr');
+  tfoot.className='total-row';
+  tfoot.innerHTML=`
+    <td colspan="2">Разом: ${entries.length} чол.</td>
+    <td>${total} грн</td>
+    <td>${entries.filter(([,e])=>e.discount).length||'—'}</td>
+    <td>${entries.filter(([,e])=>e.inventar).length||'—'}</td>
+    <td>${entries.filter(([,e])=>e.pidsak).length||'—'}</td>
+    <td>${entries.filter(([,e])=>e.instrument).length||'—'}</td>
+    <td></td>`;
+  tbody.appendChild(tfoot);
+  table.appendChild(tbody);
+  wrap.innerHTML='';
+  wrap.appendChild(table);
+}
+
+function getStatsDate(){
+  return document.getElementById('statsDate')?.value || tgDateStr();
+}
+
+async function deleteStatRow(key){
+  if(!confirm('Видалити цей запис?')) return;
+  try{
+    await db.ref(`stats/${getStatsDate()}/spinning/${key}`).remove();
+  }catch(e){setStatus('Помилка: '+e.message);}
+}
+
+function editStatRow(key, e){
+  const row = document.getElementById(`srow_${key}`);
+  if(!row) return;
+  row.innerHTML=`
+    <td colspan="7" style="padding:8px;background:#f9f9f9">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <label style="font-size:13px"><input type="checkbox" id="ed_discount" ${e.discount?'checked':''}> Пільга</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_inventar" ${e.inventar?'checked':''}> Інвентар</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_pidsak"   ${e.pidsak  ?'checked':''}> Підсак</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_instr"    ${e.instrument?'checked':''}> Інстр.</label>
+        <button id="ed_save_btn" style="padding:4px 12px;font-size:13px;border:none;border-radius:6px;background:#005356;color:#fff;cursor:pointer">💾 Зберегти</button>
+        <button id="ed_cancel_btn" style="padding:4px 10px;font-size:13px;border:none;border-radius:6px;background:#eee;cursor:pointer">✖</button>
+      </div>
+    </td><td></td>`;
+  row.querySelector('#ed_save_btn').onclick   = ()=> saveStatRow(key);
+  row.querySelector('#ed_cancel_btn').onclick = ()=> db.ref(`stats/${getStatsDate()}/spinning`).once('value', s=>renderSpinningStats(s.val(), getStatsDate()));
+}
+
+async function saveStatRow(key){
+  const discount   = document.getElementById('ed_discount')?.checked||false;
+  const inventar   = document.getElementById('ed_inventar')?.checked||false;
+  const pidsak     = document.getElementById('ed_pidsak')  ?.checked||false;
+  const instrument = document.getElementById('ed_instr')   ?.checked||false;
+
+  let amount = PRICE_BASE;
+  if(inventar)   amount += PRICE_INVENTAR;
+  if(pidsak)     amount += PRICE_PIDSAK;
+  if(instrument) amount += PRICE_INSTRUMENT;
+  if(discount)   amount  = Math.round(amount/2);
+
+  try{
+    await db.ref(`stats/${getStatsDate()}/spinning/${key}`).update({
+      discount, inventar, pidsak, instrument, amount
+    });
+  }catch(e){setStatus('Помилка: '+e.message);}
+}
+
+let statsDateUnsubscribe = null;
+
+function loadSpinningStats(){
+  const dateEl = document.getElementById('statsDate');
+  const date = dateEl ? dateEl.value : tgDateStr();
+  // Відписуємось від попереднього listener
+  if(statsDateUnsubscribe){
+    statsDateUnsubscribe.ref.off('value', statsDateUnsubscribe.fn);
+    statsDateUnsubscribe = null;
+  }
+  const ref = db.ref(`stats/${date}/spinning`);
+  const fn = ref.on('value', snap => renderSpinningStats(snap.val(), date));
+  statsDateUnsubscribe = {ref, fn};
+}
+
+// Слухаємо статистику спінінгу в реалтаймі
+db.ref(`stats/${tgDateStr()}/spinning`).on('value', snap=>{
+  renderSpinningStats(snap.val(), tgDateStr());
+});
+
 /* ===== АБОНЕМЕНТИ ===== */
 function setStatusAbon(t){const el=$('statusAbon');if(el)el.textContent=t;}
 
@@ -946,6 +1095,10 @@ db.ref('abonements').on('value', snap=>{
 function initAdmin(){
   loadFloatBookings();
   addParticipant();
+  // Встановлюємо сьогодні в полі дати статистики
+  const statsDateEl = document.getElementById('statsDate');
+  if(statsDateEl) statsDateEl.value = tgDateStr();
+  loadSpinningStats();
 }
 
 /* ===== Firebase Auth ===== */
@@ -967,9 +1120,11 @@ async function doLogin(){
   const password = document.getElementById('loginPassword').value;
   const errEl    = document.getElementById('loginErr');
   errEl.style.display='none';
+  errEl.textContent='Невірний email або пароль';
   try{
     await auth.signInWithEmailAndPassword(email, password);
   }catch(e){
+    errEl.textContent = e.message || 'Помилка входу';
     errEl.style.display='block';
   }
 }
