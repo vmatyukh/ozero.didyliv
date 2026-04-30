@@ -219,9 +219,9 @@ const MONTHS_UA = ['січня','лютого','березня','квітня','
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:500 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:500 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:700 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:300 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:300 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:500 },
   ]
 };
 
@@ -395,7 +395,6 @@ function updateSummary(){
     <strong>📅 Дата:</strong> ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}<br>
     <strong>🕐 Сесія:</strong> ${SESSION_LABELS[selectedSession]}<br>
     <strong>🎣 Сектор:</strong> ${selectedSector}<br>
-    <strong>🐟 Включено:</strong> 2 кг риби<br>
     <strong>💰 Сума:</strong> ${SESSION_PRICES[selectedSession]} грн`;
 }
 

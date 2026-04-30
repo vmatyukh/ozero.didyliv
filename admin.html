@@ -462,9 +462,9 @@ $('printBtn').onclick=async()=>{
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:500 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:500 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:700 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:300 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:300 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:500 },
   ]
 };
 
@@ -656,7 +656,6 @@ async function adminPrint(sectorNum){
       `Сесія: ${SESSION_LABELS[floatSession]}`,
       `Сектор: ${sectorNum}`,
       `День: ${d}.${m}.${y}`,
-      'Включено: 2 кг риби',
       `Сума: ${SESSION_PRICES[floatSession]} грн`,
       '—————————————————',
       'Гарного кльову!',
@@ -686,7 +685,6 @@ function renderFloatPreview(sectorMap){
       `Сесія: ${SESSION_LABELS[floatSession]}`,
       `Сектор: ${b.sector}`,
       `Імʼя: ${b.name||'—'}`,
-      'Включено: 2 кг риби',
       `Сума: ${SESSION_PRICES[floatSession]} грн`,
       '—————————————————',
       'Гарного кльову!',
