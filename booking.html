@@ -442,12 +442,11 @@ async function submitBooking(){
       `👤 Імʼя: ${name}\n`+
       `📞 Телефон: ${phone}`;
     const sendNotification = (chat_id) => fetch(
-      `https://api.telegram.org/bot8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY/sendMessage`,
+      `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,
       { method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({chat_id, text:msg}) }
     ).catch(()=>{});
-    sendNotification('8459515447');
-    sendNotification('592212598');
+    (TG_ADMIN_IDS||[]).forEach(id => sendNotification(id.trim()));
 
     showLoading(false);
     document.getElementById('successDetails').textContent=
