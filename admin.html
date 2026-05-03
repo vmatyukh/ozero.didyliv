@@ -218,6 +218,12 @@ button.danger{background:#fdd}
   <h3>Превʼю чеків поплавцевого</h3>
   <div id="previewFloat" class="previewWrap"></div>
   <pre id="statusFloat"></pre>
+
+  <!-- Всі бронювання за день -->
+  <fieldset style="margin-top:16px">
+    <legend id="allBookingsLegend">📋 Всі бронювання за день</legend>
+    <div id="allBookingsTable"></div>
+  </fieldset>
 </div>
 
 <!-- ===== АБОНЕМЕНТИ ===== -->
@@ -496,9 +502,9 @@ function loadSectorAvailability(){
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:300 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:300 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:500 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:350 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:350 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:600 },
   ]
 };
 
@@ -584,6 +590,7 @@ function loadFloatBookings(){
         else floatBlocked[sector]={session:val.session, key:val.key};
       });
       renderFloatTable();
+      renderAllBookings();
     });
     floatUnsubs.push({ref,fn});
   });
@@ -1014,6 +1021,82 @@ function loadSpinningStats(){
 db.ref(`stats/${tgDateStr()}/spinning`).on('value', snap=>{
   renderSpinningStats(snap.val(), tgDateStr());
 });
+
+/* ===== ВСІ БРОНЮВАННЯ ЗА ДЕНЬ ===== */
+function renderAllBookings(){
+  const wrap = document.getElementById('allBookingsTable');
+  const legend = document.getElementById('allBookingsLegend');
+  if(!wrap) return;
+
+  const date = $('floatDate').value;
+  const [y,m,d] = date.split('-');
+  if(legend) legend.textContent = `📋 Всі бронювання за ${d}.${m}.${y}`;
+
+  db.ref(`bookings/${date}`).once('value', snap=>{
+    const data = snap.val();
+    if(!data){
+      wrap.innerHTML='<p style="color:#888;font-size:13px;padding:8px 0">Бронювань немає</p>';
+      return;
+    }
+
+    const rows = [];
+    CONFIG.sessions.forEach(s=>{
+      const sessionData = data[s.key];
+      if(!sessionData) return;
+      Object.entries(sessionData).forEach(([key, b])=>{
+        rows.push({...b, key, sessionKey: s.key, sessionName: s.name, sessionTime: s.time});
+      });
+    });
+
+    if(!rows.length){
+      wrap.innerHTML='<p style="color:#888;font-size:13px;padding:8px 0">Бронювань немає</p>';
+      return;
+    }
+
+    rows.sort((a,b)=> a.sector - b.sector);
+
+    const table = document.createElement('table');
+    table.className='spinning-table';
+    table.innerHTML=`<thead><tr>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th></th>
+    </tr></thead>`;
+    const tbody = document.createElement('tbody');
+
+    rows.forEach(b=>{
+      const tr = document.createElement('tr');
+      const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}) : '—';
+      tr.innerHTML=`
+        <td><strong>Сектор ${b.sector}</strong></td>
+        <td>${b.sessionName}<br><span style="font-size:11px;color:#888">${b.sessionTime}</span></td>
+        <td>${b.name||'—'}</td>
+        <td>${b.phone||'—'}</td>
+        <td style="font-size:12px">${createdAt}</td>
+        <td>${b.price||SESSION_PRICES[b.sessionKey]||'—'} грн</td>
+        <td>
+          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>
+        </td>`;
+      tr.querySelector('button').onclick = ()=>{
+        if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
+          db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
+            .then(()=>renderAllBookings())
+            .catch(e=>setStatusFloat('Помилка: '+e.message));
+        }
+      };
+      tbody.appendChild(tr);
+    });
+
+    // Підсумок
+    const total = rows.reduce((s,b)=>s+(b.price||SESSION_PRICES[b.sessionKey]||0),0);
+    const tfoot = document.createElement('tr');
+    tfoot.className='total-row';
+    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td>`;
+    tbody.appendChild(tfoot);
+
+    table.appendChild(tbody);
+    wrap.innerHTML='';
+    wrap.appendChild(table);
+  });
+}
 
 /* ===== АБОНЕМЕНТИ ===== */
 function setStatusAbon(t){const el=$('statusAbon');if(el)el.textContent=t;}
