@@ -257,21 +257,20 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   };
 });
 
-/* ===== СПІНІНГ ===== */
-const PRICE_BASE=400, PRICE_INVENTAR=200, PRICE_PIDSAK=100, PRICE_INSTRUMENT=100;
+const PRICE_BASE=400, PRICE_PIDSAK=100, PRICE_INSTRUMENT=100;
 let participants=[];
 
 function calcSum(p){
+  if(p.free) return 0;
   let s=PRICE_BASE;
-  if(p.inventar) s+=PRICE_INVENTAR;
-  if(p.pidsak)   s+=PRICE_PIDSAK;
+  if(p.pidsak)     s+=PRICE_PIDSAK;
   if(p.instrument) s+=PRICE_INSTRUMENT;
-  if(p.discount) s=Math.round(s/2);
+  if(p.discount)   s=Math.round(s/2);
   return s;
 }
 function addParticipant(){
   const id=participants.length?participants[participants.length-1].id+1:1;
-  participants.push({id,discount:false,inventar:false,pidsak:false,instrument:false});
+  participants.push({id,discount:false,pidsak:false,instrument:false,cardPayment:false,free:false});
   renderList();
 }
 function removeParticipant(){participants.pop();renderList();}
@@ -283,10 +282,11 @@ function renderList(){
     const row=document.createElement('div'); row.className='participant';
     row.innerHTML=`
       <span>#${p.id}</span>
+      <label><input type="checkbox" data-field="free" ${p.free?'checked':''}> 🆓 Безкоштовно</label>
       <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
-      <label><input type="checkbox" data-field="inventar" ${p.inventar?'checked':''}> Інвентар (+${PRICE_INVENTAR} грн)</label>
       <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
       <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
+      <label><input type="checkbox" data-field="cardPayment" ${p.cardPayment?'checked':''}> 💳 Картка</label>
       <span class="sum">${calcSum(p)} грн</span>`;
     row.querySelectorAll('input').forEach(inp=>{
       inp.onchange=e=>{
@@ -310,17 +310,22 @@ $('clear').onclick=clearParticipants;
 
 function buildPayload(p){
   return{lake:'Озеро Дідилів',type:'Спінінг (спортивна риболовля)',
-    inventar:p.inventar,pidsak:p.pidsak,instrument:p.instrument,
-    discount:p.discount,amount:calcSum(p),time:nowStr(),participantNo:p.id};
+    pidsak:p.pidsak,instrument:p.instrument,
+    discount:p.discount,cardPayment:p.cardPayment,free:p.free,
+    amount:calcSum(p),time:nowStr(),participantNo:p.id};
 }
 function buildTextLines(d){
   const r=[];
-  if(d.inventar) r.push(`Інвентар (+${PRICE_INVENTAR} грн)`);
-  if(d.pidsak)   r.push(`Підсак (+${PRICE_PIDSAK} грн)`);
+  if(d.pidsak)     r.push(`Підсак (+${PRICE_PIDSAK} грн)`);
   if(d.instrument) r.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
-  return[`Дата: ${d.time}`,'—————————————————','Квиток рибалки',`${d.type}`,
-    `Оренда: ${r.length?r.join(', '):'ні'}`,`Пільга: ${d.discount?'так (−50%)':'ні'}`,
-    `Сума: ${d.amount} грн`,'—————————————————','Гарного кльову!'];
+  return[`Дата: ${d.time}`,'—————————————————',
+    d.free?'Безкоштовний квиток':'Квиток рибалки',
+    `${d.type}`,
+    `Оренда: ${r.length?r.join(', '):'ні'}`,
+    d.free?'Безкоштовно (до 10 років)':`Пільга: ${d.discount?'так (−50%)':'ні'}`,
+    `Оплата: ${d.cardPayment?'💳 Картка':'готівка'}`,
+    `Сума: ${d.amount} грн`,
+    '—————————————————','Гарного кльову!'];
 }
 function buildQrText(){return 'https://t.me/ozero_didyliv';}
 
@@ -462,9 +467,9 @@ $('printBtn').onclick=async()=>{
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:350 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:350 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:600 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:300 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:300 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:500 },
   ]
 };
 
@@ -711,9 +716,10 @@ async function saveStats(pList){
     await db.ref(`stats/${date}/spinning`).push({
       amount: calcSum(p),
       discount: p.discount,
-      inventar: p.inventar,
       pidsak: p.pidsak,
       instrument: p.instrument,
+      cardPayment: p.cardPayment||false,
+      free: p.free||false,
       time: nowStr()
     });
   }
@@ -754,11 +760,14 @@ async function sendDailyReport(dateStr){
   }
   const entries=data?Object.values(data):[];
   const count=entries.length;
+  const freeCount=entries.filter(e=>e.free).length;
+  const paidCount=count-freeCount;
   const total=entries.reduce((s,e)=>s+e.amount,0);
   const discounts=entries.filter(e=>e.discount).length;
-  const inventars=entries.filter(e=>e.inventar).length;
   const pidsaks=entries.filter(e=>e.pidsak).length;
   const instruments=entries.filter(e=>e.instrument).length;
+  const cardPayments=entries.filter(e=>e.cardPayment).length;
+  const cashPayments=paidCount-cardPayments;
 
   const abonEntries=dataAbon?Object.values(dataAbon):[];
   const abonCount=abonEntries.length;
@@ -770,12 +779,13 @@ async function sendDailyReport(dateStr){
 
   if(count>0){
     msg+=`🎣 Спінінг\n`+
-      `👥 Людей: ${count}\n`+
+      `👥 Всього: ${count} (платних: ${paidCount}${freeCount?`, безкоштовних: ${freeCount}`:''})\n`+
       `💰 Сума: ${total} грн\n`+
-      (discounts  ? `🎫 Пільга: ${discounts}\n`   : '')+
-      (inventars  ? `🎣 Інвентар: ${inventars}\n` : '')+
-      (pidsaks    ? `🪣 Підсак: ${pidsaks}\n`     : '')+
-      (instruments? `🔧 Інструмент: ${instruments}\n`: '')+'\n';
+      (cardPayments ? `💳 Картка: ${cardPayments}\n`   : '')+
+      (cashPayments ? `💵 Готівка: ${cashPayments}\n`  : '')+
+      (discounts    ? `🎫 Пільга: ${discounts}\n`      : '')+
+      (pidsaks      ? `🪣 Підсак: ${pidsaks}\n`        : '')+
+      (instruments  ? `🔧 Інструмент: ${instruments}\n`: '')+'\n';
   } else {
     msg+=`🎣 Спінінг: не було\n\n`;
   }
@@ -785,7 +795,6 @@ async function sendDailyReport(dateStr){
       `👥 Відвідали: ${abonCount}\n`+
       (abonMonthly? `📅 Місячних: ${abonMonthly}\n`:'')+
       (abonSingle ? `🎟 Разових: ${abonSingle}\n` :'');
-    // Список імен
     const names=[...new Set(abonEntries.map(e=>e.name))].join(', ');
     msg+=`👤 ${names}\n`;
   } else {
@@ -823,21 +832,23 @@ function renderSpinningStats(data, date){
   table.className='spinning-table';
   table.innerHTML=`<thead><tr>
     <th>#</th><th>Час</th><th>Сума</th>
-    <th>Пільга</th><th>Інвентар</th><th>Підсак</th><th>Інстр.</th><th></th>
+    <th>Пільга</th><th>Підсак</th><th>Інстр.</th><th>💳</th><th>🆓</th><th></th>
   </tr></thead>`;
 
   const tbody = document.createElement('tbody');
   entries.forEach(([key,e],i)=>{
     const tr = document.createElement('tr');
     tr.id = `srow_${key}`;
+    if(e.free) tr.style.background='#f0fff0';
     tr.innerHTML=`
       <td>${i+1}</td>
       <td>${e.time||'—'}</td>
-      <td>${e.amount||0} грн</td>
+      <td>${e.free?'<span style="color:#2a7;font-weight:600">Безкоштовно</span>':(e.amount||0)+' грн'}</td>
       <td>${e.discount?'✅':'—'}</td>
-      <td>${e.inventar?'✅':'—'}</td>
       <td>${e.pidsak?'✅':'—'}</td>
       <td>${e.instrument?'✅':'—'}</td>
+      <td>${e.cardPayment?'💳':'—'}</td>
+      <td>${e.free?'🆓':'—'}</td>
       <td style="white-space:nowrap">
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#eef;cursor:pointer">✏️</button>
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">🗑</button>
@@ -848,16 +859,18 @@ function renderSpinningStats(data, date){
     tbody.appendChild(tr);
   });
 
-  // Підсумковий рядок
+  const freeCount = entries.filter(([,e])=>e.free).length;
+  const cardCount = entries.filter(([,e])=>e.cardPayment).length;
   const tfoot = document.createElement('tr');
   tfoot.className='total-row';
   tfoot.innerHTML=`
-    <td colspan="2">Разом: ${entries.length} чол.</td>
+    <td colspan="2">Всього: ${entries.length} (безкоштовних: ${freeCount})</td>
     <td>${total} грн</td>
     <td>${entries.filter(([,e])=>e.discount).length||'—'}</td>
-    <td>${entries.filter(([,e])=>e.inventar).length||'—'}</td>
     <td>${entries.filter(([,e])=>e.pidsak).length||'—'}</td>
     <td>${entries.filter(([,e])=>e.instrument).length||'—'}</td>
+    <td>${cardCount||'—'}</td>
+    <td>${freeCount||'—'}</td>
     <td></td>`;
   tbody.appendChild(tfoot);
   table.appendChild(tbody);
@@ -880,12 +893,13 @@ function editStatRow(key, e){
   const row = document.getElementById(`srow_${key}`);
   if(!row) return;
   row.innerHTML=`
-    <td colspan="7" style="padding:8px;background:#f9f9f9">
+    <td colspan="8" style="padding:8px;background:#f9f9f9">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <label style="font-size:13px"><input type="checkbox" id="ed_discount" ${e.discount?'checked':''}> Пільга</label>
-        <label style="font-size:13px"><input type="checkbox" id="ed_inventar" ${e.inventar?'checked':''}> Інвентар</label>
-        <label style="font-size:13px"><input type="checkbox" id="ed_pidsak"   ${e.pidsak  ?'checked':''}> Підсак</label>
-        <label style="font-size:13px"><input type="checkbox" id="ed_instr"    ${e.instrument?'checked':''}> Інстр.</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_free"     ${e.free       ?'checked':''}> 🆓 Безкоштовно</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_discount" ${e.discount   ?'checked':''}> Пільга</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_pidsak"   ${e.pidsak     ?'checked':''}> Підсак</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_instr"    ${e.instrument ?'checked':''}> Інстр.</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_card"     ${e.cardPayment?'checked':''}> 💳 Картка</label>
         <button id="ed_save_btn" style="padding:4px 12px;font-size:13px;border:none;border-radius:6px;background:#005356;color:#fff;cursor:pointer">💾 Зберегти</button>
         <button id="ed_cancel_btn" style="padding:4px 10px;font-size:13px;border:none;border-radius:6px;background:#eee;cursor:pointer">✖</button>
       </div>
@@ -895,20 +909,22 @@ function editStatRow(key, e){
 }
 
 async function saveStatRow(key){
+  const free       = document.getElementById('ed_free')    ?.checked||false;
   const discount   = document.getElementById('ed_discount')?.checked||false;
-  const inventar   = document.getElementById('ed_inventar')?.checked||false;
   const pidsak     = document.getElementById('ed_pidsak')  ?.checked||false;
   const instrument = document.getElementById('ed_instr')   ?.checked||false;
+  const cardPayment= document.getElementById('ed_card')    ?.checked||false;
 
-  let amount = PRICE_BASE;
-  if(inventar)   amount += PRICE_INVENTAR;
-  if(pidsak)     amount += PRICE_PIDSAK;
-  if(instrument) amount += PRICE_INSTRUMENT;
-  if(discount)   amount  = Math.round(amount/2);
+  let amount = free ? 0 : PRICE_BASE;
+  if(!free){
+    if(pidsak)     amount += PRICE_PIDSAK;
+    if(instrument) amount += PRICE_INSTRUMENT;
+    if(discount)   amount  = Math.round(amount/2);
+  }
 
   try{
     await db.ref(`stats/${getStatsDate()}/spinning/${key}`).update({
-      discount, inventar, pidsak, instrument, amount
+      free, discount, pidsak, instrument, cardPayment, amount
     });
   }catch(e){setStatus('Помилка: '+e.message);}
 }
