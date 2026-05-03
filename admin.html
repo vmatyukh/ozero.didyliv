@@ -514,6 +514,31 @@ $('printBtn').onclick=async()=>{
       const qr=await qrRaster();
       await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
     }
+    // Списуємо абонементи
+    for(const p of participants){
+      if(p.freeType==='abon' && p.abonKey){
+        const snap = await db.ref(`abonements/${p.abonKey}`).once('value');
+        const val = snap.val();
+        if(val){
+          const monthlyLeft = Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
+          const useMonthly = monthlyLeft>0;
+          if(useMonthly){
+            await db.ref(`abonements/${p.abonKey}`).update({monthlyUsed:(val.monthlyUsed||0)+1});
+          } else if((val.visits||0)>0){
+            const newVisits = (val.visits||0)-1;
+            if(newVisits<=0 && (val.monthlyLimit||0)===0){
+              await db.ref(`abonements/${p.abonKey}`).remove();
+            } else {
+              await db.ref(`abonements/${p.abonKey}`).update({visits:newVisits});
+            }
+          }
+          // Зберігаємо в статистику абонементів
+          await db.ref(`stats/${tgDateStr()}/abonements`).push({
+            name: p.abonName, type: useMonthly?'monthly':'single', time: nowStr()
+          });
+        }
+      }
+    }
     setStatus('✅ Надруковано: '+participants.length+' чек(и)');
     clearParticipants();
   }catch(e){
@@ -929,7 +954,7 @@ function renderSpinningStats(data, date){
   table.className='spinning-table';
   table.innerHTML=`<thead><tr>
     <th>#</th><th>Час</th><th>Сума</th>
-    <th>Пільга</th><th>Підсак</th><th>Інстр.</th><th>💳</th><th>🆓</th><th></th>
+    <th>Пільга</th><th>Підсак</th><th>Інстр.</th><th>💳</th><th>🆓 Тип</th><th></th>
   </tr></thead>`;
 
   const tbody = document.createElement('tbody');
@@ -937,6 +962,12 @@ function renderSpinningStats(data, date){
     const tr = document.createElement('tr');
     tr.id = `srow_${key}`;
     if(e.free) tr.style.background='#f0fff0';
+    const freeLabel = e.free
+      ? (e.freeType==='child'?'👦 Дитина'
+        :e.freeType==='cert'?'🎟 Сертифікат'
+        :e.freeType==='abon'?(e.abonName?`📋 ${e.abonName}`:'📋 Абонемент')
+        :'🆓')
+      : '—';
     tr.innerHTML=`
       <td>${i+1}</td>
       <td>${e.time||'—'}</td>
@@ -945,7 +976,7 @@ function renderSpinningStats(data, date){
       <td>${e.pidsak?'✅':'—'}</td>
       <td>${e.instrument?'✅':'—'}</td>
       <td>${e.cardPayment?'💳':'—'}</td>
-      <td>${e.free?'🆓':'—'}</td>
+      <td style="font-size:12px">${freeLabel}</td>
       <td style="white-space:nowrap">
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#eef;cursor:pointer">✏️</button>
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">🗑</button>
