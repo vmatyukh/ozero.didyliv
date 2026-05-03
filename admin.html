@@ -290,9 +290,9 @@ function renderList(){
     const row=document.createElement('div'); row.className='participant';
     row.innerHTML=`
       <span>#${p.id}</span>
-      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
       <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
+      <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="cardPayment" ${p.cardPayment?'checked':''}> 💳 Картка</label>
       <label><input type="checkbox" data-field="free" ${p.free?'checked':''}> 🆓 Безкоштовно</label>
       <span class="sum">${calcSum(p)} грн</span>`;
