@@ -249,6 +249,19 @@ let bookedSectors   = {};
 let unsubscribers   = [];
 let unavailableSectors = {};
 let availabilityData = {};
+let availabilityUnsub = null;
+
+function loadAvailability(){
+  const date = document.getElementById('inputDate').value;
+  if(availabilityUnsub){ availabilityUnsub.ref.off('value', availabilityUnsub.fn); }
+  if(!date){ availabilityData={}; updateUnavailable(); return; }
+  const ref = db.ref(`sectorAvailability/${date}`);
+  const fn = ref.on('value', snap=>{
+    availabilityData = snap.val() || {};
+    updateUnavailable();
+  });
+  availabilityUnsub = {ref, fn};
+}
 
 // Слухаємо доступність секторів від адміна
 db.ref('sectorAvailability').on('value', snap=>{
@@ -321,6 +334,7 @@ inputDate.onchange = e => {
   selectedSector = null;
   updateDateDisplay(e.target.value);
   if(isMobile) dateOverlay.style.display='flex';
+  loadAvailability();
   loadSectors();
   updateSummary();
 };
@@ -339,6 +353,7 @@ function selectSession(el){
   selectedSession = el.dataset.session;
   selectedSector  = null;
   updateUnavailable();
+  loadAvailability();
   loadSectors();
   updateSummary();
 }
@@ -597,6 +612,7 @@ window.isValidPhone = v => /^\+380\d{9}$/.test(v.replace(/\s/g,''));
 
 renderSectors({});
 updateSummary();
+loadAvailability();
 
 /* ===== Telegram Mini App ===== */
 const tg = window.Telegram?.WebApp;

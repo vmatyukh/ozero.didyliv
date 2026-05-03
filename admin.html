@@ -471,16 +471,24 @@ $('printBtn').onclick=async()=>{
 let sectorAvailabilityData = {};
 
 async function toggleSectorAvailability(sectorNum, available){
+  const date = $('floatDate').value;
   try{
-    await db.ref(`sectorAvailability/${floatSession}/${sectorNum}`).set(available ? null : false);
+    await db.ref(`sectorAvailability/${date}/${floatSession}/${sectorNum}`).set(available ? null : false);
   }catch(e){ console.error(e); }
 }
 
-// Слухаємо доступність секторів
-db.ref('sectorAvailability').on('value', snap=>{
-  sectorAvailabilityData = snap.val() || {};
-  renderFloatTable();
-});
+// Слухаємо доступність секторів для поточної дати
+let availUnsub = null;
+function loadSectorAvailability(){
+  const date = $('floatDate').value;
+  if(availUnsub){ availUnsub.ref.off('value', availUnsub.fn); }
+  const ref = db.ref(`sectorAvailability/${date}`);
+  const fn = ref.on('value', snap=>{
+    sectorAvailabilityData = snap.val() || {};
+    renderFloatTable();
+  });
+  availUnsub = {ref, fn};
+}
 
 /* ===== ПОПЛАВЦЕВЕ — Firebase ===== */
 /* ============================================================
@@ -554,6 +562,7 @@ function loadFloatBookings(){
   floatUnsubs=[];
   floatBookings={};
   floatBlocked={};
+  loadSectorAvailability();
 
   const sessions=conflictingSessions(floatSession);
   const combined={}; // sectorNum -> {session, key, ...data}
