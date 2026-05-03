@@ -1208,7 +1208,7 @@ function renderAbonList(data){
         <span class="abon-name">${val.name}</span>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${badges}</div>
         <div style="display:flex;gap:6px;margin-left:auto">
-          ${hasVisits?`<button class="primary" style="padding:6px 14px;font-size:13px" onclick="abonVisit('${key}','${val.name}',${visits},${monthlyLeft},${monthlyLimit})">✅ Відвідав</button>`:''}
+          <button class="secondary" style="padding:6px 14px;font-size:13px" onclick="abonEdit('${key}','${val.name}',${visits},${monthlyLimit})">✏️ Редагувати</button>
           <button class="danger" style="padding:6px 10px;font-size:13px" onclick="abonDelete('${key}','${val.name}')">🗑</button>
         </div>`;
       wrap.appendChild(div);
@@ -1290,6 +1290,20 @@ async function printAbonTicket(name, type, remaining, limit){
   }catch(e){
     setStatusAbon('⚠️ Відвідування збережено, але помилка друку: '+e.message);
   }
+}
+
+function abonEdit(key, name, visits, monthlyLimit){
+  const newName    = prompt('Імʼя:', name);
+  if(newName===null) return;
+  const newVisits  = parseInt(prompt('Разові візити:', visits)||0);
+  const newMonthly = parseInt(prompt('Місячний ліміт:', monthlyLimit)||0);
+  if(isNaN(newVisits)||isNaN(newMonthly)) return;
+  db.ref(`abonements/${key}`).update({
+    name: newName.trim()||name,
+    visits: newVisits,
+    monthlyLimit: newMonthly
+  }).then(()=>setStatusAbon(`✅ ${newName} оновлено`))
+    .catch(e=>setStatusAbon('Помилка: '+e.message));
 }
 
 async function abonDelete(key,name){
