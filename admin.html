@@ -768,10 +768,10 @@ async function sendDailyReport(dateStr){
       <button class="secondary" style="padding:8px 14px;font-size:13px" id="reportCancelBtn">
         Скасувати
       </button>`;
+    document.getElementById('status').after(wrap);
     document.getElementById('reportDate').onchange = e => setDateDisplay('reportDateDisplay', e.target.value);
     document.getElementById('reportSendBtn').onclick = ()=> sendDailyReport(document.getElementById('reportDate').value);
     document.getElementById('reportCancelBtn').onclick = ()=> document.getElementById('reportDateInput').style.display='none';
-    document.getElementById('status').after(wrap);
     return;
   }
   // Ховаємо інпут після відправки
