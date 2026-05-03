@@ -248,14 +248,23 @@ let selectedSector  = null;
 let bookedSectors   = {};
 let unsubscribers   = [];
 let unavailableSectors = {};
+let availabilityData = {};
 
 // Слухаємо доступність секторів від адміна
 db.ref('sectorAvailability').on('value', snap=>{
-  unavailableSectors = {};
-  const data = snap.val();
-  if(data) Object.entries(data).forEach(([k,v])=>{ if(v===false) unavailableSectors[k]=true; });
-  renderSectors(bookedSectors);
+  availabilityData = snap.val() || {};
+  updateUnavailable();
 });
+
+function updateUnavailable(){
+  unavailableSectors = {};
+  if(selectedSession && availabilityData[selectedSession]){
+    Object.entries(availabilityData[selectedSession]).forEach(([k,v])=>{
+      if(v===false) unavailableSectors[k]=true;
+    });
+  }
+  renderSectors(bookedSectors);
+}
 
 /* ===== Дата ===== */
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
@@ -324,6 +333,7 @@ function selectSession(el){
   el.classList.add('selected');
   selectedSession = el.dataset.session;
   selectedSector  = null;
+  updateUnavailable();
   loadSectors();
   updateSummary();
 }
