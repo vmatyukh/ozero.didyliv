@@ -190,17 +190,12 @@ button.danger{background:#fdd}
   <div class="stats-bar" id="floatStats"></div>
 
   <fieldset>
-    <legend>🔒 Доступність секторів</legend>
-    <p style="font-size:12px;color:#888;margin:0 0 10px">Зніміть галочку щоб закрити сектор для бронювання</p>
-    <div id="sectorAvailability" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-  </fieldset>
-
-  <fieldset>
     <legend id="floatLegend">Сектори — Ранкова — сьогодні</legend>
     <table class="sectors-table">
       <thead>
         <tr>
           <th>Сектор</th>
+          <th>Доступно</th>
           <th>Статус</th>
           <th>Імʼя</th>
           <th>Телефон</th>
@@ -473,19 +468,7 @@ $('printBtn').onclick=async()=>{
 };
 
 /* ===== ДОСТУПНІСТЬ СЕКТОРІВ ===== */
-function renderSectorAvailability(data){
-  const wrap = document.getElementById('sectorAvailability');
-  if(!wrap) return;
-  wrap.innerHTML='';
-  for(let i=1;i<=11;i++){
-    const isAvailable = !data || data[i] !== false; // за замовчуванням доступний
-    const label = document.createElement('label');
-    label.style.cssText='display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #ccc;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:'+(isAvailable?'#e0f0f0':'#fdd');
-    label.innerHTML=`<input type="checkbox" ${isAvailable?'checked':''} style="cursor:pointer"> Сектор ${i}`;
-    label.querySelector('input').onchange = e => toggleSectorAvailability(i, e.target.checked);
-    wrap.appendChild(label);
-  }
-}
+let sectorAvailabilityData = {};
 
 async function toggleSectorAvailability(sectorNum, available){
   try{
@@ -495,7 +478,8 @@ async function toggleSectorAvailability(sectorNum, available){
 
 // Слухаємо доступність секторів
 db.ref('sectorAvailability').on('value', snap=>{
-  renderSectorAvailability(snap.val());
+  sectorAvailabilityData = snap.val() || {};
+  renderFloatTable();
 });
 
 /* ===== ПОПЛАВЦЕВЕ — Firebase ===== */
@@ -616,6 +600,7 @@ function renderFloatTable(){
     const blockedBy=floatBlocked[i];
     const isBooked=!!b;
     const isBlocked=!!blockedBy;
+    const isAvailable = sectorAvailabilityData[i] !== false;
     if(isBooked||isBlocked) bookedCount++;
     const tr=document.createElement('tr');
     tr.className=(isBooked||isBlocked)?'booked-row':'free-row';
@@ -640,18 +625,26 @@ function renderFloatTable(){
 
     tr.innerHTML=`
       <td><strong>Сектор ${i}</strong></td>
+      <td></td>
       <td>${statusBadge}</td>
       <td>${nameCell}</td>
       <td>${phoneCell}</td>
       <td>${timeCell}</td>
       <td class="act-btns">${actCell}</td>`;
 
+    // Додаємо чекбокс доступності
+    const availCell = tr.querySelectorAll('td')[1];
+    const chk = document.createElement('input');
+    chk.type='checkbox'; chk.checked=isAvailable; chk.style.cursor='pointer'; chk.style.width='18px'; chk.style.height='18px';
+    chk.onchange = e => toggleSectorAvailability(i, e.target.checked);
+    availCell.appendChild(chk);
+
     if(!isBooked && !isBlocked){
       tbody.appendChild(tr);
       const formRow=document.createElement('tr');
       formRow.id=`manualRow_${i}`;
       formRow.style.display='none';
-      formRow.innerHTML=`<td colspan="6" style="background:#e0f2f2;padding:8px 10px">
+      formRow.innerHTML=`<td colspan="7" style="background:#e0f2f2;padding:8px 10px">
         <div class="manual-form">
           <input type="text" id="mname_${i}" placeholder="Імʼя">
           <input type="tel" id="mphone_${i}" placeholder="Телефон">
