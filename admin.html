@@ -279,7 +279,7 @@ function calcSum(p){
 }
 function addParticipant(){
   const id=participants.length?participants[participants.length-1].id+1:1;
-  participants.push({id,discount:false,pidsak:false,instrument:false,cardPayment:false,free:false});
+  participants.push({id,discount:false,pidsak:false,instrument:false,cardPayment:false,free:false,freeType:'',abonKey:'',abonName:''});
   renderList();
 }
 function removeParticipant(){participants.pop();renderList();}
@@ -295,15 +295,75 @@ function renderList(){
       <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
       <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="cardPayment" ${p.cardPayment?'checked':''}> 💳 Картка</label>
-      <label><input type="checkbox" data-field="free" ${p.free?'checked':''}> 🆓 Безкоштовно</label>
+      <span style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">🆓</span>
+        <select data-field="freeType" style="padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px">
+          <option value="">— платний —</option>
+          <option value="child" ${p.freeType==='child'?'selected':''}>Діти до 10 р.</option>
+          <option value="cert"  ${p.freeType==='cert' ?'selected':''}>Сертифікат</option>
+          <option value="abon"  ${p.freeType==='abon' ?'selected':''}>Абонемент</option>
+        </select>
+        <span class="abon-search" style="display:${p.freeType==='abon'?'flex':'none'};align-items:center;gap:4px">
+          <input type="text" placeholder="Пошук..." style="padding:4px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px;width:130px" value="${p.abonName||''}">
+          <span class="abon-results" style="position:relative"></span>
+        </span>
+      </span>
       <span class="sum">${calcSum(p)} грн</span>`;
-    row.querySelectorAll('input').forEach(inp=>{
+
+    // Чекбокси
+    row.querySelectorAll('input[type=checkbox]').forEach(inp=>{
       inp.onchange=e=>{
         p[e.target.dataset.field]=e.target.checked;
         row.querySelector('.sum').textContent=calcSum(p)+' грн';
         updateTotals();
       };
     });
+
+    // Селект безкоштовно
+    const sel = row.querySelector('select[data-field=freeType]');
+    sel.onchange=e=>{
+      p.freeType = e.target.value;
+      p.free = !!e.target.value;
+      if(!p.free){ p.abonKey=''; p.abonName=''; }
+      row.querySelector('.abon-search').style.display = p.freeType==='abon'?'flex':'none';
+      row.querySelector('.sum').textContent=calcSum(p)+' грн';
+      updateTotals();
+    };
+
+    // Пошук по абонементах
+    const abonInput = row.querySelector('.abon-search input');
+    const abonResults = row.querySelector('.abon-results');
+    if(abonInput){
+      abonInput.oninput=()=>{
+        const q = abonInput.value.toLowerCase();
+        abonResults.innerHTML='';
+        if(!q){ p.abonKey=''; p.abonName=''; return; }
+        const matches = Object.entries(window._abonData||{})
+          .filter(([,v])=>v.name&&v.name.toLowerCase().includes(q))
+          .slice(0,5);
+        if(!matches.length) return;
+        const dd = document.createElement('div');
+        dd.style.cssText='position:absolute;top:100%;left:0;background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 12px #0002;z-index:100;min-width:180px';
+        matches.forEach(([key,val])=>{
+          const item = document.createElement('div');
+          item.style.cssText='padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee';
+          const visits = val.visits||0;
+          const monthlyLeft = Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
+          item.textContent = `${val.name} (${visits>0?`${visits} разових`:''}${monthlyLeft>0?` ${monthlyLeft} міс.`:''})`; 
+          item.onmousedown=()=>{
+            p.abonKey=key; p.abonName=val.name;
+            abonInput.value=val.name;
+            abonResults.innerHTML='';
+          };
+          item.onmouseover=()=>item.style.background='#e0f0f0';
+          item.onmouseout=()=>item.style.background='';
+          dd.appendChild(item);
+        });
+        abonResults.appendChild(dd);
+      };
+      abonInput.onblur=()=>setTimeout(()=>abonResults.innerHTML='',200);
+    }
+
     wrap.appendChild(row);
   });
   updateTotals();
@@ -320,7 +380,8 @@ $('clear').onclick=clearParticipants;
 function buildPayload(p){
   return{lake:'Озеро Дідилів',type:'Спінінг (спортивна риболовля)',
     pidsak:p.pidsak,instrument:p.instrument,
-    discount:p.discount,cardPayment:p.cardPayment,free:p.free,
+    discount:p.discount,cardPayment:p.cardPayment,
+    free:p.free,freeType:p.freeType||'',abonName:p.abonName||'',
     amount:calcSum(p),time:nowStr(),participantNo:p.id};
 }
 function buildTextLines(d){
@@ -328,9 +389,12 @@ function buildTextLines(d){
   if(d.pidsak)     lines.push(`Підсак (+${PRICE_PIDSAK} грн)`);
   if(d.instrument) lines.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
   if(d.discount)   lines.push('Пільга −50%');
+  if(d.free){
+    const label = d.freeType==='child'?'Діти до 10 років':d.freeType==='cert'?'Сертифікат':d.abonName?`Абонемент: ${d.abonName}`:'Безкоштовно';
+    lines.push(label);
+  }
   lines.push(`Сума: ${d.free?'Безкоштовно':d.amount+' грн'}`);
   lines.push('—————————————————','Гарного кльову!');
-  if(d.free)       lines.push('(до 10 років — безкоштовно)');
   return lines;
 }
 function buildQrText(){return 'https://t.me/ozero_didyliv';}
@@ -769,6 +833,8 @@ async function saveStats(pList){
       instrument: p.instrument,
       cardPayment: p.cardPayment||false,
       free: p.free||false,
+      freeType: p.freeType||'',
+      abonName: p.abonName||'',
       time: nowStr()
     });
   }
@@ -1206,6 +1272,7 @@ async function abonDelete(key,name){
 // Слухаємо зміни + перевіряємо скид місяця
 db.ref('abonements').on('value', snap=>{
   const data = snap.val();
+  window._abonData = data || {};
   if(data){
     Object.entries(data).forEach(([key,val])=>checkMonthlyReset(key,val));
   }
