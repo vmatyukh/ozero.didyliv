@@ -190,6 +190,12 @@ button.danger{background:#fdd}
   <div class="stats-bar" id="floatStats"></div>
 
   <fieldset>
+    <legend>🔒 Доступність секторів</legend>
+    <p style="font-size:12px;color:#888;margin:0 0 10px">Зніміть галочку щоб закрити сектор для бронювання</p>
+    <div id="sectorAvailability" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </fieldset>
+
+  <fieldset>
     <legend id="floatLegend">Сектори — Ранкова — сьогодні</legend>
     <table class="sectors-table">
       <thead>
@@ -465,6 +471,32 @@ $('printBtn').onclick=async()=>{
     // Не очищаємо список — адмін може спробувати ще раз
   }
 };
+
+/* ===== ДОСТУПНІСТЬ СЕКТОРІВ ===== */
+function renderSectorAvailability(data){
+  const wrap = document.getElementById('sectorAvailability');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  for(let i=1;i<=11;i++){
+    const isAvailable = !data || data[i] !== false; // за замовчуванням доступний
+    const label = document.createElement('label');
+    label.style.cssText='display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid #ccc;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:'+(isAvailable?'#e0f0f0':'#fdd');
+    label.innerHTML=`<input type="checkbox" ${isAvailable?'checked':''} style="cursor:pointer"> Сектор ${i}`;
+    label.querySelector('input').onchange = e => toggleSectorAvailability(i, e.target.checked);
+    wrap.appendChild(label);
+  }
+}
+
+async function toggleSectorAvailability(sectorNum, available){
+  try{
+    await db.ref(`sectorAvailability/${sectorNum}`).set(available ? null : false);
+  }catch(e){ console.error(e); }
+}
+
+// Слухаємо доступність секторів
+db.ref('sectorAvailability').on('value', snap=>{
+  renderSectorAvailability(snap.val());
+});
 
 /* ===== ПОПЛАВЦЕВЕ — Firebase ===== */
 /* ============================================================

@@ -219,9 +219,9 @@ const MONTHS_UA = ['січня','лютого','березня','квітня','
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:350 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:350 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:600 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:300 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:300 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:500 },
   ]
 };
 
@@ -247,6 +247,15 @@ let selectedSession = null;
 let selectedSector  = null;
 let bookedSectors   = {};
 let unsubscribers   = [];
+let unavailableSectors = {};
+
+// Слухаємо доступність секторів від адміна
+db.ref('sectorAvailability').on('value', snap=>{
+  unavailableSectors = {};
+  const data = snap.val();
+  if(data) Object.entries(data).forEach(([k,v])=>{ if(v===false) unavailableSectors[k]=true; });
+  renderSectors(bookedSectors);
+});
 
 /* ===== Дата ===== */
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
@@ -360,14 +369,17 @@ function renderSectors(booked){
   const w=36, h=38, gap=4, startX=102, y=326;
   for(let i=1;i<=SECTORS_COUNT;i++){
     const x = startX+(i-1)*(w+gap);
-    const isBooked   = !!booked[i];
-    const isSelected = selectedSector===i;
+    const isBooked      = !!booked[i];
+    const isUnavailable = !!unavailableSectors[i];
+    const isSelected    = selectedSector===i;
+    const isBlocked     = isBooked || isUnavailable;
     let fill, stroke, textFill;
-    if(isBooked){       fill='#e67e00'; stroke='#b35900'; textFill='#fff'; }
-    else if(isSelected){fill='#b0dcdc'; stroke='#005356'; textFill='#005356'; }
-    else{               fill='#005356'; stroke='#003a3c'; textFill='#fff'; }
+    if(isBooked){          fill='#e67e00'; stroke='#b35900'; textFill='#fff'; }
+    else if(isUnavailable){fill='#bbb';    stroke='#999';    textFill='#fff'; }
+    else if(isSelected){   fill='#b0dcdc'; stroke='#005356'; textFill='#005356'; }
+    else{                  fill='#005356'; stroke='#003a3c'; textFill='#fff'; }
     const grp=document.createElementNS('http://www.w3.org/2000/svg','g');
-    grp.style.cursor=isBooked?'not-allowed':'pointer';
+    grp.style.cursor=isBlocked?'not-allowed':'pointer';
     const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('x',x); rect.setAttribute('y',y);
     rect.setAttribute('width',w); rect.setAttribute('height',h);
@@ -378,7 +390,7 @@ function renderSectors(booked){
     txt.setAttribute('dominant-baseline','central'); txt.setAttribute('fill',textFill);
     txt.textContent=i;
     grp.appendChild(rect); grp.appendChild(txt);
-    if(!isBooked) grp.onclick=()=>{ selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
+    if(!isBlocked) grp.onclick=()=>{ selectedSector=i; renderSectors(bookedSectors); updateSummary(); };
     g.appendChild(grp);
   }
 }
