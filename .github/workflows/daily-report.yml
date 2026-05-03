@@ -62,7 +62,8 @@ jobs:
             const entries     = (snap&&!snap.error)         ? Object.values(snap)     : [];
             const abonEntries = (snapAbon&&!snapAbon.error) ? Object.values(snapAbon) : [];
 
-            let msg = `📊 Звіт за ${d}.${m}.${y}\n\n`;
+            let msg = `📊 Звіт за ${d}.${m}.${y}\n`+
+              `👥 Всього відвідувачів: ${entries.length + abonEntries.length}\n\n`;
 
             if(entries.length>0){
               const count      = entries.length;
