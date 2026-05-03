@@ -158,7 +158,11 @@ button.danger{background:#fdd}
   <fieldset style="margin-top:16px">
     <legend id="spinningStatsLegend">📋 Сьогодні надруковано</legend>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-      <input type="date" id="statsDate" style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      <div style="position:relative;display:inline-block">
+        <div id="statsDateDisplay" onclick="document.getElementById('statsDate').showPicker?document.getElementById('statsDate').showPicker():document.getElementById('statsDate').click()"
+          style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px"></div>
+        <input type="date" id="statsDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+      </div>
       <button onclick="loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">🔍 Показати</button>
       <button onclick="document.getElementById('statsDate').value=tgDateStr();loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">Сьогодні</button>
     </div>
@@ -171,7 +175,11 @@ button.danger{background:#fdd}
 
   <div class="float-filter">
     <strong>📅 Дата:</strong>
-    <input type="date" id="floatDate">
+    <div style="position:relative;display:inline-block">
+      <div id="floatDateDisplay"
+        style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px"></div>
+      <input type="date" id="floatDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+    </div>
     <button class="secondary" onclick="setFloatDate(-1)">◀ Вчора</button>
     <button class="secondary" onclick="setFloatDate(0)">Сьогодні</button>
     <button class="secondary" onclick="setFloatDate(1)">Завтра ▶</button>
@@ -282,11 +290,11 @@ function renderList(){
     const row=document.createElement('div'); row.className='participant';
     row.innerHTML=`
       <span>#${p.id}</span>
-      <label><input type="checkbox" data-field="free" ${p.free?'checked':''}> 🆓 Безкоштовно</label>
       <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
       <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
       <label><input type="checkbox" data-field="cardPayment" ${p.cardPayment?'checked':''}> 💳 Картка</label>
+      <label><input type="checkbox" data-field="free" ${p.free?'checked':''}> 🆓 Безкоштовно</label>
       <span class="sum">${calcSum(p)} грн</span>`;
     row.querySelectorAll('input').forEach(inp=>{
       inp.onchange=e=>{
@@ -315,17 +323,14 @@ function buildPayload(p){
     amount:calcSum(p),time:nowStr(),participantNo:p.id};
 }
 function buildTextLines(d){
-  const r=[];
-  if(d.pidsak)     r.push(`Підсак (+${PRICE_PIDSAK} грн)`);
-  if(d.instrument) r.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
-  return[`Дата: ${d.time}`,'—————————————————',
-    d.free?'Безкоштовний квиток':'Квиток рибалки',
-    `${d.type}`,
-    `Оренда: ${r.length?r.join(', '):'ні'}`,
-    d.free?'Безкоштовно (до 10 років)':`Пільга: ${d.discount?'так (−50%)':'ні'}`,
-    `Оплата: ${d.cardPayment?'💳 Картка':'готівка'}`,
-    `Сума: ${d.amount} грн`,
-    '—————————————————','Гарного кльову!'];
+  const lines=[`Дата: ${d.time}`,'—————————————————','Квиток рибалки',`${d.type}`];
+  if(d.pidsak)     lines.push(`Підсак (+${PRICE_PIDSAK} грн)`);
+  if(d.instrument) lines.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
+  if(d.discount)   lines.push('Пільга −50%');
+  lines.push(`Сума: ${d.free?'Безкоштовно':d.amount+' грн'}`);
+  lines.push('—————————————————','Гарного кльову!');
+  if(d.free)       lines.push('(до 10 років — безкоштовно)');
+  return lines;
 }
 function buildQrText(){return 'https://t.me/ozero_didyliv';}
 
@@ -488,13 +493,29 @@ let floatBookings={}; // key -> booking obj
 let floatBlocked={};
 let floatUnsubs=[];
 
+const MONTHS_SHORT=['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
+
+function formatAdminDate(val){
+  if(!val) return '—';
+  const [y,m,d]=val.split('-');
+  return `${parseInt(d)} ${MONTHS_SHORT[parseInt(m)-1]} ${y}`;
+}
+
+function setDateDisplay(displayId, val){
+  const el=document.getElementById(displayId);
+  if(el) el.textContent=formatAdminDate(val);
+}
+
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
 $('floatDate').value=todayStr;
-$('floatDate').onchange=()=>loadFloatBookings();
+setDateDisplay('floatDateDisplay', todayStr);
+$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); loadFloatBookings(); };
 
 function setFloatDate(offset){
   const d=new Date();d.setDate(d.getDate()+offset);
-  $('floatDate').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  $('floatDate').value=val;
+  setDateDisplay('floatDateDisplay', val);
   loadFloatBookings();
 }
 function selectFloatSession(el){
@@ -735,14 +756,21 @@ async function sendDailyReport(dateStr){
     wrap.id='reportDateInput';
     wrap.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap';
     wrap.innerHTML=`
-      <input type="date" id="reportDate" value="${tgDateStr()}"
-        style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
-      <button class="primary" style="padding:8px 14px;font-size:13px" onclick="sendDailyReport(document.getElementById('reportDate').value)">
+      <div style="position:relative;display:inline-block">
+        <div id="reportDateDisplay"
+          style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px">${formatAdminDate(tgDateStr())}</div>
+        <input type="date" id="reportDate" value="${tgDateStr()}"
+          style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+      </div>
+      <button class="primary" style="padding:8px 14px;font-size:13px" id="reportSendBtn">
         📤 Надіслати
       </button>
-      <button class="secondary" style="padding:8px 14px;font-size:13px" onclick="document.getElementById('reportDateInput').style.display='none'">
+      <button class="secondary" style="padding:8px 14px;font-size:13px" id="reportCancelBtn">
         Скасувати
       </button>`;
+    document.getElementById('reportDate').onchange = e => setDateDisplay('reportDateDisplay', e.target.value);
+    document.getElementById('reportSendBtn').onclick = ()=> sendDailyReport(document.getElementById('reportDate').value);
+    document.getElementById('reportCancelBtn').onclick = ()=> document.getElementById('reportDateInput').style.display='none';
     document.getElementById('status').after(wrap);
     return;
   }
@@ -1109,9 +1137,12 @@ db.ref('abonements').on('value', snap=>{
 function initAdmin(){
   loadFloatBookings();
   addParticipant();
-  // Встановлюємо сьогодні в полі дати статистики
   const statsDateEl = document.getElementById('statsDate');
-  if(statsDateEl) statsDateEl.value = tgDateStr();
+  if(statsDateEl){
+    statsDateEl.value = tgDateStr();
+    setDateDisplay('statsDateDisplay', tgDateStr());
+    statsDateEl.onchange = e => setDateDisplay('statsDateDisplay', e.target.value);
+  }
   loadSpinningStats();
 }
 
