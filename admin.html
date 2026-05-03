@@ -120,7 +120,11 @@ button.danger{background:#fdd}
 <header>
   <img id="logo" src="logo.png" alt="Логотип Озеро Дідилів">
   <div style="flex:1"><h2 style="margin:0">Адмінка — Озеро Дідилів</h2><p style="margin:2px 0 0;color:#666;font-size:13px">Система друку чеків та бронювання</p></div>
-  <button onclick="doLogout()" style="padding:6px 14px;background:#fdd;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">Вийти</button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="connectBtn" class="warn">🔌 Принтер</button>
+    <button id="testBtn" class="secondary">🧪 Тест</button>
+    <button onclick="doLogout()" style="padding:6px 14px;background:#fdd;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">Вийти</button>
+  </div>
 </header>
 
 <div class="tabs">
@@ -144,8 +148,6 @@ button.danger{background:#fdd}
   <fieldset>
     <legend>Дії</legend>
     <div class="row">
-      <button id="connectBtn" class="warn">🔌 Підключити принтер</button>
-      <button id="testBtn" class="secondary">🧪 Тестовий чек</button>
       <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
       <button onclick="sendDailyReport()" class="secondary">📊 Звіт за день</button>
     </div>
@@ -207,15 +209,7 @@ button.danger{background:#fdd}
     </table>
   </fieldset>
 
-  <fieldset>
-    <legend>Дії</legend>
-    <div class="row">
-      <button id="connectBtnF" class="warn">🔌 Підключити принтер</button>
-      <button id="testBtnF" class="secondary">🧪 Тестовий чек</button>
-    </div>
-  </fieldset>
 
-  <h3>Превʼю чеків поплавцевого</h3>
   <div id="previewFloat" class="previewWrap"></div>
   <pre id="statusFloat"></pre>
 
@@ -380,11 +374,19 @@ async function connect(auto=false){
   }catch(e){setStatus('Помилка: '+e.message);}
 }
 $('connectBtn').onclick=connect;
-$('connectBtnF').onclick=connect;
 async function send(b){if(!device){await connect();if(!device)return;}await device.transferOut(epOut,b);}
-function setStatus(t){$('status').textContent=t;}
-function setStatusFloat(t){$('statusFloat').textContent=t;}
+function setStatus(t){const el=$('status');if(el)el.textContent=t;}
+function setStatusFloat(t){const el=$('statusFloat');if(el)el.textContent=t;}
 
+$('testBtn').onclick=async()=>{
+  try{
+    await connect();
+    const logo=await logoRaster();
+    const text=textBlockRaster(['ОЗЕРО ДІДИЛІВ','Тестовий друк'],{center:true,regularFont:'26px Arial',boldFont:'34px Arial',lineHeight:38});
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut));
+    setStatus('✅ Тестовий чек відправлено');
+  }catch(e){setStatus('Помилка: '+e.message);}
+};
 function rasterFromCanvas(canvas,threshold=160){
   const w=canvas.width,h=canvas.height;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
@@ -433,24 +435,7 @@ async function qrRaster(){
   return rasterFromCanvas(c,160);
 }
 
-$('testBtn').onclick=async()=>{
-  try{
-    await connect();
-    const logo=await logoRaster();
-    const text=textBlockRaster(['ОЗЕРО ДІДИЛІВ','Тестовий друк'],{center:true,regularFont:'26px Arial',boldFont:'34px Arial',lineHeight:38});
-    await send(merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut));
-    setStatus('✅ Тестовий чек відправлено');
-  }catch(e){setStatus('Помилка: '+e.message);}
-};
-$('testBtnF').onclick=async()=>{
-  try{
-    await connect();
-    const logo=await logoRaster();
-    const text=textBlockRaster(['ОЗЕРО ДІДИЛІВ','Поплавцеве — тест'],{center:true,regularFont:'26px Arial',boldFont:'34px Arial',lineHeight:38});
-    await send(merge(new Uint8Array([ESC,0x40]),alignC,logo,lf,text,lf,cut));
-    setStatusFloat('✅ Тестовий чек відправлено');
-  }catch(e){setStatusFloat('Помилка: '+e.message);}
-};
+
 $('printBtn').onclick=async()=>{
   if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
   // Зберігаємо статистику одразу
