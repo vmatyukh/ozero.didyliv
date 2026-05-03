@@ -258,11 +258,16 @@ db.ref('sectorAvailability').on('value', snap=>{
 
 function updateUnavailable(){
   unavailableSectors = {};
-  if(selectedSession && availabilityData[selectedSession]){
-    Object.entries(availabilityData[selectedSession]).forEach(([k,v])=>{
-      if(v===false) unavailableSectors[k]=true;
-    });
-  }
+  if(!selectedSession) return;
+  // Перевіряємо конфліктуючі сесії — якщо закрито fullday, то morning/evening теж недоступні
+  const sessions = conflictingSessions(selectedSession);
+  sessions.forEach(s=>{
+    if(availabilityData[s]){
+      Object.entries(availabilityData[s]).forEach(([k,v])=>{
+        if(v===false) unavailableSectors[k]=true;
+      });
+    }
+  });
   renderSectors(bookedSectors);
 }
 

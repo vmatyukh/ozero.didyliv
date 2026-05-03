@@ -600,7 +600,9 @@ function renderFloatTable(){
     const blockedBy=floatBlocked[i];
     const isBooked=!!b;
     const isBlocked=!!blockedBy;
-    const isAvailable = !sectorAvailabilityData[floatSession] || sectorAvailabilityData[floatSession][i] !== false;
+    const isAvailable = conflictingSessions(floatSession).every(s=>
+      !sectorAvailabilityData[s] || sectorAvailabilityData[s][i] !== false
+    );
     if(isBooked||isBlocked) bookedCount++;
     const tr=document.createElement('tr');
     tr.className=(isBooked||isBlocked)?'booked-row':'free-row';
