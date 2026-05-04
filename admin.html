@@ -161,8 +161,8 @@ button.danger{background:#fdd}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
       <div style="position:relative;display:inline-block">
         <div id="statsDateDisplay"
-          style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px"></div>
-        <input type="date" id="statsDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+          style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px;padding-right:32px"></div>
+        <input type="date" id="statsDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:0;pointer-events:none">
       </div>
       <button onclick="loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">🔍 Показати</button>
       <button onclick="document.getElementById('statsDate').value=tgDateStr();loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">Сьогодні</button>
@@ -179,8 +179,8 @@ button.danger{background:#fdd}
     <strong>📅 Дата:</strong>
     <div style="position:relative;display:inline-block">
       <div id="floatDateDisplay"
-        style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px;pointer-events:none"></div>
-      <input type="date" id="floatDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+        style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px;padding-right:32px"></div>
+      <input type="date" id="floatDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:0;pointer-events:none">
     </div>
     <button class="secondary" onclick="setFloatDate(-1)">◀ Вчора</button>
     <button class="secondary" onclick="setFloatDate(0)">Сьогодні</button>
@@ -608,6 +608,16 @@ function formatAdminDate(val){
 function setDateDisplay(displayId, val){
   const el=document.getElementById(displayId);
   if(el) el.textContent=formatAdminDate(val);
+}
+
+// Відкриваємо datepicker при кліку на display div
+function initDateDisplay(displayId, inputId){
+  const display = document.getElementById(displayId);
+  const input   = document.getElementById(inputId);
+  if(!display||!input) return;
+  display.addEventListener('click', ()=>{
+    try{ input.showPicker(); }catch(e){ input.focus(); input.click(); }
+  });
 }
 
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
@@ -1328,6 +1338,8 @@ db.ref('abonements').on('value', snap=>{
 function initAdmin(){
   loadFloatBookings();
   addParticipant();
+  initDateDisplay('floatDateDisplay', 'floatDate');
+  initDateDisplay('statsDateDisplay', 'statsDate');
   const statsDateEl = document.getElementById('statsDate');
   if(statsDateEl){
     statsDateEl.value = tgDateStr();
