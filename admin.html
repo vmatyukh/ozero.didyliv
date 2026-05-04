@@ -988,12 +988,14 @@ function renderSpinningStats(data, date){
       <td>${e.cardPayment?'💳':'—'}</td>
       <td style="font-size:12px">${freeLabel}</td>
       <td style="white-space:nowrap">
+        <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#eef;cursor:pointer">✏️</button>
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">🗑</button>
       </td>`;
-    const [editBtn, delBtn] = tr.querySelectorAll('button');
-    editBtn.onclick = ()=> editStatRow(key, e);
-    delBtn.onclick  = ()=> deleteStatRow(key);
+    const [printBtn, editBtn, delBtn] = tr.querySelectorAll('button');
+    printBtn.onclick = ()=> printStatRow(e);
+    editBtn.onclick  = ()=> editStatRow(key, e);
+    delBtn.onclick   = ()=> deleteStatRow(key);
     tbody.appendChild(tr);
   });
 
@@ -1014,6 +1016,26 @@ function renderSpinningStats(data, date){
   table.appendChild(tbody);
   wrap.innerHTML='';
   wrap.appendChild(table);
+}
+
+async function printStatRow(e){
+  try{
+    await connect(true);
+    const logoBytes = await logoRaster();
+    const d = {
+      type: 'Спінінг (спортивна риболовля)',
+      time: e.time||nowStr(),
+      pidsak: e.pidsak, instrument: e.instrument,
+      discount: e.discount, cardPayment: e.cardPayment,
+      free: e.free, freeType: e.freeType||'', abonName: e.abonName||'',
+      amount: e.amount||0
+    };
+    const tr = textBlockRaster(buildTextLines(d),{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+    const li = textBlockRaster(['——————————————'],{center:true});
+    const qr = await qrRaster();
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
+    setStatus('✅ Чек надруковано');
+  }catch(err){ setStatus('Помилка друку: '+err.message); }
 }
 
 function getStatsDate(){
