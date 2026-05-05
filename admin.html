@@ -990,12 +990,12 @@ function renderSpinningStats(data, date){
       <td style="white-space:nowrap">
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#eef;cursor:pointer">✏️</button>
-        <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">🗑</button>
+        ${isAdmin?`<button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">🗑</button>`:''}
       </td>`;
-    const [printBtn, editBtn, delBtn] = tr.querySelectorAll('button');
-    printBtn.onclick = ()=> printStatRow(e);
-    editBtn.onclick  = ()=> editStatRow(key, e);
-    delBtn.onclick   = ()=> deleteStatRow(key);
+    const btns = tr.querySelectorAll('button');
+    btns[0].onclick = ()=> printStatRow(e);
+    btns[1].onclick = ()=> editStatRow(key, e);
+    if(isAdmin) btns[2].onclick = ()=> deleteStatRow(key);
     tbody.appendChild(tr);
   });
 
@@ -1373,13 +1373,17 @@ function initAdmin(){
 
 /* ===== Firebase Auth ===== */
 const auth = firebase.auth();
+const ADMIN_EMAIL = 'ozero.didyliv@gmail.com';
+let isAdmin = false;
 
 auth.onAuthStateChanged(user=>{
   if(user){
+    isAdmin = user.email === ADMIN_EMAIL;
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('adminContent').style.display='block';
     initAdmin();
   } else {
+    isAdmin = false;
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('adminContent').style.display='none';
   }
