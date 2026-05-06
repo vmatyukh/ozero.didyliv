@@ -223,9 +223,9 @@ const MONTHS_UA = ['січня','лютого','березня','квітня','
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:350 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:350 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:600 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:350, endHour:13 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:350, endHour:21 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:600, endHour:21 },
   ]
 };
 
@@ -236,15 +236,33 @@ const SESSION_LABELS = Object.fromEntries(
 const SESSION_PRICES = Object.fromEntries(
   CONFIG.sessions.map(s=>[ s.key, s.price ])
 );
+const SESSION_END = Object.fromEntries(
+  CONFIG.sessions.map(s=>[ s.key, s.endHour ])
+);
+
+// Перевіряємо чи сесія ще доступна для бронювання
+function isSessionAvailable(sessionKey, dateStr){
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  if(dateStr !== today) return true; // майбутні дати — завжди доступні
+  return now.getHours() < SESSION_END[sessionKey];
+}
 
 // Генеруємо картки сесій
-document.getElementById('sessionsContainer').innerHTML = CONFIG.sessions.map(s=>`
-  <div class="session-btn" data-session="${s.key}" onclick="selectSession(this)">
-    <div class="icon">${s.icon}</div>
-    <div class="name">${s.name}</div>
-    <div class="time">${s.time}</div>
-    <div class="price">${s.price} грн</div>
-  </div>`).join('');
+function renderSessionCards(){
+  const dateStr = document.getElementById('inputDate').value;
+  document.getElementById('sessionsContainer').innerHTML = CONFIG.sessions.map(s=>{
+    const available = isSessionAvailable(s.key, dateStr);
+    return `<div class="session-btn${available?'':' disabled'}" data-session="${s.key}"
+      onclick="${available?'selectSession(this)':''}"
+      style="${available?'':'opacity:.45;cursor:not-allowed;pointer-events:none'}">
+      <div class="icon">${s.icon}</div>
+      <div class="name">${s.name}</div>
+      <div class="time">${s.time}</div>
+      <div class="price">${available?s.price+' грн':'<span style="font-size:11px;color:#c0392b">Сесія завершена</span>'}</div>
+    </div>`;
+  }).join('');
+}
 
 /* ===== Стан ===== */
 let selectedSession = null;
@@ -336,8 +354,11 @@ if(isMobile){
 
 inputDate.onchange = e => {
   selectedSector = null;
+  selectedSession = null;
+  document.querySelectorAll('.session-btn').forEach(b=>b.classList.remove('selected'));
   updateDateDisplay(e.target.value);
   if(isMobile) dateOverlay.style.display='flex';
+  renderSessionCards();
   loadAvailability();
   loadSectors();
   updateSummary();
@@ -617,6 +638,7 @@ function showLoading(v){ document.getElementById('loadingOverlay').classList.tog
 })();
 window.isValidPhone = v => /^\+380\d{9}$/.test(v.replace(/\s/g,''));
 
+renderSessionCards();
 renderSectors({});
 updateSummary();
 loadAvailability();
