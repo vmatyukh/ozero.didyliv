@@ -1153,7 +1153,7 @@ function renderAllBookings(){
     const table = document.createElement('table');
     table.className='spinning-table';
     table.innerHTML=`<thead><tr>
-      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th></th>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th>🐟</th><th></th>
     </tr></thead>`;
     const tbody = document.createElement('tbody');
 
@@ -1167,6 +1167,7 @@ function renderAllBookings(){
         <td>${b.phone||'—'}</td>
         <td style="font-size:12px">${createdAt}</td>
         <td>${b.price||SESSION_PRICES[b.sessionKey]||'—'} грн</td>
+        <td>${b.buyFish?'🐟':'—'}</td>
         <td>
           ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
         </td>`;
@@ -1186,7 +1187,7 @@ function renderAllBookings(){
     const total = rows.reduce((s,b)=>s+(b.price||SESSION_PRICES[b.sessionKey]||0),0);
     const tfoot = document.createElement('tr');
     tfoot.className='total-row';
-    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td>`;
+    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td><td></td>`;
     tbody.appendChild(tfoot);
 
     table.appendChild(tbody);
