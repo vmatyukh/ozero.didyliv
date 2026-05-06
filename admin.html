@@ -576,9 +576,9 @@ function loadSectorAvailability(){
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:350 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:350 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:600 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00–13:00',  price:350, endHour:13 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00–21:00', price:350, endHour:21 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00–21:00',  price:600, endHour:21 },
   ]
 };
 
@@ -586,14 +586,31 @@ const SESSION_LABELS = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,`${s.nam
 const SESSION_PRICES = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,s.price]));
 const SESSION_UK     = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,s.name]));
 
-// Генеруємо таби сесій
-document.getElementById('sessionTabs').innerHTML = CONFIG.sessions.map((s,i)=>`
-  <div class="stab${i===0?' active':''}" data-session="${s.key}" onclick="selectFloatSession(this)">
-    ${s.icon} ${s.name} (${s.time}) — ${s.price} грн
-  </div>`).join('');
+function isSessionExpired(sessionKey, dateStr){
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  if(dateStr !== today) return false;
+  const session = CONFIG.sessions.find(s=>s.key===sessionKey);
+  return session && now.getHours() >= session.endHour;
+}
 
+function renderSessionTabs(){
+  const date = $('floatDate').value;
+  document.getElementById('sessionTabs').innerHTML = CONFIG.sessions.map((s,i)=>{
+    const expired = isSessionExpired(s.key, date);
+    return `<div class="stab${i===0&&!expired?' active':''} ${expired?'expired':''}"
+      data-session="${s.key}"
+      onclick="${expired?'':' selectFloatSession(this)'}"
+      style="${expired?'opacity:.45;cursor:not-allowed;text-decoration:line-through':''}">
+      ${s.icon} ${s.name} (${s.time}) — ${expired?'завершена':s.price+' грн'}
+    </div>`;
+  }).join('');
+  // Автоматично вибираємо першу доступну сесію
+  const available = CONFIG.sessions.find(s=>!isSessionExpired(s.key, date));
+  if(available) floatSession = available.key;
+}
 let floatSession='morning';
-let floatBookings={}; // key -> booking obj
+let floatBookings={};
 let floatBlocked={};
 let floatUnsubs=[];
 
@@ -623,13 +640,14 @@ function initDateDisplay(displayId, inputId){
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
 $('floatDate').value=todayStr;
 setDateDisplay('floatDateDisplay', todayStr);
-$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); loadFloatBookings(); };
+$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); renderSessionTabs(); loadFloatBookings(); };
 
 function setFloatDate(offset){
   const d=new Date();d.setDate(d.getDate()+offset);
   const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   $('floatDate').value=val;
   setDateDisplay('floatDateDisplay', val);
+  renderSessionTabs();
   loadFloatBookings();
 }
 function selectFloatSession(el){
@@ -1375,6 +1393,7 @@ db.ref('abonements').on('value', snap=>{
 
 // Ініціалізація — запускається після логіну
 function initAdmin(){
+  renderSessionTabs();
   loadFloatBookings();
   addParticipant();
   initDateDisplay('floatDateDisplay', 'floatDate');
