@@ -712,7 +712,9 @@ function renderFloatTable(){
     if(isBooked){
       statusBadge=`<span class="status-badge booked">🔴 Зайнято</span>`;
       nameCell=b.name||'—'; phoneCell=b.phone||'—'; timeCell=createdAt;
-      actCell=`${isAdmin?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
+      const currentEmail = firebase.auth().currentUser?.email||'';
+      const canCancel = isAdmin || b.createdBy === currentEmail;
+      actCell=`${canCancel?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
                <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
       if(b.buyFish) nameCell += ' 🐟';
     } else if(isBlocked){
@@ -783,10 +785,12 @@ async function adminBook(i){
   const date=$('floatDate').value;
   const name=($(`mname_${i}`)?.value||'').trim()||'Адмін';
   const phone=($(`mphone_${i}`)?.value||'').trim()||'—';
+  const currentUser = firebase.auth().currentUser;
   try{
     await db.ref(`bookings/${date}/${floatSession}`).push({
-      sector:i,name,phone,session:floatSession,
-      price:SESSION_PRICES[floatSession],date,
+      sector:i, name, phone, session:floatSession,
+      price:SESSION_PRICES[floatSession], date,
+      createdBy: currentUser?.email||'',
       createdAt:new Date().toISOString()
     });
     setStatusFloat(`✅ Сектор ${i} заброньовано`);
@@ -1160,6 +1164,8 @@ function renderAllBookings(){
     rows.forEach(b=>{
       const tr = document.createElement('tr');
       const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}) : '—';
+      const currentEmail = firebase.auth().currentUser?.email||'';
+      const canCancel = isAdmin || b.createdBy === currentEmail;
       tr.innerHTML=`
         <td><strong>Сектор ${b.sector}</strong></td>
         <td>${b.sessionName}<br><span style="font-size:11px;color:#888">${b.sessionTime}</span></td>
@@ -1169,9 +1175,9 @@ function renderAllBookings(){
         <td>${b.price||SESSION_PRICES[b.sessionKey]||'—'} грн</td>
         <td>${b.buyFish?'🐟':'—'}</td>
         <td>
-          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
+          ${canCancel?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
         </td>`;
-      if(isAdmin){
+      if(canCancel){
         tr.querySelector('button').onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
