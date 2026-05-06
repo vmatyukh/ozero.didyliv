@@ -1238,6 +1238,10 @@ async function checkMonthlyReset(key, val){
 function renderAbonList(data){
   const wrap=$('abonList');
   if(!wrap) return;
+
+  // Показуємо/ховаємо форму додавання залежно від ролі
+  const addForm = document.getElementById('abonAddFieldset');
+  if(addForm) addForm.style.display = isAdmin ? '' : 'none';
   if(!data||Object.keys(data).length===0){
     wrap.innerHTML='<p style="color:#888;font-size:13px;padding:8px 0">Список порожній</p>';
     return;
@@ -1360,16 +1364,25 @@ async function printAbonTicket(name, type, remaining, limit){
 }
 
 function abonEdit(key, name, visits, monthlyLimit){
+  const wrap = document.getElementById('abonList');
+  const item = wrap.querySelector(`[data-key="${key}"]`);
+
+  // Простий prompt-based редактор
   const newName    = prompt('Імʼя:', name);
-  if(newName===null) return;
-  const newVisits  = parseInt(prompt('Разові візити:', visits)||0);
-  const newMonthly = parseInt(prompt('Місячний ліміт:', monthlyLimit)||0);
-  if(isNaN(newVisits)||isNaN(newMonthly)) return;
-  db.ref(`abonements/${key}`).update({
-    name: newName.trim()||name,
-    visits: newVisits,
-    monthlyLimit: newMonthly
-  }).then(()=>setStatusAbon(`✅ ${newName} оновлено`))
+  if(newName === null) return;
+  const newVisits  = prompt('Разові візити:', visits);
+  if(newVisits === null) return;
+  const newMonthly = prompt('Місячний ліміт:', monthlyLimit);
+  if(newMonthly === null) return;
+
+  const updates = {
+    name: newName.trim() || name,
+    visits: Math.max(0, parseInt(newVisits)||0),
+    monthlyLimit: Math.max(0, parseInt(newMonthly)||0)
+  };
+
+  db.ref(`abonements/${key}`).update(updates)
+    .then(()=>setStatusAbon(`✅ ${updates.name} оновлено`))
     .catch(e=>setStatusAbon('Помилка: '+e.message));
 }
 
@@ -1398,6 +1411,9 @@ function initAdmin(){
   addParticipant();
   initDateDisplay('floatDateDisplay', 'floatDate');
   initDateDisplay('statsDateDisplay', 'statsDate');
+  // Ховаємо форму додавання абонементів для не-адміна
+  const abonAdd = document.getElementById('abonAddFieldset');
+  if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
   if(statsDateEl){
     statsDateEl.value = tgDateStr();
