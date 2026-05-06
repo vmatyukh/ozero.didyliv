@@ -182,6 +182,10 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
         <input type="tel" id="inputPhone" placeholder="+380XXXXXXXXX" value="+380">
         <div class="error-msg" id="errPhone">Введіть коректний номер (+380XXXXXXXXX)</div>
       </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <input type="checkbox" id="inputBuyFish" style="width:18px;height:18px;cursor:pointer;flex-shrink:0">
+        <label for="inputBuyFish" style="font-size:14px;color:#222;cursor:pointer;margin:0">🐟 Планую викупляти зловлену рибу</label>
+      </div>
     </div>
 
     <!-- Підсумок -->
@@ -433,11 +437,12 @@ function updateSummary(){
     box.innerHTML='Оберіть дату, сесію та сектор'; return;
   }
   const [y,m,d]=date.split('-');
+  const buyFish = document.getElementById('inputBuyFish')?.checked;
   box.innerHTML=`
     <strong>📅 Дата:</strong> ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}<br>
     <strong>🕐 Сесія:</strong> ${SESSION_LABELS[selectedSession]}<br>
     <strong>🎣 Сектор:</strong> ${selectedSector}<br>
-    <strong>💰 Сума:</strong> ${SESSION_PRICES[selectedSession]} грн`;
+    <strong>💰 Сума:</strong> ${SESSION_PRICES[selectedSession]} грн${buyFish?'<br><strong>🐟 Викуп риби:</strong> так':''}`;
 }
 
 /* ===== Підтвердження ===== */
@@ -445,6 +450,7 @@ async function submitBooking(){
   const date  = document.getElementById('inputDate').value;
   const name  = document.getElementById('inputName').value.trim();
   const phone = document.getElementById('inputPhone').value.trim();
+  const buyFish = document.getElementById('inputBuyFish')?.checked||false;
   let ok=true;
   document.getElementById('errName').style.display  = name  ?'none':'block'; if(!name)  ok=false;
   const phoneValid = window.isValidPhone(phone);
@@ -470,7 +476,7 @@ async function submitBooking(){
     await db.ref(`bookings/${date}/${selectedSession}`).push({
       sector:selectedSector, name, phone,
       session:selectedSession, price:SESSION_PRICES[selectedSession],
-      date, createdAt:new Date().toISOString()
+      buyFish, date, createdAt:new Date().toISOString()
     });
 
     // Telegram повідомлення адміну
@@ -481,7 +487,8 @@ async function submitBooking(){
       `🎯 Сектор: ${selectedSector}\n`+
       `💰 Сума: ${SESSION_PRICES[selectedSession]} грн\n`+
       `👤 Імʼя: ${name}\n`+
-      `📞 Телефон: ${phone}`;
+      `📞 Телефон: ${phone}`+
+      (buyFish?'\n🐟 Планує викупляти рибу':'');
     const sendNotification = (chat_id) => fetch(
       `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,
       { method:'POST', headers:{'Content-Type':'application/json'},

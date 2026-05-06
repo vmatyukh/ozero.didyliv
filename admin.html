@@ -349,7 +349,7 @@ function renderList(){
           item.style.cssText='padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee';
           const visits = val.visits||0;
           const monthlyLeft = Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
-          item.textContent = `${val.name} (${visits>0?`${visits} разових`:''}${monthlyLeft>0?` ${monthlyLeft} міс.`:''})`; 
+          item.textContent = `${val.name} (${visits>0?`${visits} разових`:''}${monthlyLeft>0?` ${monthlyLeft} міс.`:''})`;
           item.onmousedown=()=>{
             p.abonKey=key; p.abonName=val.name;
             abonInput.value=val.name;
@@ -714,6 +714,7 @@ function renderFloatTable(){
       nameCell=b.name||'—'; phoneCell=b.phone||'—'; timeCell=createdAt;
       actCell=`${isAdmin?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
                <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
+      if(b.buyFish) nameCell += ' 🐟';
     } else if(isBlocked){
       const bl=floatBlocked[i];
       statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[bl.session]}</span>`;
