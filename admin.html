@@ -222,7 +222,7 @@ button.danger{background:#fdd}
 
 <!-- ===== АБОНЕМЕНТИ ===== -->
 <div id="tab-abonements" class="tab-content">
-  <fieldset>
+  <fieldset id="abonAddFieldset">
     <legend>➕ Додати людину</legend>
     <div class="row" style="align-items:flex-end;gap:10px;flex-wrap:wrap">
       <div style="flex:2;min-width:160px">
@@ -1275,8 +1275,8 @@ function renderAbonList(data){
         <span class="abon-name">${val.name}</span>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${badges}</div>
         <div style="display:flex;gap:6px;margin-left:auto">
-          <button class="secondary" style="padding:6px 14px;font-size:13px" onclick="abonEdit('${key}','${val.name}',${visits},${monthlyLimit})">✏️ Редагувати</button>
-          <button class="danger" style="padding:6px 10px;font-size:13px" onclick="abonDelete('${key}','${val.name}')">🗑</button>
+          ${isAdmin?`<button class="secondary" style="padding:6px 14px;font-size:13px" onclick="abonEdit('${key}','${val.name}',${visits},${monthlyLimit})">✏️ Редагувати</button>`:''}
+          ${isAdmin?`<button class="danger" style="padding:6px 10px;font-size:13px" onclick="abonDelete('${key}','${val.name}')">🗑</button>`:''}
         </div>`;
       wrap.appendChild(div);
     });
