@@ -935,7 +935,7 @@ async function sendDailyReport(dateStr){
   const abonSingle=abonEntries.filter(e=>e.type==='single').length;
 
   const [y,m,d]=dateStr.split('-');
-  const totalVisitors = count + abonCount;
+  const totalVisitors = count;
   let msg=`📊 Звіт за ${d}.${m}.${y}\n`+
     `👥 Всього відвідувачів: ${totalVisitors}\n\n`;
 
