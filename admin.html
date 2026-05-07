@@ -1248,7 +1248,12 @@ function renderAbonList(data){
   }
   wrap.innerHTML='';
   Object.entries(data)
-    .sort((a,b)=>a[1].name.localeCompare(b[1].name,'uk'))
+    .sort((a,b)=>{
+      const aMonthly = (a[1].monthlyLimit||0) > 0;
+      const bMonthly = (b[1].monthlyLimit||0) > 0;
+      if(aMonthly !== bMonthly) return aMonthly ? 1 : -1;
+      return a[1].name.localeCompare(b[1].name,'uk');
+    })
     .forEach(([key,val])=>{
       const visits       = val.visits||0;
       const monthlyLimit = val.monthlyLimit||0;
