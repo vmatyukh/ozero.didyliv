@@ -248,6 +248,9 @@ button.danger{background:#fdd}
 <script>
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
+const ADMIN_EMAIL = 'ozero.didyliv@gmail.com';
+let isAdmin = false;
 
 const $=id=>document.getElementById(id);
 const nowStr=()=>new Date().toLocaleString('uk-UA',{hour12:false}).replace(',','');
@@ -305,7 +308,8 @@ function renderList(){
           <span class="abon-results" style="position:relative"></span>
         </span>
       </span>
-      <span class="sum">${calcSum(p)} грн</span>`;
+      <span class="sum">${calcSum(p)} грн</span>
+      <button style="background:none;border:none;cursor:pointer;font-size:18px;color:#c0392b;padding:0 4px" title="Видалити">✕</button>`;
 
     // Чекбокси
     row.querySelectorAll('input[type=checkbox]').forEach(inp=>{
@@ -361,6 +365,12 @@ function renderList(){
       abonInput.onblur=()=>setTimeout(()=>abonResults.innerHTML='',200);
     }
 
+    // Кнопка видалення конкретного учасника
+    row.querySelector('button').onclick = ()=>{
+      participants = participants.filter(x=>x.id!==p.id);
+      renderList();
+    };
+
     wrap.appendChild(row);
   });
   updateTotals();
@@ -371,7 +381,6 @@ function updateTotals(){
   renderPreview();
 }
 $('add').onclick=addParticipant;
-$('remove').onclick=removeParticipant;
 $('clear').onclick=clearParticipants;
 
 function buildPayload(p){
@@ -1466,10 +1475,6 @@ function initAdmin(){
 }
 
 /* ===== Firebase Auth ===== */
-const auth = firebase.auth();
-const ADMIN_EMAIL = 'ozero.didyliv@gmail.com';
-let isAdmin = false;
-
 auth.onAuthStateChanged(user=>{
   if(user){
     isAdmin = user.email === ADMIN_EMAIL;
