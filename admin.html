@@ -209,8 +209,6 @@ button.danger{background:#fdd}
     </table>
   </fieldset>
 
-
-  <div id="previewFloat" class="previewWrap"></div>
   <pre id="statusFloat"></pre>
 
   <!-- Всі бронювання за день -->
@@ -801,7 +799,7 @@ function renderFloatTable(){
     <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
     <div class="stat-card"><strong>${Object.keys(sectorMap).length*SESSION_PRICES[floatSession]} грн</strong>Виручка</div>`;
 
-  renderFloatPreview(sectorMap);
+
 }
 
 function showManualBook(i){$(`manualRow_${i}`).style.display='';}
@@ -830,6 +828,33 @@ async function adminCancel(key,sectorNum,session){
   try{
     await db.ref(`bookings/${date}/${s}/${key}`).remove();
     setStatusFloat(`Сектор ${sectorNum} звільнено`);
+  }catch(e){setStatusFloat('Помилка: '+e.message);}
+}
+
+async function adminPrintByData(b){
+  const date = $('floatDate').value;
+  const [y,m,d] = date.split('-');
+  try{
+    await connect(true);
+    const logoBytes = await logoRaster();
+    const lines=[
+      `Дата: ${nowStr()}`,
+      '—————————————————',
+      'Квиток рибалки',
+      'Поплавцеве озеро',
+      `Сесія: ${SESSION_LABELS[b.sessionKey]}`,
+      `Сектор: ${b.sector}`,
+      `Імʼя: ${b.name||'—'}`,
+      `День: ${d}.${m}.${y}`,
+      `Сума: ${b.price||SESSION_PRICES[b.sessionKey]} грн`,
+      '—————————————————',
+      'Гарного кльову!',
+    ];
+    const tr=textBlockRaster(lines,{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+    const li=textBlockRaster(['——————————————'],{center:true});
+    const qr=await qrRaster();
+    await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
+    setStatusFloat(`✅ Чек сектору ${b.sector} надруковано`);
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 }
 
@@ -1201,10 +1226,15 @@ function renderAllBookings(){
         <td>${b.price||SESSION_PRICES[b.sessionKey]||'—'} грн</td>
         <td>${b.buyFish?'🐟':'—'}</td>
         <td>
+          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
           ${canCancel?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
         </td>`;
+      const btns = tr.querySelectorAll('button');
+      let btnIdx = 0;
+      // Кнопка друку завжди перша
+      btns[btnIdx++].onclick = ()=> adminPrintByData(b);
       if(canCancel){
-        tr.querySelector('button').onclick = ()=>{
+        btns[btnIdx].onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
               .then(()=>renderAllBookings())
