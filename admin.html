@@ -47,6 +47,7 @@ button.danger{background:#fdd}
 .participant{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #eee;flex-wrap:wrap}
 .participant label{white-space:nowrap}
 .participant .sum{min-width:90px;text-align:right;font-weight:600}
+.participant .del-btn{margin-left:auto;flex-shrink:0}
 #totalSum{font-weight:700;text-align:right;margin-top:8px}
 .previewWrap{display:grid;grid-template-columns:repeat(4,220px);gap:5px;margin-top:10px}
 .ticketPreview{border:1px dashed #ddd;border-radius:8px;padding:12px;background:#fafafa}
@@ -309,7 +310,7 @@ function renderList(){
         </span>
       </span>
       <span class="sum">${calcSum(p)} грн</span>
-      <button style="background:none;border:none;cursor:pointer;font-size:16px;color:#c0392b;padding:0 4px;line-height:1" title="Видалити">🗑</button>`;
+      <button class="del-btn" style="background:none;border:none;cursor:pointer;font-size:16px;font-weight:700;color:#c0392b;padding:0 4px;line-height:1" title="Видалити">✕</button>`;
 
     // Чекбокси
     row.querySelectorAll('input[type=checkbox]').forEach(inp=>{
