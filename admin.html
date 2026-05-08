@@ -162,7 +162,7 @@ button.danger{background:#fdd}
       <div style="position:relative;display:inline-block">
         <div id="statsDateDisplay"
           style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px;padding-right:32px"></div>
-        <input type="date" id="statsDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:0;pointer-events:none">
+        <input type="date" id="statsDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
       </div>
       <button onclick="loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">🔍 Показати</button>
       <button onclick="document.getElementById('statsDate').value=tgDateStr();loadSpinningStats()" class="secondary" style="padding:7px 14px;font-size:13px">Сьогодні</button>
@@ -180,7 +180,7 @@ button.danger{background:#fdd}
     <div style="position:relative;display:inline-block">
       <div id="floatDateDisplay"
         style="padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px;padding-right:32px"></div>
-      <input type="date" id="floatDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:0;pointer-events:none">
+      <input type="date" id="floatDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
     </div>
     <button class="secondary" onclick="setFloatDate(-1)">◀ Вчора</button>
     <button class="secondary" onclick="setFloatDate(0)">Сьогодні</button>
@@ -632,9 +632,17 @@ function initDateDisplay(displayId, inputId){
   const display = document.getElementById(displayId);
   const input   = document.getElementById(inputId);
   if(!display||!input) return;
-  display.addEventListener('click', ()=>{
-    try{ input.showPicker(); }catch(e){ input.focus(); input.click(); }
-  });
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(!isMobile){
+    // Десктоп — display div ловить клік і викликає showPicker
+    input.style.pointerEvents='none';
+    input.style.zIndex='0';
+    display.style.cursor='pointer';
+    display.addEventListener('click', ()=>{
+      try{ input.showPicker(); }catch(e){ input.focus(); }
+    });
+  }
+  // Мобільний — інпут з z-index:2 сам ловить тап
 }
 
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
