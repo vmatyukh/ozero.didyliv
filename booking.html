@@ -285,12 +285,6 @@ function loadAvailability(){
   availabilityUnsub = {ref, fn};
 }
 
-// Слухаємо доступність секторів від адміна
-db.ref('sectorAvailability').on('value', snap=>{
-  availabilityData = snap.val() || {};
-  updateUnavailable();
-});
-
 function updateUnavailable(){
   unavailableSectors = {};
   if(!selectedSession) return;
