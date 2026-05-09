@@ -509,21 +509,11 @@ async function qrRaster(){
 
 $('printBtn').onclick=async()=>{
   if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
-  // Зберігаємо статистику одразу
+  // Зберігаємо статистику і списуємо абонементи одразу — незалежно від принтера
   await saveStats(participants).catch(()=>{});
-  try{
-    await connect(true);
-    const logoBytes=await logoRaster();
-    for(const p of participants){
-      const d=buildPayload(p);
-      const tr=textBlockRaster(buildTextLines(d),{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
-      const li=textBlockRaster(['——————————————'],{center:true});
-      const qr=await qrRaster();
-      await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
-    }
-    // Списуємо абонементи
-    for(const p of participants){
-      if(p.freeType==='abon' && p.abonKey){
+  for(const p of participants){
+    if(p.freeType==='abon' && p.abonKey){
+      try{
         const snap = await db.ref(`abonements/${p.abonKey}`).once('value');
         const val = snap.val();
         if(val){
@@ -539,18 +529,27 @@ $('printBtn').onclick=async()=>{
               await db.ref(`abonements/${p.abonKey}`).update({visits:newVisits});
             }
           }
-          // Зберігаємо в статистику абонементів
           await db.ref(`stats/${tgDateStr()}/abonements`).push({
             name: p.abonName, type: useMonthly?'monthly':'single', time: nowStr()
           });
         }
-      }
+      }catch(e){ console.error('Abonement error:', e); }
+    }
+  }
+  try{
+    await connect(true);
+    const logoBytes=await logoRaster();
+    for(const p of participants){
+      const d=buildPayload(p);
+      const tr=textBlockRaster(buildTextLines(d),{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+      const li=textBlockRaster(['——————————————'],{center:true});
+      const qr=await qrRaster();
+      await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
     }
     setStatus('✅ Надруковано: '+participants.length+' чек(и)');
     clearParticipants();
   }catch(e){
     setStatus('⚠️ Статистику збережено, але помилка друку: '+e.message);
-    // Не очищаємо список — адмін може спробувати ще раз
   }
 };
 
