@@ -190,7 +190,7 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
 
     <!-- Правила -->
     <div class="card">
-      <a href="float_rules.html" target="_blank" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:#005356;font-size:15px;font-weight:600;margin-bottom:14px">
+      <a onclick="showRules()" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:#005356;font-size:15px;font-weight:600;margin-bottom:14px;cursor:pointer">
         <span>📋 Правила риболовлі</span>
         <span style="font-size:18px">→</span>
       </a>
@@ -219,6 +219,101 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
     <button onclick="resetForm()" style="margin-top:20px;padding:10px 24px;background:#fff;color:#005356;border:none;border-radius:8px;font-weight:700;cursor:pointer">Забронювати ще раз</button>
   </div>
 
+</div>
+
+<!-- ===== ЕКРАН ПРАВИЛ ===== -->
+<div id="rulesScreen" style="display:none">
+  <div style="background:#005356;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10">
+    <button onclick="hideRules()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;line-height:1">←</button>
+    <span style="font-size:16px;font-weight:600">Правила риболовлі</span>
+  </div>
+  <div style="max-width:700px;margin:0 auto;padding:16px">
+
+    <div class="card">
+      <h2 style="font-size:16px">1. Філософія нашого озера</h2>
+      <p style="font-size:14px;line-height:1.7;margin:0">Ми підтримуємо <strong>спортивну риболовлю</strong> — заради задоволення від процесу, а не видобутку. Просимо кожного відвідувача поважати цей принцип.</p>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px">2. Час роботи та сесії</h2>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="background:#e0f0f0">
+            <th style="padding:8px;text-align:left;color:#005356">Сесія</th>
+            <th style="padding:8px;text-align:left;color:#005356">☀️ Літо (квіт–жовт)</th>
+            <th style="padding:8px;text-align:left;color:#005356">🍂 Міжсезоння</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee">🌅 Ранкова</td><td style="padding:8px;border-bottom:1px solid #eee">06:00–13:00</td><td style="padding:8px;border-bottom:1px solid #eee">07:00–13:00</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee">🌆 Вечірня</td><td style="padding:8px;border-bottom:1px solid #eee">14:00–21:00</td><td style="padding:8px;border-bottom:1px solid #eee">13:00–18:00</td></tr>
+            <tr><td style="padding:8px">☀️ Денна</td><td style="padding:8px">06:00–21:00</td><td style="padding:8px">07:00–18:00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin:10px 0 0;background:#fff8e1;padding:8px 12px;border-radius:8px;border-left:3px solid #f39c12">❄️ Зимовий сезон — уточнюйте у адміністратора.</p>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px">3. Дозволені снасті</h2>
+      <ul style="font-size:14px;line-height:1.8;margin:0;padding-left:18px">
+        <li>Виключно поплавкові вудочки (махова, болонська, матч, штекер)</li>
+        <li>Максимальна довжина вудлища — <strong>7 м</strong></li>
+        <li>Не більше <strong>2 вудочок</strong> на один місток, максимум <strong>2 особи</strong></li>
+        <li>Повідець — лише з одним гачком</li>
+        <li>Підсак та екстрактор — обов'язкові (оренда на місці)</li>
+      </ul>
+      <p style="font-size:13px;margin:10px 0 0;background:#fdd;padding:8px 12px;border-radius:8px">Будь-які інші снасті — <strong>ЗАБОРОНЕНІ</strong></p>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px">4. Насадки та прикормка</h2>
+      <p style="font-size:13px;margin:0 0 8px"><strong>✅ Дозволено:</strong> черв'як, опариш, кукурудза, тісто/хліб, бойли, пелети, перловка, горох</p>
+      <p style="font-size:13px;margin:0 0 8px">Прикормка — до 0,5–1 кг/сесію, тільки руками або рогаткою. Годівниці заборонені.</p>
+      <p style="font-size:13px;margin:0;background:#fdd;padding:8px 12px;border-radius:8px"><strong>❌ Заборонено:</strong> живець, хімічні ароматизатори</p>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px">5. Поводження з рибою</h2>
+      <p style="font-size:14px;margin:0 0 10px">Вся риба, яку не викуповуєте — <strong>негайно відпускається</strong>. Тримати в садку без викупу — заборонено.</p>
+      <p style="font-size:13px;margin:0 0 8px"><strong>🐟 Тільки відпуск:</strong> щука, окунь, амур, лин, в'юн</p>
+      <p style="font-size:13px;font-weight:600;margin:0 0 6px">🛒 Можна викупити:</p>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="background:#e0f0f0">
+            <th style="padding:7px;text-align:left;color:#005356">Вид</th>
+            <th style="padding:7px;text-align:left;color:#005356">Екз.</th>
+            <th style="padding:7px;text-align:left;color:#005356">За сесію</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:7px;border-bottom:1px solid #eee">Плотва, краснопірка</td><td style="padding:7px;border-bottom:1px solid #eee">—</td><td style="padding:7px;border-bottom:1px solid #eee">—</td></tr>
+            <tr><td style="padding:7px;border-bottom:1px solid #eee">Карась</td><td style="padding:7px;border-bottom:1px solid #eee">до 1 кг</td><td style="padding:7px;border-bottom:1px solid #eee">до 2 кг</td></tr>
+            <tr><td style="padding:7px">Короп</td><td style="padding:7px">до 3 кг</td><td style="padding:7px">до 3 кг</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px">6. Правила поведінки</h2>
+      <ul style="font-size:14px;line-height:1.8;margin:0;padding-left:18px">
+        <li>Тиша та повага до інших рибалок</li>
+        <li>Чистота на містку та березі</li>
+        <li>Дбати про рослинність та берегову зону</li>
+      </ul>
+      <h2 style="font-size:16px;margin-top:16px">7. Заборонено</h2>
+      <p style="font-size:13px;margin:0;background:#fdd;padding:8px 12px;border-radius:8px">Інші снасті • більше 2 осіб на містку • садок без викупу • смітити • вогонь • купатися</p>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px">8. Порушення</h2>
+      <p style="font-size:14px;margin:0 0 10px">Попередження → припинення риболовлі → видалення з території → заборона на відвідування.</p>
+      <p style="font-size:13px;margin:0 0 16px;background:#fdd;padding:8px 12px;border-radius:8px">❗ Оплата у разі порушення <strong>не повертається</strong>.</p>
+      <p style="font-size:14px;margin:0">Дякуємо, що поважаєте природу! 🌿<br>
+        З питань звертайтесь: <a href="tel:0638454040" style="color:#005356;font-weight:700">063 845 40 40</a></p>
+    </div>
+
+    <button onclick="hideRules()" class="btn-primary" style="margin-bottom:16px">← Назад до бронювання</button>
+  </div>
 </div>
 
 <script>
@@ -650,6 +745,18 @@ function showLoading(v){ document.getElementById('loadingOverlay').classList.tog
   });
 })();
 window.isValidPhone = v => /^\+380\d{9}$/.test(v.replace(/\s/g,''));
+
+/* ===== Роутинг правил ===== */
+function showRules(){
+  document.querySelector('.container').style.display='none';
+  document.getElementById('rulesScreen').style.display='block';
+  window.scrollTo(0,0);
+}
+function hideRules(){
+  document.getElementById('rulesScreen').style.display='none';
+  document.querySelector('.container').style.display='block';
+  window.scrollTo(0,0);
+}
 
 renderSessionCards();
 renderSectors({});
