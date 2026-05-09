@@ -188,6 +188,18 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
       </div>
     </div>
 
+    <!-- Правила -->
+    <div class="card">
+      <a href="float_rules.html" target="_blank" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:#005356;font-size:15px;font-weight:600;margin-bottom:14px">
+        <span>📋 Правила риболовлі</span>
+        <span style="font-size:18px">→</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="agreeRules" style="width:20px;height:20px;cursor:pointer;flex-shrink:0">
+        <label for="agreeRules" style="font-size:14px;color:#222;cursor:pointer;margin:0">Я ознайомився з правилами і погоджуюся їх дотримуватись</label>
+      </div>
+    </div>
+
     <!-- Підсумок -->
     <div class="card">
       <h2>📋 Підсумок</h2>
@@ -466,11 +478,16 @@ async function submitBooking(){
   const name  = document.getElementById('inputName').value.trim();
   const phone = document.getElementById('inputPhone').value.trim();
   const buyFish = document.getElementById('inputBuyFish')?.checked||false;
+  const agreeRules = document.getElementById('agreeRules')?.checked||false;
   let ok=true;
   document.getElementById('errName').style.display  = name  ?'none':'block'; if(!name)  ok=false;
   const phoneValid = window.isValidPhone(phone);
   document.getElementById('errPhone').style.display = phoneValid ?'none':'block'; if(!phoneValid) ok=false;
   document.getElementById('errGeneral').style.display='none';
+  if(!agreeRules){
+    const eg=document.getElementById('errGeneral');
+    eg.textContent='Потрібно погодитись з правилами риболовлі'; eg.style.display='block'; ok=false;
+  }
   if(!date||!selectedSession||!selectedSector){
     const eg=document.getElementById('errGeneral');
     eg.textContent='Оберіть дату, сесію та сектор'; eg.style.display='block'; ok=false;
@@ -531,6 +548,8 @@ function resetForm(){
   document.querySelectorAll('.session-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('inputName').value='';
   document.getElementById('inputPhone').value='';
+  const agreeEl = document.getElementById('agreeRules');
+  if(agreeEl) agreeEl.checked=false;
   document.getElementById('inputDate').value=todayStr;
   updateDateDisplay(todayStr);
   document.getElementById('dateOverlay').style.display='flex';
