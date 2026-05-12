@@ -696,7 +696,7 @@ function loadFloatBookings(){
       Object.keys(combined).forEach(k=>{ if(combined[k].session===s) delete combined[k]; });
       snap.forEach(child=>{
         const d=child.val();
-        if(d&&d.sector) combined[d.sector]={session:s,key:child.key,...d};
+        if(d&&d.sector&&!d.earlyLeave) combined[d.sector]={session:s,key:child.key,...d};
       });
       // Розділяємо на поточну сесію і заблоковані
       floatBookings={};
