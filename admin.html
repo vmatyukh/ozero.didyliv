@@ -300,7 +300,7 @@ function renderList(){
         <span style="font-size:13px">🆓</span>
         <select data-field="freeType" style="padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px">
           <option value="">— платний —</option>
-          <option value="child" ${p.freeType==='child'?'selected':''}>Діти до 10 р.</option>
+          <option value="child" ${p.freeType==='child'?'selected':''}>Діти до 14 р.</option>
           <option value="cert"  ${p.freeType==='cert' ?'selected':''}>Сертифікат</option>
           <option value="abon"  ${p.freeType==='abon' ?'selected':''}>Абонемент</option>
         </select>
@@ -397,7 +397,7 @@ function buildTextLines(d){
   if(d.instrument) lines.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
   if(d.discount)   lines.push('Пільга −50%');
   if(d.free){
-    const label = d.freeType==='child'?'Діти до 10 років':d.freeType==='cert'?'Сертифікат':d.abonName?`Абонемент: ${d.abonName}`:'Безкоштовно';
+    const label = d.freeType==='child'?'Діти до 14 років':d.freeType==='cert'?'Сертифікат':d.abonName?`Абонемент: ${d.abonName}`:'Безкоштовно';
     lines.push(label);
   }
   lines.push(`Сума: ${d.free?'Безкоштовно':d.amount+' грн'}`);
@@ -1136,7 +1136,16 @@ function editStatRow(key, e){
   row.innerHTML=`
     <td colspan="8" style="padding:8px;background:#f9f9f9">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <label style="font-size:13px"><input type="checkbox" id="ed_free"     ${e.free       ?'checked':''}> 🆓 Безкоштовно</label>
+        <label style="font-size:13px"><input type="checkbox" id="ed_free"     ${e.free       ?'checked':''}> 🆓</label>
+        <select id="ed_freeType" style="padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px;display:${e.free?'inline':'none'}">
+          <option value="child" ${e.freeType==='child'?'selected':''}>Діти до 14 р.</option>
+          <option value="cert"  ${e.freeType==='cert' ?'selected':''}>Сертифікат</option>
+          <option value="abon"  ${e.freeType==='abon' ?'selected':''}>Абонемент</option>
+        </select>
+        <span id="ed_abonWrap" style="display:${e.freeType==='abon'&&e.free?'inline':'none'}">
+          <input type="text" id="ed_abonName" value="${e.abonName||''}" placeholder="Ім'я абонемента"
+            style="padding:4px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px;width:140px">
+        </span>
         <label style="font-size:13px"><input type="checkbox" id="ed_discount" ${e.discount   ?'checked':''}> Пільга</label>
         <label style="font-size:13px"><input type="checkbox" id="ed_pidsak"   ${e.pidsak     ?'checked':''}> Підсак</label>
         <label style="font-size:13px"><input type="checkbox" id="ed_instr"    ${e.instrument ?'checked':''}> Інстр.</label>
@@ -1145,12 +1154,23 @@ function editStatRow(key, e){
         <button id="ed_cancel_btn" style="padding:4px 10px;font-size:13px;border:none;border-radius:6px;background:#eee;cursor:pointer">✖</button>
       </div>
     </td><td></td>`;
+
+  // Показуємо/ховаємо тип безкоштовного
+  row.querySelector('#ed_free').onchange = e2=>{
+    row.querySelector('#ed_freeType').style.display = e2.target.checked?'inline':'none';
+    if(!e2.target.checked) row.querySelector('#ed_abonWrap').style.display='none';
+  };
+  row.querySelector('#ed_freeType').onchange = e2=>{
+    row.querySelector('#ed_abonWrap').style.display = e2.target.value==='abon'?'inline':'none';
+  };
   row.querySelector('#ed_save_btn').onclick   = ()=> saveStatRow(key);
   row.querySelector('#ed_cancel_btn').onclick = ()=> db.ref(`stats/${getStatsDate()}/spinning`).once('value', s=>renderSpinningStats(s.val(), getStatsDate()));
 }
 
 async function saveStatRow(key){
   const free       = document.getElementById('ed_free')    ?.checked||false;
+  const freeType   = document.getElementById('ed_freeType')?.value||'';
+  const abonName   = document.getElementById('ed_abonName')?.value.trim()||'';
   const discount   = document.getElementById('ed_discount')?.checked||false;
   const pidsak     = document.getElementById('ed_pidsak')  ?.checked||false;
   const instrument = document.getElementById('ed_instr')   ?.checked||false;
@@ -1165,7 +1185,8 @@ async function saveStatRow(key){
 
   try{
     await db.ref(`stats/${getStatsDate()}/spinning/${key}`).update({
-      free, discount, pidsak, instrument, cardPayment, amount
+      free, freeType: free?freeType:'', abonName: free&&freeType==='abon'?abonName:'',
+      discount, pidsak, instrument, cardPayment, amount
     });
   }catch(e){setStatus('Помилка: '+e.message);}
 }
