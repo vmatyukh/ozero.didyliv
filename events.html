@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Хижа Ліга Дідилів 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #005356; --green-dark: #003a3c; --green-mid: #00888d;
+  --bg: #011516; --bg2: #02292a; --surface: #032e2f;
+  --border: rgba(0,83,86,0.35); --text: #f0f4f1; --text-muted: #8aab96;
+  --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32;
+  --font-display: 'Oswald', sans-serif; --font-body: 'Inter', sans-serif;
+}
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+.page { display: none; animation: fadeIn 0.2s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SHARED ── */
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 48px; }
+.top-bar { display: flex; align-items: center; gap: 10px; padding: 16px 0 20px; }
+.back-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+.back-btn:hover { background: var(--bg2); }
+.back-btn svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.page-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text); }
+.btn-fill { height: 48px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; background: var(--green); color: #fff; cursor: pointer; font-family: var(--font-display); letter-spacing: 0.04em; transition: background 0.15s, transform 0.1s; padding: 0 20px; }
+.btn-fill:hover { background: var(--green-dark); }
+.btn-fill:active { transform: scale(0.98); }
+.btn-fill:disabled { background: #013a3c; cursor: not-allowed; }
+.btn-outline { height: 48px; border-radius: 10px; font-size: 15px; font-weight: 500; border: 1.5px solid var(--green); background: transparent; color: var(--green); cursor: pointer; font-family: var(--font-display); letter-spacing: 0.03em; transition: background 0.15s; padding: 0 20px; }
+.btn-outline:hover { background: rgba(0,83,86,0.12); }
+.section-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+.loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+.spinner-sm { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+
+/* ── HOME ── */
+.home-hero { max-width: 960px; margin: 0 auto; padding: 32px 24px 0; }
+.home-title { font-family: var(--font-display); font-size: 28px; font-weight: 600; line-height: 1.2; margin-bottom: 6px; }
+.home-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+.home-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 0; }
+.home-footer-mobile { max-width: 960px; margin: 0 auto; padding: 16px 16px 0; display: none; }
+.home-footer-mobile .home-actions { flex-direction: column; }
+.home-footer-mobile .home-actions .btn-fill,
+.home-footer-mobile .home-actions .btn-outline { width: 100%; }
+
+@media (max-width: 680px) {
+  .home-hero { padding: 16px 16px 0; }
+  .home-footer-mobile { display: block; }
+  .wrap { padding: 0 16px 48px; }
+}
+@media (min-width: 681px) { .home-footer-mobile { display: none; } }
+
+/* ── CALENDAR ── */
+.calendar-wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 0; }
+@media (max-width: 680px) { .calendar-wrap { padding: 24px 16px 0; } }
+.cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s; }
+.event-card:hover { border-color: var(--green-mid); }
+.event-card-top { padding: 16px 16px 12px; }
+.event-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+.badge-reg  { background: rgba(0,136,141,0.15); color: var(--green-mid); border: 1px solid rgba(0,136,141,0.3); }
+.badge-done { background: rgba(255,215,0,0.08); color: #d4b84a; border: 1px solid rgba(255,215,0,0.2); }
+.badge-soon { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+.event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.event-date  { font-size: 13px; color: var(--text-muted); }
+.event-card-bottom { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.event-card-bottom .btn-fill,
+.event-card-bottom .btn-outline { height: 38px; font-size: 13px; flex: 1; }
+.event-participants { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--text-muted); }
+.event-p-count { color: var(--green-mid); font-weight: 600; font-family: var(--font-display); font-size: 15px; }
+
+/* ── PARTICIPANTS ── */
+.participants-wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 0; }
+@media (max-width: 680px) { .participants-wrap { padding: 24px 16px 0; } }
+.participants-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.participants-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.participants-count { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 13px; color: var(--green-mid); }
+.participants-table { width: 100%; border-collapse: collapse; }
+.participants-table th { text-align: left; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 0 12px 10px; font-weight: 500; }
+.participants-table td { padding: 10px 12px; font-size: 14px; color: var(--text); border-top: 1px solid var(--border); }
+.participants-table tr:hover td { background: rgba(0,83,86,0.08); }
+.p-num { color: var(--text-muted); font-size: 13px; width: 32px; }
+.p-loading { text-align: center; padding: 24px; font-size: 14px; color: var(--text-muted); }
+.p-empty   { text-align: center; padding: 32px 16px; font-size: 14px; color: var(--text-muted); }
+
+/* ── LEADERBOARD ── */
+.lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.lb-header { background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%); padding: 20px 20px 16px; }
+.lb-header-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.lb-header-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table td { padding: 12px 16px; font-size: 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+.lb-table tr:hover td { background: rgba(0,83,86,0.08); }
+.lb-name   { font-weight: 500; }
+.lb-points { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--green-mid); text-align: right; }
+.lb-weight { font-size: 12px; color: var(--text-muted); text-align: right; }
+.lb-events { font-size: 12px; color: var(--text-muted); text-align: center; }
+.lb-empty  { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+.medal { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 12px; font-weight: 600; }
+.medal-1 { background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.35); color: var(--gold); }
+.medal-2 { background: rgba(192,192,192,0.1);  border: 1px solid rgba(192,192,192,0.25); color: var(--silver); }
+.medal-3 { background: rgba(205,127,50,0.12);  border: 1px solid rgba(205,127,50,0.3);  color: var(--bronze); }
+.place-num { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text-muted); }
+
+/* ── RESULTS ── */
+.tour-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
+.tour-tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); transition: all 0.15s; font-family: var(--font-display); }
+.tour-tab:hover { border-color: var(--green-mid); color: var(--text); }
+.tour-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
+.results-table-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.results-table { width: 100%; border-collapse: collapse; }
+.results-table th { background: var(--green); color: #fff; font-family: var(--font-display); font-size: 12px; padding: 10px 14px; text-align: left; letter-spacing: 0.05em; white-space: nowrap; }
+.results-table td { padding: 10px 14px; font-size: 13px; color: var(--text); border-top: 1px solid var(--border); vertical-align: middle; }
+.results-table tr:nth-child(even) td { background: rgba(0,83,86,0.05); }
+.results-table tr:hover td { background: rgba(0,83,86,0.1); }
+.points-badge { display: inline-block; background: rgba(0,83,86,0.2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 500; color: var(--green-mid); }
+.weight-val  { font-weight: 500; }
+.zero-weight { color: var(--text-muted); }
+.tour-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; gap: 24px; flex-wrap: wrap; }
+.ts-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.ts-value { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--green-mid); }
+
+/* ── REGISTRATION ── */
+.reg-wrap { max-width: 480px; margin: 0 auto; }
+.reg-event-info { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+.reg-event-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.reg-event-date { font-size: 13px; color: var(--text-muted); }
+.reg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 20px; }
+.field-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; margin-top: 16px; }
+.field-label:first-child { margin-top: 0; }
+input[type=text], input[type=tel] { width: 100%; height: 44px; padding: 0 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; font-family: var(--font-body); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+input::placeholder { color: #1a5558; }
+input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,83,86,0.2); }
+input.err { border-color: #e24b4a; }
+.err-msg { font-size: 12px; color: #f09595; margin-top: 4px; display: none; }
+.err-msg.show { display: block; }
+.field-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; opacity: 0.7; }
+.btn-submit { width: 100%; margin-top: 20px; height: 48px; background: var(--green); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; font-family: var(--font-display); letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+.btn-submit:hover { background: var(--green-dark); }
+.btn-submit:active { transform: scale(0.98); }
+.btn-submit:disabled { background: #013a3c; cursor: not-allowed; }
+.success { text-align: center; padding: 32px 16px; }
+.success-circle { width: 64px; height: 64px; border-radius: 50%; background: rgba(0,83,86,0.2); border: 1.5px solid var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.success-circle svg { width: 28px; height: 28px; stroke: var(--green-mid); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.success h2 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+.success p  { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+/* ── RULES ── */
+.rules-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
+@media (max-width: 680px) { .rules-wrap { padding: 0 16px 60px; } }
+.r-hero { text-align: center; padding: 0 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+.r-hero-title { font-family: var(--font-display); font-size: 30px; font-weight: 600; color: var(--green-mid); margin-bottom: 6px; }
+.r-hero-sub { font-size: 14px; color: var(--text-muted); }
+.r-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
+.r-nav a { font-size: 12px; color: var(--text-muted); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; cursor: pointer; background: var(--surface); transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+.r-nav a:hover { background: var(--green); color: #fff; border-color: var(--green); }
+.r-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+.r-body .r-section:nth-child(1),
+.r-body .r-section:nth-child(2),
+.r-body .r-section:nth-child(3) { grid-column: 1 / -1; }
+@media (max-width: 680px) { .r-body { grid-template-columns: 1fr; } }
+.r-section { margin-bottom: 28px; }
+.r-sec-title { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.09em; border-left: 3px solid var(--green); padding-left: 10px; margin-bottom: 12px; }
+.r-list { list-style: none; border-top: 1px solid var(--border); }
+.r-list li { font-size: 14px; color: var(--text); line-height: 1.6; padding: 9px 4px 9px 20px; border-bottom: 1px solid var(--border); position: relative; }
+.r-list li:last-child { border-bottom: none; }
+.r-list li::before { content: ""; position: absolute; left: 4px; top: 17px; width: 6px; height: 6px; border-radius: 50%; background: var(--green-mid); }
+.r-subhead { font-size: 11px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.07em; margin: 10px 0 2px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.r-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.r-table { width: 100%; border-collapse: collapse; }
+.r-table thead tr { background: var(--green); }
+.r-table thead td { font-family: var(--font-display); font-size: 13px; color: #fff; padding: 10px 14px; }
+.r-table tbody tr { border-bottom: 1px solid var(--border); }
+.r-table tbody tr:last-child { border-bottom: none; }
+.r-table tbody tr:nth-child(even) { background: rgba(0,83,86,0.07); }
+.r-table tbody td { padding: 9px 14px; font-size: 13px; color: var(--text); }
+.r-table tbody td:first-child { font-family: var(--font-display); color: var(--green-mid); white-space: nowrap; }
+.r-table tbody td.muted { color: var(--text-muted); }
+.fish-pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; }
+.fish-pill { background: rgba(0,83,86,0.2); border: 1px solid var(--border); color: var(--green-mid); font-size: 12px; font-weight: 500; padding: 3px 12px; border-radius: 20px; }
+.award-list { border-top: 1px solid var(--border); }
+.award-row { display: flex; gap: 12px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.award-row:last-child { border-bottom: none; }
+.medal-r { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+.m1 { background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.35); color: #FFD700; }
+.m2 { background: rgba(192,192,192,0.1);  border: 1px solid rgba(192,192,192,0.25); color: #C0C0C0; }
+.m3 { background: rgba(205,127,50,0.12);  border: 1px solid rgba(205,127,50,0.3);  color: #CD7F32; }
+.r-note { background: rgba(0,83,86,0.1); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-top: 10px; }
+.r-footer { text-align: center; padding: 24px 0 32px; border-top: 1px solid var(--border); margin-top: 8px; }
+.r-footer-slava { font-family: var(--font-display); font-size: 16px; color: var(--green-mid); letter-spacing: 0.05em; margin-bottom: 16px; }
+.r-footer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 400px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ HOME ══════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="home-hero">
+    <div class="home-title">Хижа Ліга Дідилів 2026</div>
+    <div class="home-sub">Серія рейтингових змагань зі спінінгової ловлі · Озеро Дідилів</div>
+    <div class="home-actions">
+      <button class="btn-fill"    onclick="navigate('leaderboard')">🏆 Лідерборд</button>
+      <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
+    </div>
+  </div>
+  <div class="home-footer-mobile">
+    <div class="home-actions">
+      <button class="btn-fill"    onclick="navigate('leaderboard')">🏆 Лідерборд</button>
+      <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
+    </div>
+  </div>
+
+  <div class="calendar-wrap">
+    <div class="section-title">Events — Хижа Ліга та інші події</div>
+    <div class="cal-grid" id="calGrid"><div class="loading">Завантаження...</div></div>
+  </div>
+
+  <div class="participants-wrap">
+    <div class="participants-header">
+      <div class="participants-title">Зареєстровані учасники</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="participants-count" id="pCount">—</div>
+        <button onclick="refreshParticipants()" id="refreshBtn" style="background:none;border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Оновити">
+          <svg id="refreshIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <table class="participants-table">
+      <thead><tr><th class="p-num">#</th><th>Ім'я</th></tr></thead>
+      <tbody id="pList"><tr><td colspan="2" class="p-loading">Завантаження...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ LEADERBOARD ══════════════════════════════ -->
+<div id="page-leaderboard" class="page">
+  <div class="wrap">
+    <div class="top-bar">
+      <button class="back-btn" onclick="navigate('home')">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="page-title">Лідерборд 2026</div>
+    </div>
+    <div class="lb-card">
+      <div class="lb-header">
+        <div class="lb-header-title">Хижа Ліга Дідилів 2026</div>
+        <div class="lb-header-sub">Рейтинг сезону · Індивідуальний залік</div>
+      </div>
+      <div id="lbContent"><div class="loading">Завантаження...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ RESULTS ══════════════════════════════ -->
+<div id="page-results" class="page">
+  <div class="wrap">
+    <div class="top-bar">
+      <button class="back-btn" onclick="navigate('home')">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="page-title" id="resultsTitle">Результати</div>
+    </div>
+    <div class="tour-tabs" id="tourTabs"></div>
+    <div id="resultsContent"><div class="loading">Завантаження...</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ REGISTRATION ══════════════════════════════ -->
+<div id="page-reg" class="page">
+  <div class="wrap">
+    <div class="top-bar">
+      <button class="back-btn" onclick="navigate('home')">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="page-title">Реєстрація</div>
+    </div>
+    <div class="reg-wrap">
+      <div class="reg-event-info" id="regEventInfo"></div>
+      <div class="reg-card" id="regCard">
+        <div class="field-label">Ім'я та прізвище</div>
+        <input type="text" id="fullname" placeholder="Іван Петренко" autocomplete="name" />
+        <div class="err-msg" id="fullname-err">Введіть ім'я та прізвище</div>
+        <div class="field-label">Номер телефону</div>
+        <input type="tel" id="phone" placeholder="+380 XX XXX XX XX" autocomplete="tel" />
+        <div class="err-msg" id="phone-err">Введіть коректний номер</div>
+        <div class="field-hint">Формат: +380... або 0XX XXX XX XX</div>
+        <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Зареєструватись</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ RULES ══════════════════════════════ -->
+<div id="page-rules" class="page">
+  <div class="top-bar" style="max-width:860px;margin:0 auto;padding-left:24px;padding-right:24px">
+    <button class="back-btn" onclick="navigate('home')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="page-title">Регламент</div>
+  </div>
+  <div class="rules-wrap">
+    <div class="r-hero">
+      <div class="r-hero-title">Хижа Ліга Дідилів 2026</div>
+      <div class="r-hero-sub">Регламент змагань зі спінінгової ловлі · Озеро Дідилів · Індивідуальний залік</div>
+    </div>
+    <nav class="r-nav">
+      <a onclick="document.getElementById('r1').scrollIntoView({behavior:'smooth'})">1. Загальні положення</a>
+      <a onclick="document.getElementById('r2').scrollIntoView({behavior:'smooth'})">2. Місце і час</a>
+      <a onclick="document.getElementById('r3').scrollIntoView({behavior:'smooth'})">3. Розклад</a>
+      <a onclick="document.getElementById('r4').scrollIntoView({behavior:'smooth'})">4. Учасники</a>
+      <a onclick="document.getElementById('r5').scrollIntoView({behavior:'smooth'})">5. Снасті</a>
+      <a onclick="document.getElementById('r6').scrollIntoView({behavior:'smooth'})">6. Правила туру</a>
+      <a onclick="document.getElementById('r7').scrollIntoView({behavior:'smooth'})">7. Залік та бали</a>
+      <a onclick="document.getElementById('r8').scrollIntoView({behavior:'smooth'})">8. Фіксація</a>
+      <a onclick="document.getElementById('r9').scrollIntoView({behavior:'smooth'})">9. Безпека</a>
+      <a onclick="document.getElementById('r10').scrollIntoView({behavior:'smooth'})">10. Суддівство</a>
+      <a onclick="document.getElementById('r11').scrollIntoView({behavior:'smooth'})">11. Нагородження</a>
+      <a onclick="document.getElementById('r12').scrollIntoView({behavior:'smooth'})">12. Заключне</a>
+    </nav>
+    <div class="r-body">
+      <div class="r-section" id="r1">
+        <div class="r-sec-title">1. Загальні положення</div>
+        <ul class="r-list">
+          <li>Хижа Ліга Дідилів 2026 — відкритий турнір зі спінінгової ловлі хижої риби.</li>
+          <li>Організатор — Озеро Дідилів.</li>
+          <li>Формат — індивідуальний залік. 4 тури по 75 хвилин.</li>
+          <li>Принцип — «Спіймав — Зважив — Відпустив» (Catch & Release).</li>
+          <li>Частина коштів спрямовується на підтримку ЗСУ.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r2">
+        <div class="r-sec-title">2. Місце та час проведення</div>
+        <ul class="r-list">
+          <li>Місце проведення — Озеро Дідилів.</li>
+          <li>Тривалість одного туру — 75 хвилин.</li>
+          <li>Акваторія ділиться на дві зони А і Б.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r3">
+        <div class="r-sec-title">3. Розклад змагань</div>
+        <div class="r-table-wrap">
+          <table class="r-table">
+            <thead><tr><td style="width:70px">Час</td><td>Подія</td></tr></thead>
+            <tbody>
+              <tr><td>06:40</td><td>Реєстрація учасників</td></tr>
+              <tr><td>07:00</td><td>Відкриття, інструктаж та жеребкування</td></tr>
+              <tr><td>07:45</td><td>Старт 1-го туру (75 хв)</td></tr>
+              <tr><td>09:00</td><td>Фініш 1-го туру. Зважування. Перерва</td></tr>
+              <tr><td>09:15</td><td>Старт 2-го туру (75 хв)</td></tr>
+              <tr><td>10:30</td><td>Фініш 2-го туру. Зважування. Перерва</td></tr>
+              <tr><td>10:45</td><td>Старт 3-го туру (75 хв)</td></tr>
+              <tr><td>12:00</td><td>Фініш 3-го туру. Зважування. Перерва</td></tr>
+              <tr><td>12:15</td><td>Старт 4-го туру (75 хв)</td></tr>
+              <tr><td>13:30</td><td>Фініш 4-го туру. Фінальне зважування</td></tr>
+              <tr><td>13:45</td><td>Підбиття підсумків</td></tr>
+              <tr><td>14:00</td><td>Нагородження призерів</td></tr>
+              <tr><td>14:30</td><td>Спільне частування</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="r-note">Розклад може коригуватися організатором.</div>
+      </div>
+      <div class="r-section" id="r4">
+        <div class="r-sec-title">4. Учасники</div>
+        <ul class="r-list">
+          <li>До участі допускаються особи, які попередньо зареєструвались.</li>
+          <li>Учасник вважається зареєстрованим після підтвердження та сплати внеску.</li>
+          <li>Неповнолітні — лише у супроводі дорослих.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r5">
+        <div class="r-sec-title">5. Снасті та обладнання</div>
+        <div class="r-subhead">Дозволено</div>
+        <ul class="r-list">
+          <li>Спінінгове або кастингове вудилище — одне в активній ловлі.</li>
+          <li>Виключно штучні приманки.</li>
+          <li>Підсак — обов'язковий.</li>
+        </ul>
+        <div class="r-subhead">Заборонено</div>
+        <ul class="r-list">
+          <li>Живець та насадки тваринного походження.</li>
+          <li>Заходити у воду.</li>
+          <li>Допомога сторонніх осіб під час туру.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r6">
+        <div class="r-sec-title">6. Правила проведення туру</div>
+        <ul class="r-list">
+          <li>До сигналу «Старт» ловля заборонена.</li>
+          <li>Після «Фініш» ловля припиняється негайно.</li>
+          <li>Передача риби між учасниками — заборонена.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r7">
+        <div class="r-sec-title">7. Залік улову та підрахунок балів</div>
+        <div class="r-subhead">Залікова риба</div>
+        <div class="fish-pills">
+          <span class="fish-pill">Щука</span>
+          <span class="fish-pill">Окунь</span>
+          <span class="fish-pill">Судак</span>
+        </div>
+        <div class="r-table-wrap" style="margin-top:10px">
+          <table class="r-table">
+            <thead><tr><td>Ситуація</td><td>Правило</td></tr></thead>
+            <tbody>
+              <tr><td class="muted">За кожен тур</td><td>Бал = місце в цьому турі</td></tr>
+              <tr><td class="muted">Нульовий результат</td><td>К-сть учасників + 1 бал</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="r-note">Переможець — учасник з найменшою сумою балів за 4 тури.</div>
+      </div>
+      <div class="r-section" id="r8">
+        <div class="r-sec-title">8. Фіксація результатів</div>
+        <ul class="r-list">
+          <li>Зважування проводиться суддею.</li>
+          <li>За фальсифікацію — дискваліфікація.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r9">
+        <div class="r-sec-title">9. Безпека та поведінка</div>
+        <ul class="r-list">
+          <li>Дотримуватися правил техніки безпеки біля води.</li>
+          <li>Вживання алкоголю під час туру — заборонено.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r10">
+        <div class="r-sec-title">10. Суддівство</div>
+        <ul class="r-list">
+          <li>Суддя має право дискваліфікувати учасника.</li>
+          <li>Рішення головного судді є остаточним.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r11">
+        <div class="r-sec-title">11. Нагородження та номінації</div>
+        <div class="award-list">
+          <div class="award-row"><div class="medal-r m1">1</div><div>Кубок, медаль, грошовий приз та призи від партнерів</div></div>
+          <div class="award-row"><div class="medal-r m2">2</div><div>Кубок, медаль, грошовий приз та призи від партнерів</div></div>
+          <div class="award-row"><div class="medal-r m3">3</div><div>Кубок, медаль, грошовий приз та призи від партнерів</div></div>
+        </div>
+        <div class="r-subhead" style="margin-top:12px">Додаткові номінації</div>
+        <ul class="r-list">
+          <li>🐟 Big Fish — найбільша риба турніру.</li>
+          <li>🏆 ТОП 10 — подарунки від партнерів.</li>
+        </ul>
+      </div>
+      <div class="r-section" id="r12">
+        <div class="r-sec-title">12. Заключні положення</div>
+        <ul class="r-list">
+          <li>Участь означає повну згоду з цим Регламентом.</li>
+          <li>Учасник погоджується на фото- та відеозйомку.</li>
+          <li>Звіт про кошти на ЗСУ надається після заходу.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="r-footer">
+      <div class="r-footer-slava">Слава Україні! 🇺🇦</div>
+      <div class="r-footer-btns">
+        <button class="btn-outline" onclick="navigate('home')">На головну</button>
+        <button class="btn-fill"    onclick="navigate('home')">До подій</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL        = 'https://script.google.com/macros/s/AKfycbx4s_MzFxv0yPiOQ_LDxtauXhu5zhAGlgtR5XFPoFtLE_eKoY4wrTZfgNdyvdYDUkGf/exec';
+const SEASON         = '2026';
+
+// Token and chat IDs come from config.js; fallback to hardcoded values
+const BOT_TOKEN = (typeof TG_BOT_TOKEN !== 'undefined') ? TG_BOT_TOKEN : '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
+const CHAT_IDS  = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459515447', '592212598'];
+
+firebase.initializeApp(firebaseConfig);
+
+let activeRegRoundKey         = null;
+let activeRegTitle            = null;
+let activeRegDate             = null;
+let activeParticipantsRoundKey = null;
+
+/* ── Navigation ── */
+function navigate(page, params) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  window.scrollTo(0, 0);
+  if (page === 'leaderboard') loadLeaderboard();
+  if (page === 'results' && params) loadResults(params.roundKey, params.title);
+  if (page === 'reg'     && params) openReg(params);
+}
+
+/* ── Format date from Excel serial or ISO string ── */
+function fmtDate(val) {
+  if (!val) return '';
+  if (typeof val === 'number') {
+    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+    return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+  }
+  return String(val).split('T')[0].split('-').reverse().join('.');
+}
+
+/* ── Calendar ── */
+async function loadCalendar() {
+  try {
+    const res  = await fetch(`${API_URL}?action=rounds`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+
+    const allRounds = (data.rounds || []);
+
+    // Find active reg round for participants table
+    const activeRound = allRounds.find(r => r.status.regEnabled);
+    if (activeRound) {
+      activeParticipantsRoundKey = activeRound.roundKey;
+      loadParticipants();
+    } else {
+      document.getElementById('pCount').textContent = '—';
+      document.getElementById('pList').innerHTML = '<tr><td colspan="2" class="p-empty">Немає активної реєстрації</td></tr>';
+    }
+
+    // Sort: active reg first, then upcoming, then archived (newest first)
+    const active  = allRounds.filter(r => r.status.regEnabled);
+    const soon    = allRounds.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
+                             .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const done    = allRounds.filter(r => r.status.archived || r.status.resultsPublished)
+                             .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    const rounds  = [...active, ...soon, ...done];
+
+    const grid = document.getElementById('calGrid');
+    if (!rounds.length) { grid.innerHTML = '<div class="loading">Подій не знайдено</div>'; return; }
+
+    grid.innerHTML = rounds.map(r => {
+      const date     = fmtDate(r.date);
+      const archived = r.status.archived;
+      const regOpen  = r.status.regEnabled;
+      const results  = r.status.resultsPublished;
+
+      let badge, actions;
+      if (archived || results) {
+        badge   = `<span class="event-badge badge-done">✅ Завершено</span>`;
+        actions = `<button class="btn-fill" onclick="navigate('results',{roundKey:'${r.roundKey}',title:'${r.title}'})">Результати</button>`;
+      } else if (regOpen) {
+        badge   = `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>`;
+        actions = `<button class="btn-fill" onclick="navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Зареєструватися</button>`;
+      } else {
+        badge   = `<span class="event-badge badge-soon">📅 Скоро</span>`;
+        actions = '';
+      }
+
+      // Participants count on active reg card
+      const participantsBlock = regOpen ? `<div class="event-participants" id="cardParticipants">
+        <span class="event-p-label">Зареєстровано:</span>
+        <span class="event-p-count" id="cardPCount">—</span>
+      </div>` : '';
+
+      return `<div class="event-card">
+        <img src="posters/${r.roundKey}.jpg" alt="${r.title}" style="width:100%;display:block;border-radius:14px 14px 0 0;" onerror="this.style.display='none'">
+        <div class="event-card-top">
+          ${badge}
+          <div class="event-title">${r.title}</div>
+          <div class="event-date">📅 ${date}</div>
+          ${participantsBlock}
+        </div>
+        ${actions ? `<div class="event-card-bottom">${actions}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    // Update participants count on card after render
+    if (activeRound) updateCardParticipants();
+
+  } catch(e) {
+    document.getElementById('calGrid').innerHTML = `<div class="loading">Помилка завантаження</div>`;
+  }
+}
+
+/* ── Results ── */
+async function loadResults(roundKey, title) {
+  document.getElementById('resultsTitle').textContent = title || 'Результати';
+  document.getElementById('tourTabs').innerHTML = '';
+  document.getElementById('resultsContent').innerHTML = '<div class="loading">Завантаження...</div>';
+
+  try {
+    const res  = await fetch(`${API_URL}?action=roundResults&roundKey=${roundKey}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+
+    const results = data.results || [];
+    if (!results.length) {
+      document.getElementById('resultsContent').innerHTML = '<div class="loading">Результати ще не опубліковані</div>';
+      return;
+    }
+
+    const tabs = [
+      { key:'t1',    label:'Тур 1',           wKey:'t1_weight', pKey:'t1_points' },
+      { key:'t2',    label:'Тур 2',           wKey:'t2_weight', pKey:'t2_points' },
+      { key:'t3',    label:'Тур 3',           wKey:'t3_weight', pKey:'t3_points' },
+      { key:'t4',    label:'Тур 4',           wKey:'t4_weight', pKey:'t4_points' },
+      { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points' },
+    ];
+
+    const tabsEl = document.getElementById('tourTabs');
+    tabs.forEach((t, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'tour-tab' + (i === 4 ? ' active' : '');
+      btn.textContent = t.label;
+      btn.onclick = () => {
+        document.querySelectorAll('.tour-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderResultsTab(results, t);
+      };
+      tabsEl.appendChild(btn);
+    });
+
+    renderResultsTab(results, tabs[4]);
+
+  } catch(e) {
+    document.getElementById('resultsContent').innerHTML = `<div class="loading">Помилка: ${e.message}</div>`;
+  }
+}
+
+function renderResultsTab(results, tab) {
+  const isTotal = tab.key === 'total';
+
+  let sorted;
+  if (isTotal) {
+    sorted = [...results].sort((a, b) =>
+      Number(a.total_points) - Number(b.total_points) ||
+      Number(b.total_weight) - Number(a.total_weight));
+  } else {
+    const withFish = results.filter(r => Number(r[tab.wKey]) > 0)
+      .sort((a, b) => Number(b[tab.wKey]) - Number(a[tab.wKey]));
+    const noFish   = results.filter(r => Number(r[tab.wKey]) === 0);
+    sorted = [...withFish, ...noFish];
+  }
+
+  const totalWeight = sorted.reduce((s, r) => s + Number(r[tab.wKey] || 0), 0);
+  const nonZero     = sorted.filter(r => Number(r[tab.wKey]) > 0).length;
+
+  let html = '';
+
+  if (!isTotal) {
+    html += `<div class="tour-summary">
+      <div><div class="ts-label">Загальна вага</div><div class="ts-value">${(totalWeight/1000).toFixed(2)} кг</div></div>
+      <div><div class="ts-label">Зловили рибу</div><div class="ts-value">${nonZero} / ${sorted.length}</div></div>
+    </div>`;
+  }
+
+  html += `<div class="results-table-wrap"><table class="results-table">`;
+
+  if (isTotal) {
+    html += `<thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Бали</th><th>Вага (г)</th></tr></thead><tbody>`;
+    sorted.forEach((r, i) => {
+      const place = i + 1;
+      const placeEl = place === 1 ? `<span class="medal medal-1">1</span>` :
+                      place === 2 ? `<span class="medal medal-2">2</span>` :
+                      place === 3 ? `<span class="medal medal-3">3</span>` :
+                      `<span class="place-num">${place}</span>`;
+      const w = Number(r.total_weight || 0);
+      html += `<tr>
+        <td>${placeEl}</td>
+        <td style="font-weight:500">${r.name}</td>
+        <td><span class="points-badge">${r.total_points}</span></td>
+        <td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td>
+      </tr>`;
+    });
+  } else {
+    html += `<thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Вага (г)</th><th>Бали</th></tr></thead><tbody>`;
+    let place = 0;
+    sorted.forEach(r => {
+      const w = Number(r[tab.wKey] || 0);
+      const p = Number(r[tab.pKey] || 0);
+      if (w > 0) place++;
+      const placeEl = w > 0 && place <= 3 ? `<span class="medal medal-${place}">${place}</span>` :
+                      w > 0 ? `<span class="place-num">${place}</span>` : `<span class="place-num">—</span>`;
+      html += `<tr>
+        <td>${placeEl}</td>
+        <td style="font-weight:500">${r.name}</td>
+        <td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td>
+        <td><span class="points-badge">${p}</span></td>
+      </tr>`;
+    });
+  }
+
+  html += `</tbody></table></div>`;
+  document.getElementById('resultsContent').innerHTML = html;
+}
+
+/* ── Leaderboard ── */
+async function loadLeaderboard() {
+  document.getElementById('lbContent').innerHTML = '<div class="loading">Завантаження...</div>';
+  try {
+    const res  = await fetch(`${API_URL}?action=seasonRating&season=${SEASON}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+
+    const rating = data.rating || [];
+    if (!rating.length) {
+      document.getElementById('lbContent').innerHTML = '<div class="lb-empty">Рейтинг ще не сформовано</div>';
+      return;
+    }
+
+    let html = `<table class="lb-table"><tbody>`;
+    rating.forEach(r => {
+      const place = Number(r.place);
+      const placeEl = place === 1 ? `<span class="medal medal-1">1</span>` :
+                      place === 2 ? `<span class="medal medal-2">2</span>` :
+                      place === 3 ? `<span class="medal medal-3">3</span>` :
+                      `<span class="place-num">${place}</span>`;
+      html += `<tr>
+        <td style="width:44px">${placeEl}</td>
+        <td class="lb-name">${r.name}</td>
+        <td class="lb-events">${r.eventsCount} ет.</td>
+        <td class="lb-weight">${Number(r.totalWeight||0).toLocaleString('uk-UA')} г</td>
+        <td class="lb-points">${r.totalPoints} б</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById('lbContent').innerHTML = html;
+  } catch(e) {
+    document.getElementById('lbContent').innerHTML = '<div class="lb-empty">Помилка завантаження</div>';
+  }
+}
+
+/* ── Registration ── */
+function openReg(params) {
+  activeRegRoundKey = params.roundKey;
+  activeRegTitle    = params.title;
+  activeRegDate     = params.date;
+  document.getElementById('regEventInfo').innerHTML = `
+    <div class="reg-event-name">${params.title}</div>
+    <div class="reg-event-date">📅 ${params.date}</div>`;
+  document.getElementById('regCard').innerHTML = `
+    <div class="field-label">Ім'я та прізвище</div>
+    <input type="text" id="fullname" placeholder="Іван Петренко" autocomplete="name" />
+    <div class="err-msg" id="fullname-err">Введіть ім'я та прізвище</div>
+    <div class="field-label">Номер телефону</div>
+    <input type="tel" id="phone" placeholder="+380 XX XXX XX XX" autocomplete="tel" />
+    <div class="err-msg" id="phone-err">Введіть коректний номер</div>
+    <div class="field-hint">Формат: +380... або 0XX XXX XX XX</div>
+    <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Зареєструватись</button>`;
+}
+
+function validatePhone(v) {
+  return /^(\+380|380|0)\d{9}$/.test(v.replace(/[\s\-\(\)]/g, ''));
+}
+function setErr(id, show) {
+  document.getElementById(id).classList.toggle('err', show);
+  document.getElementById(id + '-err').classList.toggle('show', show);
+}
+
+async function handleSubmit() {
+  const name  = document.getElementById('fullname').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  let ok = true;
+  if (name.length < 3)       { setErr('fullname', true); ok = false; } else setErr('fullname', false);
+  if (!validatePhone(phone)) { setErr('phone',    true); ok = false; } else setErr('phone',    false);
+  if (!ok) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-sm"></span>Надсилаємо...';
+
+  try {
+    const res  = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'register', roundKey: activeRegRoundKey, name, phone })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Помилка');
+
+    const timestamp = new Date().toLocaleString('uk-UA', { hour12: false });
+    const text = `🎣 *Нова реєстрація — ${activeRegTitle}*\n\n👤 ${name}\n📞 ${phone}\n📅 ${activeRegDate}\n🕐 ${timestamp}`;
+    CHAT_IDS.forEach(chat_id =>
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id, text, parse_mode: 'Markdown' })
+      }).catch(() => {})
+    );
+
+    const first = name.split(' ')[0];
+    document.getElementById('regCard').innerHTML = `
+      <div class="success">
+        <div class="success-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h2>Готово, ${first}!</h2>
+        <p>Твою заявку на<br><strong>${activeRegTitle}</strong><br>прийнято.<br>Організатор зв'яжеться для підтвердження.</p>
+      </div>`;
+    loadParticipants();
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Зареєструватись';
+    alert('Помилка: ' + e.message);
+  }
+}
+
+async function updateCardParticipants() {
+  if (!activeParticipantsRoundKey) return;
+  try {
+    const res  = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${activeParticipantsRoundKey}`);
+    const data = await res.json();
+    const count = (data.ok && data.names) ? data.names.length : 0;
+    const el = document.getElementById('cardPCount');
+    if (el) el.textContent = count;
+  } catch(e) {}
+}
+
+/* ── Participants ── */
+async function loadParticipants() {
+  if (!activeParticipantsRoundKey) return;
+  try {
+    const res  = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${activeParticipantsRoundKey}`);
+    const data = await res.json();
+    const names = (data.ok && data.names) ? data.names : [];
+    const count = names.length;
+    document.getElementById('pCount').textContent =
+      count === 0 ? 'ще немає' :
+      count === 1 ? '1 учасник' :
+      count < 5   ? `${count} учасники` : `${count} учасників`;
+    const tbody = document.getElementById('pList');
+    tbody.innerHTML = count
+      ? names.map((n, i) => `<tr><td class="p-num">${i+1}</td><td>${n}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="p-empty">Поки що ніхто не зареєструвався.<br>Будь першим!</td></tr>';
+  } catch(e) {
+    document.getElementById('pList').innerHTML = '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
+  }
+}
+
+async function refreshParticipants() {
+  const icon = document.getElementById('refreshIcon');
+  const btn  = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  icon.style.animation = 'spin 0.7s linear infinite';
+  await loadParticipants();
+  icon.style.animation = '';
+  btn.disabled = false;
+}
+
+/* ── Init ── */
+loadCalendar();
+</script>
+</body>
+</html>
