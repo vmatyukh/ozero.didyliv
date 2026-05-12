@@ -82,38 +82,22 @@
 
   /* ── RULES PAGE ── */
   .rules-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
-
   .r-hero { text-align: center; padding: 0 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
   .r-hero-title { font-family: var(--font-display); font-size: 32px; font-weight: 600; color: var(--green-mid); letter-spacing: 0.02em; margin-bottom: 6px; }
   .r-hero-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
-  .r-hero-badge { display: inline-block; background: rgba(220,185,50,0.1); border: 1px solid rgba(220,185,50,0.3); color: #d4b84a; font-size: 13px; padding: 5px 16px; border-radius: 20px; }
-
   .r-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
   .r-nav a { font-size: 12px; color: var(--text-muted); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; cursor: pointer; background: var(--surface); transition: all 0.15s; text-decoration: none; white-space: nowrap; }
   .r-nav a:hover { background: var(--green); color: #fff; border-color: var(--green); }
-
-  /* two-column layout on desktop */
   .r-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
-  .r-body .r-section:nth-child(1),
-  .r-body .r-section:nth-child(2),
-  .r-body .r-section:nth-child(3) { grid-column: 1 / -1; }
+  .r-body .r-section:nth-child(1), .r-body .r-section:nth-child(2), .r-body .r-section:nth-child(3) { grid-column: 1 / -1; }
   @media (max-width: 680px) { .r-body { grid-template-columns: 1fr; } }
-
   .r-section { margin-bottom: 28px; }
-  .r-sec-title {
-    font-family: var(--font-display); font-size: 13px; font-weight: 500;
-    color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.09em;
-    border-left: 3px solid var(--green); padding-left: 10px; margin-bottom: 12px;
-  }
-
+  .r-sec-title { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.09em; border-left: 3px solid var(--green); padding-left: 10px; margin-bottom: 12px; }
   .r-list { list-style: none; border-top: 1px solid var(--border); }
   .r-list li { font-size: 14px; color: var(--text); line-height: 1.6; padding: 9px 4px 9px 20px; border-bottom: 1px solid var(--border); position: relative; }
   .r-list li:last-child { border-bottom: none; }
   .r-list li::before { content: ""; position: absolute; left: 4px; top: 17px; width: 6px; height: 6px; border-radius: 50%; background: var(--green-mid); }
-
   .r-subhead { font-size: 11px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.07em; margin: 10px 0 2px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-
-  /* Schedule table */
   .r-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
   .r-table { width: 100%; border-collapse: collapse; }
   .r-table thead tr { background: var(--green); }
@@ -124,12 +108,8 @@
   .r-table tbody td { padding: 9px 14px; font-size: 13px; color: var(--text); vertical-align: top; }
   .r-table tbody td:first-child { font-family: var(--font-display); color: var(--green-mid); white-space: nowrap; }
   .r-table tbody td.muted { color: var(--text-muted); }
-
-  /* Fish pills */
   .fish-pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; }
   .fish-pill { background: rgba(0,83,86,0.2); border: 1px solid var(--border); color: var(--green-mid); font-size: 12px; font-weight: 500; padding: 3px 12px; border-radius: 20px; }
-
-  /* Awards */
   .award-list { border-top: 1px solid var(--border); }
   .award-row { display: flex; gap: 12px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); }
   .award-row:last-child { border-bottom: none; }
@@ -138,9 +118,7 @@
   .m2 { background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.25); color: #C0C0C0; }
   .m3 { background: rgba(205,127,50,0.12); border: 1px solid rgba(205,127,50,0.3); color: #CD7F32; }
   .award-text { font-size: 14px; color: var(--text); }
-
   .r-note { background: rgba(0,83,86,0.1); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-top: 10px; }
-
   .r-footer { text-align: center; padding: 24px 0 32px; border-top: 1px solid var(--border); margin-top: 8px; }
   .r-footer-slava { font-family: var(--font-display); font-size: 16px; color: var(--green-mid); letter-spacing: 0.05em; margin-bottom: 16px; }
   .r-footer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 400px; margin: 0 auto; }
@@ -180,7 +158,7 @@
 <div id="page-home" class="page active">
   <div class="home-wrap">
     <div class="poster">
-      <img src="afisha.jpg" alt="Хижа Ліга Дідилів 2026" />
+      <img src="posters/hyzha_liga_2026_round_1.jpg" alt="Хижа Ліга Дідилів 2026" />
     </div>
     <div class="home-right">
       <div class="home-title">Хижа Ліга Дідилів 2026</div>
@@ -234,13 +212,11 @@
     </button>
     <div class="page-title">Регламент</div>
   </div>
-
   <div class="rules-wrap">
     <div class="r-hero">
       <div class="r-hero-title">Хижа Ліга Дідилів 2026</div>
       <div class="r-hero-sub">Регламент змагань зі спінінгової ловлі · Озеро Дідилів · Індивідуальний залік</div>
     </div>
-
     <nav class="r-nav">
       <a onclick="document.getElementById('r1').scrollIntoView({behavior:'smooth'})">1. Загальні положення</a>
       <a onclick="document.getElementById('r2').scrollIntoView({behavior:'smooth'})">2. Місце і час</a>
@@ -255,10 +231,7 @@
       <a onclick="document.getElementById('r11').scrollIntoView({behavior:'smooth'})">11. Нагородження</a>
       <a onclick="document.getElementById('r12').scrollIntoView({behavior:'smooth'})">12. Заключне</a>
     </nav>
-
     <div class="r-body">
-
-      <!-- 1 — full width -->
       <div class="r-section" id="r1">
         <div class="r-sec-title">1. Загальні положення</div>
         <ul class="r-list">
@@ -270,8 +243,6 @@
           <li>Частина коштів від внесків спрямовується на підтримку Збройних Сил України. Звіт про збір надається після заходу.</li>
         </ul>
       </div>
-
-      <!-- 2 — full width -->
       <div class="r-section" id="r2">
         <div class="r-sec-title">2. Місце та час проведення</div>
         <ul class="r-list">
@@ -281,8 +252,6 @@
           <li>Акваторія ділиться на дві зони А і Б, учасники згідно з жеребкуванням ловлять почергово в зоні А та зоні Б.</li>
         </ul>
       </div>
-
-      <!-- 3 — full width -->
       <div class="r-section" id="r3">
         <div class="r-sec-title">3. Розклад змагань</div>
         <div class="r-table-wrap">
@@ -307,8 +276,6 @@
         </div>
         <div class="r-note">Розклад може коригуватися організатором. Актуальний час оголошується на інструктажі.</div>
       </div>
-
-      <!-- 4 -->
       <div class="r-section" id="r4">
         <div class="r-sec-title">4. Учасники</div>
         <ul class="r-list">
@@ -318,8 +285,6 @@
           <li>Кожен учасник несе особисту відповідальність за власну безпеку.</li>
         </ul>
       </div>
-
-      <!-- 5 -->
       <div class="r-section" id="r5">
         <div class="r-sec-title">5. Снасті та обладнання</div>
         <div class="r-subhead">Дозволено</div>
@@ -338,20 +303,16 @@
           <li>Будь-яка допомога сторонніх осіб під час туру.</li>
         </ul>
       </div>
-
-      <!-- 6 -->
       <div class="r-section" id="r6">
         <div class="r-sec-title">6. Правила проведення туру</div>
         <ul class="r-list">
           <li>До сигналу «Старт» ловля заборонена.</li>
-          <li>Після сигналу «Фініш» ловля припиняється негайно. Риба, заведена в підсак до сигналу «Фініш», зараховується. Риба на гачку або в процесі виважування — не зараховується.</li>
+          <li>Після сигналу «Фініш» ловля припиняється негайно. Риба, заведена в підсак до сигналу «Фініш», зараховується.</li>
           <li>Передача риби між учасниками — заборонена.</li>
           <li>Навмисне перешкоджання іншим учасникам — заборонено.</li>
           <li>Під час туру учасники можуть вільно переміщатися між секторами у межах відведеної зони.</li>
         </ul>
       </div>
-
-      <!-- 7 -->
       <div class="r-section" id="r7">
         <div class="r-sec-title">7. Залік улову та підрахунок балів</div>
         <div class="r-subhead">Залікова риба</div>
@@ -360,7 +321,7 @@
           <span class="fish-pill">Окунь</span>
           <span class="fish-pill">Судак</span>
         </div>
-        <div class="r-note" style="margin-top:10px;margin-bottom:12px;">Приймається до зважування вся риба, спіймана за рот. Мінімальний розмір не встановлюється. Забагрена риба (гачок за межами жаберної кришки) до заліку не приймається. Риба зберігається в тканинному садку та після зважування суддею відпускається назад у водойму.</div>
+        <div class="r-note" style="margin-top:10px;margin-bottom:12px;">Приймається до зважування вся риба, спіймана за рот. Мінімальний розмір не встановлюється. Забагрена риба до заліку не приймається.</div>
         <div class="r-subhead">Система підрахунку балів</div>
         <div class="r-table-wrap">
           <table class="r-table">
@@ -372,27 +333,21 @@
             </tbody>
           </table>
         </div>
-        <div class="r-note">Приклад: місця в турах 3 + 1 + 5 + 1 = 10 балів. Переможець — учасник з найменшою сумою балів за всі 4 тури.</div>
+        <div class="r-note">Переможець — учасник з найменшою сумою балів за всі 4 тури.</div>
       </div>
-
-      <!-- 8 -->
       <div class="r-section" id="r8">
         <div class="r-sec-title">8. Фіксація результатів</div>
         <ul class="r-list">
           <li>Зважування проводиться суддею, результат фіксується у протоколі.</li>
           <li>За фальсифікацію ваги, передачу риби або неналежне поводження — дискваліфікація.</li>
-          <li>Допомога суперників або сторонніх осіб при виважуванні — заборонена.</li>
         </ul>
       </div>
-
-      <!-- 9 -->
       <div class="r-section" id="r9">
         <div class="r-sec-title">9. Безпека та поведінка</div>
         <div class="r-subhead">Обов'язки учасників</div>
         <ul class="r-list">
           <li>Дотримуватися правил техніки безпеки біля води.</li>
-          <li>Не заходити у воду без необхідності та без відповідного спорядження.</li>
-          <li>При виникненні нещасного випадку — негайно повідомити організатора або суддю.</li>
+          <li>При виникненні нещасного випадку — негайно повідомити організатора.</li>
         </ul>
         <div class="r-subhead">Заборонено</div>
         <ul class="r-list">
@@ -401,19 +356,14 @@
         </ul>
         <div class="r-note">Організатор не несе відповідальності за шкоду, завдану здоров'ю чи майну учасників.</div>
       </div>
-
-      <!-- 10 -->
       <div class="r-section" id="r10">
         <div class="r-sec-title">10. Суддівство</div>
         <ul class="r-list">
           <li>Контроль за дотриманням Регламенту здійснює суддівська колегія.</li>
           <li>Суддя має право винести попередження або дискваліфікувати учасника без апеляції.</li>
-          <li>У спірних ситуаціях, не передбачених Регламентом, рішення може прийматися колегіально — шляхом голосування суддівської колегії.</li>
           <li>Рішення головного судді є остаточним.</li>
         </ul>
       </div>
-
-      <!-- 11 -->
       <div class="r-section" id="r11">
         <div class="r-sec-title">11. Нагородження та номінації</div>
         <div class="award-list">
@@ -431,21 +381,17 @@
           <li>Смачне частування від організаторів.</li>
         </ul>
       </div>
-
-      <!-- 12 -->
       <div class="r-section" id="r12">
         <div class="r-sec-title">12. Заключні положення</div>
         <ul class="r-list">
           <li>Участь у турнірі означає повну згоду з цим Регламентом.</li>
           <li>Учасник погоджується на фото- та відеозйомку під час заходу та використання матеріалів організатором.</li>
           <li>Організатор залишає за собою право вносити зміни до Регламенту та повідомляти учасників завчасно.</li>
-          <li>У разі форс-мажорних обставин (погода, безпека, надзвичайні події) захід може бути перенесений або скасований.</li>
+          <li>У разі форс-мажорних обставин захід може бути перенесений або скасований.</li>
           <li>Звіт про благодійні кошти, направлені на підтримку ЗСУ, надається учасникам після проведення заходу.</li>
         </ul>
       </div>
-
-    </div><!-- /.r-body -->
-
+    </div>
     <div class="r-footer">
       <div class="r-footer-slava">Слава Україні! 🇺🇦</div>
       <div class="r-footer-btns">
@@ -479,22 +425,12 @@
 </div>
 
 <script>
-  const TG_BOT_TOKEN = '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
-  const TG_CHATS  = ['8459515447', '592212598'];
-  const ROUND_KEY = 'hyzha_liga_2026_round_1';
   const API_URL   = 'https://script.google.com/macros/s/AKfycbx4s_MzFxv0yPiOQ_LDxtauXhu5zhAGlgtR5XFPoFtLE_eKoY4wrTZfgNdyvdYDUkGf/exec';
+  const ROUND_KEY = 'hyzha_liga_2026_round_1';
+  const BOT_TOKEN = (typeof TG_BOT_TOKEN !== 'undefined') ? TG_BOT_TOKEN : '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
+  const CHAT_IDS  = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459515447', '592212598'];
 
   firebase.initializeApp(firebaseConfig);
-
-  async function refreshParticipants() {
-    const icon = document.getElementById('refreshIcon');
-    const btn  = document.getElementById('refreshBtn');
-    btn.disabled = true;
-    icon.style.animation = 'spin 0.7s linear infinite';
-    await loadParticipants();
-    icon.style.animation = '';
-    btn.disabled = false;
-  }
 
   function navigate(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -504,7 +440,7 @@
 
   async function loadParticipants() {
     try {
-      const res = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${ROUND_KEY}`);
+      const res  = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${ROUND_KEY}`);
       const data = await res.json();
       const names = (data.ok && data.names) ? data.names : [];
       const count = names.length;
@@ -521,6 +457,16 @@
     } catch(e) {
       document.getElementById('pList').innerHTML = '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
     }
+  }
+
+  async function refreshParticipants() {
+    const icon = document.getElementById('refreshIcon');
+    const btn  = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    icon.style.animation = 'spin 0.7s linear infinite';
+    await loadParticipants();
+    icon.style.animation = '';
+    btn.disabled = false;
   }
 
   loadParticipants();
@@ -546,7 +492,7 @@
     btn.innerHTML = '<span class="spinner"></span>Надсилаємо...';
 
     try {
-      const res = await fetch(API_URL, {
+      const res  = await fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'register', roundKey: ROUND_KEY, name, phone })
       });
@@ -555,8 +501,8 @@
 
       const timestamp = new Date().toLocaleString('uk-UA', { hour12: false });
       const text = `🎣 *Нова реєстрація — Хижа Ліга Дідилів*\n\n👤 ${name}\n📞 ${phone}\n📅 25.04.2026\n🕐 ${timestamp}`;
-      TG_CHATS.forEach(chat_id =>
-        fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+      CHAT_IDS.forEach(chat_id =>
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chat_id, text, parse_mode: 'Markdown' })
