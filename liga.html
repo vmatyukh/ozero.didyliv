@@ -559,6 +559,7 @@ async function loadCalendar() {
       }
 
       return `<div class="event-card">
+        <img src="posters/${r.roundKey}.jpg" alt="${r.title}" style="width:100%;display:block;border-radius:14px 14px 0 0;" onerror="this.style.display='none'">
         <div class="event-card-top">
           ${badge}
           <div class="event-title">${r.title}</div>
