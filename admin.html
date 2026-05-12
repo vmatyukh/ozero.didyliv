@@ -723,7 +723,7 @@ function renderFloatTable(){
   const tbody=$('floatTbody'); tbody.innerHTML='';
   const sectorMap={};
   Object.entries(floatBookings).forEach(([key,val])=>{
-    if(val&&val.sector) sectorMap[val.sector]={key,...val};
+    if(val&&val.sector&&!val.earlyLeave) sectorMap[val.sector]={key,...val};
   });
 
   let bookedCount=0;
@@ -747,6 +747,7 @@ function renderFloatTable(){
       const currentEmail = firebase.auth().currentUser?.email||'';
       const canCancel = isAdmin || b.createdBy === currentEmail;
       actCell=`${canCancel?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
+               <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
                <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
       if(b.buyFish) nameCell += ' 🐟';
     } else if(isBlocked){
@@ -826,6 +827,15 @@ async function adminBook(i){
       createdAt:new Date().toISOString()
     });
     setStatusFloat(`✅ Сектор ${i} заброньовано`);
+  }catch(e){setStatusFloat('Помилка: '+e.message);}
+}
+
+async function earlyLeave(key, session, sectorNum){
+  if(!confirm(`Позначити сектор ${sectorNum} як вільний?\nБронювання збережеться в статистиці.`)) return;
+  const date = $('floatDate').value;
+  try{
+    await db.ref(`bookings/${date}/${session}/${key}`).update({earlyLeave: true});
+    setStatusFloat(`✅ Сектор ${sectorNum} позначено як вільний`);
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 }
 

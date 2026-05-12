@@ -508,7 +508,7 @@ function loadSectors(){
       Object.keys(combined).forEach(k=>{ if(combined[k]===s) delete combined[k]; });
       snap.forEach(child=>{
         const d = child.val();
-        if(d&&d.sector) combined[d.sector]=s;
+        if(d&&d.sector&&!d.earlyLeave) combined[d.sector]=s;
       });
       bookedSectors={};
       Object.keys(combined).forEach(k=>{ bookedSectors[k]=true; });
