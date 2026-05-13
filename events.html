@@ -90,12 +90,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .ei-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
 .ei-value { font-size: 14px; font-weight: 500; }
-.event-prize-block { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
-.prize-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.prize-row:last-child { border-bottom: none; }
-.prize-row-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
-.prize-row-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-.prize-row-value { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text); }
+@media (max-width: 480px) { .event-info-grid { grid-template-columns: 1fr; } }
+.event-prize-block { margin-bottom: 16px; }
+.prize-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.prize-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.prize-pill { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.3); color: var(--green-mid); font-size: 13px; font-weight: 500; padding: 5px 14px; border-radius: 20px; }
 .rules-link { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
 .rules-link:hover { border-color: var(--green-mid); }
 .rules-link-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
@@ -461,15 +460,13 @@ async function openEvent(params) {
     ).join('')}</div>`;
   }
 
-  // Prize — split by | into rows
+  // Prize pills
   if (r.prize) {
-    const prizeIcons = ['🏆','🎁','🎣','🥇','💰'];
     const rows = r.prize.split('|').map(p => p.trim()).filter(Boolean);
-    html += `<div class="event-prize-block">${rows.map((p, i) => `
-      <div class="prize-row">
-        <div class="prize-row-icon">${prizeIcons[i] || '🏅'}</div>
-        <div class="prize-row-value">${p}</div>
-      </div>`).join('')}</div>`;
+    html += `<div class="event-prize-block">
+      <div class="prize-label">🏆 Призовий фонд</div>
+      <div class="prize-pills">${rows.map(p => `<span class="prize-pill">${p}</span>`).join('')}</div>
+    </div>`;
   }
 
   // ZSU
