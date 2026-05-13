@@ -63,7 +63,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 /* ── CALENDAR ── */
 .calendar-wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 48px; }
 @media (max-width: 680px) { .calendar-wrap { padding: 24px 16px 48px; } }
-.cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-items: stretch; }
 
 /* ── EVENT CARD ── */
 .event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s; cursor: pointer; display: flex; flex-direction: column; }
@@ -71,9 +71,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-card-body { padding: 14px 16px 16px; flex: 1; }
 .event-card:hover { border-color: var(--green-mid); }
 .event-poster { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px 14px 0 0; }
-.event-poster-placeholder { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
-.event-poster-placeholder.compact { aspect-ratio: unset; height: 100px; }
+.event-poster-placeholder { width: 100%; flex: 1; min-height: 120px; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.event-poster-placeholder.compact { min-height: 80px; flex: unset; height: 80px; }
 .event-poster-placeholder svg { width: 40px; height: 40px; opacity: 0.3; }
+.event-poster { width: 100%; display: block; border-radius: 14px 14px 0 0; }
 .event-card-body { padding: 14px 16px 16px; }
 .event-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
 .badge-reg  { background: rgba(0,136,141,0.15); color: var(--green-mid); border: 1px solid rgba(0,136,141,0.3); }
