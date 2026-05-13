@@ -73,7 +73,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-date { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 .event-card-bottom { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: center; }
 .event-card-bottom .btn-fill,
-.event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 120px; flex: none; }
+.event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 220px; }
 
 /* ── EVENT DETAIL ── */
 .event-detail-poster { width: 100%; max-width: 400px; display: block; border-radius: 12px; margin-bottom: 20px; }
@@ -171,13 +171,18 @@ input.err { border-color: #e24b4a; }
     <div class="home-title">Events — Озеро Дідилів</div>
     <div class="home-sub">Хижа Ліга та інші змагання · 2026</div>
     <div class="home-actions">
-      <button class="btn-fill"    onclick="navigate('leaderboard')">🏆 Лідерборд</button>
-      <button class="btn-outline" href="liga.html">Хижа Ліга</button>
+      <button class="btn-fill" style="width:100%;max-width:400px" onclick="navigate('leaderboard')">🏆 Лідерборд сезону</button>
     </div>
   </div>
   <div class="calendar-wrap">
-    <div class="section-title">Всі події</div>
+    <div class="section-title">Активні та майбутні події</div>
     <div class="cal-grid" id="calGrid"><div class="loading">Завантаження...</div></div>
+    <div id="archiveSection" style="display:none;margin-top:40px">
+      <div class="section-title" style="color:var(--text-muted);font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+        <span>📦</span> Архів
+      </div>
+      <div class="cal-grid" id="archiveGrid"></div>
+    </div>
   </div>
 </div>
 
@@ -301,27 +306,16 @@ async function loadCalendar() {
     const rounds = [...active, ...soon, ...done];
 
     const grid = document.getElementById('calGrid');
-    if (!rounds.length) { grid.innerHTML = '<div class="loading">Подій не знайдено</div>'; return; }
+    if (!rounds.length && !done.length) { grid.innerHTML = '<div class="loading">Подій не знайдено</div>'; return; }
 
-    grid.innerHTML = rounds.map(r => {
+    const renderCard = r => {
       const date    = fmtDate(r.date);
       const regOpen = r.status.regEnabled;
       const isDone  = r.status.archived || r.status.resultsPublished;
-
       const badge = isDone  ? `<span class="event-badge badge-done">✅ Завершено</span>` :
                     regOpen ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
                               `<span class="event-badge badge-soon">📅 Скоро</span>`;
-
-      const poster = `<img
-        class="event-poster"
-        src="posters/${r.roundKey}.jpg"
-        alt="${r.title}"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="event-poster-placeholder" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Афіша незабаром</span>
-        </div>`;
-
+      const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
       return `<div class="event-card">
         ${poster}
         <div class="event-card-body" onclick="navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})">
@@ -334,7 +328,19 @@ async function loadCalendar() {
           ${isDone  ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})">Результати</button>` : ''}
         </div>` : ''}
       </div>`;
-    }).join('');
+    };
+
+    // Active + soon
+    const activeCards = [...active, ...soon];
+    grid.innerHTML = activeCards.length
+      ? activeCards.map(renderCard).join('')
+      : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
+
+    // Archive
+    if (done.length) {
+      document.getElementById('archiveSection').style.display = 'block';
+      document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
+    }
 
   } catch(e) {
     document.getElementById('calGrid').innerHTML = `<div class="loading">Помилка завантаження</div>`;
