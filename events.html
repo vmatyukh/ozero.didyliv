@@ -454,8 +454,7 @@ function renderCalendar() {
                   r.status.resultsPublished ? `<span class="event-badge badge-live">🔴 Live результати</span>` :
                   regOpen                  ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
                                              `<span class="event-badge badge-soon">📅 Скоро</span>`;
-    const isSoon = !regOpen && !isDone;
-    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder${isSoon ? ' compact' : ''}" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
+    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder compact" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
     const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
     return `<div class="event-card" onclick="${navCall}">
       ${poster}
