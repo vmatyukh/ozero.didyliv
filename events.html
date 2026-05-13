@@ -158,7 +158,15 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .two-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .zone-block { min-width: 0; }
 .zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
-@media (max-width: 600px) { .two-zones { grid-template-columns: 1fr; } }
+.zone-tabs { display: none; gap: 6px; margin-bottom: 12px; }
+.zone-tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-display); text-align: center; transition: all 0.15s; }
+.zone-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
+@media (max-width: 600px) {
+  .two-zones { grid-template-columns: 1fr; }
+  .two-zones .zone-block { display: none; }
+  .two-zones .zone-block.active { display: block; }
+  .zone-tabs { display: flex; }
+}
 .reg-wrap { max-width: 480px; margin: 0 auto; }
 .reg-event-info { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
 .reg-event-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin-bottom: 4px; }
@@ -758,8 +766,12 @@ function renderResultsTo(results, tab, targetId) {
       </div>`;
 
       const maxRows = Math.max(zoneA.length, zoneB.length);
-      html += `<div class="two-zones">
-        <div class="zone-block">
+      html += `<div class="zone-tabs">
+        <div class="zone-tab active" onclick="switchZone(this,'zone-a-${targetId}','zone-b-${targetId}')">Зона А</div>
+        <div class="zone-tab" onclick="switchZone(this,'zone-b-${targetId}','zone-a-${targetId}')">Зона Б</div>
+      </div>
+      <div class="two-zones">
+        <div class="zone-block active" id="zone-a-${targetId}">
           <div class="zone-header">Зона А</div>
           <div class="results-table-wrap"><table class="results-table">
             <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
@@ -774,7 +786,7 @@ function renderResultsTo(results, tab, targetId) {
       });
       html += `</tbody></table></div></div>
 
-        <div class="zone-block">
+        <div class="zone-block" id="zone-b-${targetId}">
           <div class="zone-header">Зона Б</div>
           <div class="results-table-wrap"><table class="results-table">
             <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
@@ -818,6 +830,14 @@ function renderResultsTo(results, tab, targetId) {
   }
 
   document.getElementById(targetId).innerHTML = html;
+}
+
+function switchZone(btn, showId, hideId) {
+  document.getElementById(showId).classList.add('active');
+  document.getElementById(hideId).classList.remove('active');
+  const tabs = btn.parentElement.querySelectorAll('.zone-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
 }
 
 /* ── Leaderboard ── */
