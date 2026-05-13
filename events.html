@@ -162,7 +162,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .ts-value { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--green-mid); }
 /* ── TOUR STATS CARDS ── */
 .tour-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-.ts-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.ts-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .ts-card-total { border-color: rgba(0,136,141,0.4); }
 .ts-zone-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 .ts-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; }
@@ -171,13 +171,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .ts-bf-name { font-size: 11px; color: var(--text-muted); width: 100%; }
 @media (max-width: 480px) { .tour-stats { grid-template-columns: 1fr 1fr; } .ts-card-total { grid-column: span 2; } }
 
-.bigfish-winner { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.4); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
+.bigfish-winner { border: 1px solid rgba(0,136,141,0.4); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
 .bfw-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .bfw-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; flex: 1; }
 .bfw-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); white-space: nowrap; }
 .two-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .zone-block { min-width: 0; }
-.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
+.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; margin-bottom: 8px; text-align: center; border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
 .zone-tabs { display: none; gap: 6px; margin-bottom: 12px; }
 .zone-tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-display); text-align: center; transition: all 0.15s; }
 .zone-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
@@ -824,7 +824,7 @@ function renderResultsTo(results, tab, targetId) {
         <div class="zone-block active" id="zone-a-${targetId}">
           <div class="zone-header">Зона А</div>
           <div class="results-table-wrap"><table class="results-table">
-            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Бали</th></tr></thead><tbody>`;
       let plA = 0;
       zoneA.forEach(r => {
         const w = Number(r[tab.wKey] || 0);
@@ -839,7 +839,7 @@ function renderResultsTo(results, tab, targetId) {
         <div class="zone-block" id="zone-b-${targetId}">
           <div class="zone-header">Зона Б</div>
           <div class="results-table-wrap"><table class="results-table">
-            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Бали</th></tr></thead><tbody>`;
       let plB = 0;
       zoneB.forEach(r => {
         const w = Number(r[tab.wKey] || 0);
