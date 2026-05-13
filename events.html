@@ -154,7 +154,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .ts-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
 .ts-value { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--green-mid); }
 
-/* ── REGISTRATION ── */
+/* ── TWO ZONES ── */
+.two-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.zone-block { min-width: 0; }
+.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
+@media (max-width: 600px) { .two-zones { grid-template-columns: 1fr; } }
 .reg-wrap { max-width: 480px; margin: 0 auto; }
 .reg-event-info { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
 .reg-event-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin-bottom: 4px; }
@@ -717,51 +721,102 @@ function renderResultsTab(results, tab) { renderResultsTo(results, tab, 'results
 
 function renderResultsTo(results, tab, targetId) {
   const isTotal = tab.key === 'total';
-  let sorted;
-  if (isTotal) {
-    sorted = [...results].sort((a, b) =>
-      Number(a.total_points) - Number(b.total_points) ||
-      Number(b.total_weight) - Number(a.total_weight));
-  } else {
-    sorted = [
-      ...results.filter(r => Number(r[tab.wKey]) > 0).sort((a, b) => Number(b[tab.wKey]) - Number(a[tab.wKey])),
-      ...results.filter(r => Number(r[tab.wKey]) === 0),
-    ];
-  }
-
-  const totalWeight = sorted.reduce((s, r) => s + Number(r[tab.wKey] || 0), 0);
-  const nonZero     = sorted.filter(r => Number(r[tab.wKey]) > 0).length;
   let html = '';
 
-  if (!isTotal) {
-    html += `<div class="tour-summary">
-      <div><div class="ts-label">Загальна вага</div><div class="ts-value">${(totalWeight/1000).toFixed(2)} кг</div></div>
-      <div><div class="ts-label">Зловили рибу</div><div class="ts-value">${nonZero} / ${sorted.length}</div></div>
-    </div>`;
-  }
-
-  html += `<div class="results-table-wrap"><table class="results-table">`;
   if (isTotal) {
-    html += `<thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Бали</th><th>Вага (г)</th></tr></thead><tbody>`;
+    // ── Загальний залік ──
+    const sorted = [...results].sort((a, b) =>
+      Number(a.total_points) - Number(b.total_points) ||
+      Number(b.total_weight) - Number(a.total_weight));
+
+    html += `<div class="results-table-wrap"><table class="results-table">
+      <thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Бали</th><th>Вага (г)</th></tr></thead><tbody>`;
     sorted.forEach((r, i) => {
       const p = i + 1;
       const pl = p <= 3 ? `<span class="medal medal-${p}">${p}</span>` : `<span class="place-num">${p}</span>`;
       const w = Number(r.total_weight || 0);
       html += `<tr><td>${pl}</td><td style="font-weight:500">${r.name}</td><td><span class="points-badge">${r.total_points}</span></td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td></tr>`;
     });
+    html += `</tbody></table></div>`;
+
   } else {
-    html += `<thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Вага (г)</th><th>Бали</th></tr></thead><tbody>`;
-    let place = 0;
-    sorted.forEach(r => {
-      const w = Number(r[tab.wKey] || 0);
-      const p = Number(r[tab.pKey] || 0);
-      if (w > 0) place++;
-      const pl = w > 0 && place <= 3 ? `<span class="medal medal-${place}">${place}</span>` :
-                 w > 0 ? `<span class="place-num">${place}</span>` : `<span class="place-num">—</span>`;
-      html += `<tr><td>${pl}</td><td style="font-weight:500">${r.name}</td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td><td><span class="points-badge">${p}</span></td></tr>`;
-    });
+    // ── Тур з двома зонами А/Б ──
+    const zKey = tab.key + '_zone'; // e.g. t1_zone
+    const hasZones = results.length > 0 && results[0][zKey];
+
+    if (hasZones) {
+      const zoneA = results.filter(r => r[zKey] === 'А').sort((a, b) => Number(b[tab.wKey]) - Number(a[tab.wKey]));
+      const zoneB = results.filter(r => r[zKey] === 'Б').sort((a, b) => Number(b[tab.wKey]) - Number(a[tab.wKey]));
+
+      const totalA = zoneA.reduce((s, r) => s + Number(r[tab.wKey] || 0), 0);
+      const totalB = zoneB.reduce((s, r) => s + Number(r[tab.wKey] || 0), 0);
+
+      html += `<div class="tour-summary">
+        <div><div class="ts-label">Зона А</div><div class="ts-value">${(totalA/1000).toFixed(2)} кг</div></div>
+        <div><div class="ts-label">Зона Б</div><div class="ts-value">${(totalB/1000).toFixed(2)} кг</div></div>
+        <div><div class="ts-label">Разом</div><div class="ts-value">${((totalA+totalB)/1000).toFixed(2)} кг</div></div>
+      </div>`;
+
+      const maxRows = Math.max(zoneA.length, zoneB.length);
+      html += `<div class="two-zones">
+        <div class="zone-block">
+          <div class="zone-header">Зона А</div>
+          <div class="results-table-wrap"><table class="results-table">
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
+      let plA = 0;
+      zoneA.forEach(r => {
+        const w = Number(r[tab.wKey] || 0);
+        const p = Number(r[tab.pKey] || 0);
+        if (w > 0) plA++;
+        const pl = w > 0 && plA <= 3 ? `<span class="medal medal-${plA}">${plA}</span>` :
+                   w > 0 ? `<span class="place-num">${plA}</span>` : `<span class="place-num">—</span>`;
+        html += `<tr><td>${pl}</td><td style="font-weight:500;font-size:12px">${r.name}</td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}" style="font-size:12px">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td><td><span class="points-badge">${p}</span></td></tr>`;
+      });
+      html += `</tbody></table></div></div>
+
+        <div class="zone-block">
+          <div class="zone-header">Зона Б</div>
+          <div class="results-table-wrap"><table class="results-table">
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
+      let plB = 0;
+      zoneB.forEach(r => {
+        const w = Number(r[tab.wKey] || 0);
+        const p = Number(r[tab.pKey] || 0);
+        if (w > 0) plB++;
+        const pl = w > 0 && plB <= 3 ? `<span class="medal medal-${plB}">${plB}</span>` :
+                   w > 0 ? `<span class="place-num">${plB}</span>` : `<span class="place-num">—</span>`;
+        html += `<tr><td>${pl}</td><td style="font-weight:500;font-size:12px">${r.name}</td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}" style="font-size:12px">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td><td><span class="points-badge">${p}</span></td></tr>`;
+      });
+      html += `</tbody></table></div></div>
+      </div>`;
+
+    } else {
+      // No zones — simple table
+      const sorted = [
+        ...results.filter(r => Number(r[tab.wKey]) > 0).sort((a, b) => Number(b[tab.wKey]) - Number(a[tab.wKey])),
+        ...results.filter(r => Number(r[tab.wKey]) === 0),
+      ];
+      const totalWeight = sorted.reduce((s, r) => s + Number(r[tab.wKey] || 0), 0);
+      const nonZero = sorted.filter(r => Number(r[tab.wKey]) > 0).length;
+      html += `<div class="tour-summary">
+        <div><div class="ts-label">Загальна вага</div><div class="ts-value">${(totalWeight/1000).toFixed(2)} кг</div></div>
+        <div><div class="ts-label">Зловили рибу</div><div class="ts-value">${nonZero} / ${sorted.length}</div></div>
+      </div>`;
+      html += `<div class="results-table-wrap"><table class="results-table">
+        <thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Вага (г)</th><th>Бали</th></tr></thead><tbody>`;
+      let place = 0;
+      sorted.forEach(r => {
+        const w = Number(r[tab.wKey] || 0);
+        const p = Number(r[tab.pKey] || 0);
+        if (w > 0) place++;
+        const pl = w > 0 && place <= 3 ? `<span class="medal medal-${place}">${place}</span>` :
+                   w > 0 ? `<span class="place-num">${place}</span>` : `<span class="place-num">—</span>`;
+        html += `<tr><td>${pl}</td><td style="font-weight:500">${r.name}</td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td><td><span class="points-badge">${p}</span></td></tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
   }
-  html += `</tbody></table></div>`;
+
   document.getElementById(targetId).innerHTML = html;
 }
 
