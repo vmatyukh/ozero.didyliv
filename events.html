@@ -715,10 +715,10 @@ function openReg(params) {
     <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
     <div class="err-msg" id="firstName-err">Введіть імʼя</div>
     <div class="field-label">Номер телефону</div>
-    <input type="tel" id="phone" placeholder="+380 XX XXX XX XX" autocomplete="tel" />
+    <input type="tel" id="phone" placeholder="+380XXXXXXXXX" value="+380" autocomplete="tel" />
     <div class="err-msg" id="phone-err">Введіть коректний номер</div>
-    <div class="field-hint">Формат: +380... або 0XX XXX XX XX</div>
     <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Зареєструватись</button>`;
+
   document.getElementById('regBackBtn').onclick = () => navigate('event', {
     roundKey: activeRegRoundKey,
     title: activeRegTitle,
@@ -726,10 +726,27 @@ function openReg(params) {
     regOpen: true,
     isDone: false,
   });
+
+  // Phone auto-format
+  const phoneInput = document.getElementById('phone');
+  phoneInput.addEventListener('input', () => {
+    let v = phoneInput.value.replace(/[^\d+]/g, '');
+    if (!v.startsWith('+380')) {
+      if (v.startsWith('380'))    v = '+' + v;
+      else if (v.startsWith('0')) v = '+38' + v;
+      else                        v = '+380';
+    }
+    if (v.length > 13) v = v.slice(0, 13);
+    phoneInput.value = v;
+    document.getElementById('phone-err').classList.remove('show');
+  });
+  phoneInput.addEventListener('keydown', e => {
+    if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.selectionStart <= 4) e.preventDefault();
+  });
 }
 
 function validatePhone(v) {
-  return /^(\+380|380|0)\d{9}$/.test(v.replace(/[\s\-\(\)]/g, ''));
+  return /^\+380\d{9}$/.test(v.replace(/\s/g, ''));
 }
 function setErr(id, show) {
   document.getElementById(id).classList.toggle('err', show);
