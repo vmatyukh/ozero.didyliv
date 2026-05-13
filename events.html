@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Events — Озеро Дідилів</title>
+<title>Події — Озеро Дідилів</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
 <script src="config.js"></script>
 <style>
@@ -73,7 +73,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-date { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 .event-card-bottom { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: center; }
 .event-card-bottom .btn-fill,
-.event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 220px; }
+.event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 320px; }
 
 /* ── EVENT DETAIL ── */
 .event-detail-poster { width: 100%; max-width: 400px; display: block; border-radius: 12px; margin-bottom: 20px; }
@@ -168,7 +168,7 @@ input.err { border-color: #e24b4a; }
 <!-- ══ HOME ══ -->
 <div id="page-home" class="page active">
   <div class="home-hero">
-    <div class="home-title">Events — Озеро Дідилів</div>
+    <div class="home-title">Події — Озеро Дідилів</div>
     <div class="home-sub">Хижа Ліга та інші змагання · 2026</div>
     <div class="home-actions">
       <button class="btn-fill" style="width:100%;max-width:400px" onclick="navigate('leaderboard')">🏆 Лідерборд сезону</button>
@@ -303,10 +303,9 @@ async function loadCalendar() {
                       .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
     const done   = all.filter(r => r.status.archived || r.status.resultsPublished)
                       .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
-    const rounds = [...active, ...soon, ...done];
 
     const grid = document.getElementById('calGrid');
-    if (!rounds.length && !done.length) { grid.innerHTML = '<div class="loading">Подій не знайдено</div>'; return; }
+    if (!active.length && !soon.length && !done.length) { grid.innerHTML = '<div class="loading">Подій не знайдено</div>'; return; }
 
     const renderCard = r => {
       const date    = fmtDate(r.date);
