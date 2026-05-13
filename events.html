@@ -347,11 +347,11 @@ async function loadCalendar() {
         <div class="event-card-body" onclick="navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})">
           ${badge}
           <div class="event-title">${r.title}</div>
-          <div class="event-date">📅 ${date}</div>
+          <div class="event-date">${date}</div>
         </div>
         ${(regOpen || isDone) ? `<div class="event-card-bottom">
           ${regOpen ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Реєстрація</button>` : ''}
-          ${isDone  ? `<button class="btn-outline" onclick="event.stopPropagation();navigate('results',{roundKey:'${r.roundKey}',title:'${r.title}',fromEvent:true})">Результати</button>` : ''}
+          ${isDone  ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})">Результати</button>` : ''}
         </div>` : ''}
       </div>`;
     }).join('');
