@@ -420,6 +420,31 @@ async function loadCalendar() {
 function renderCalendar() {
   const isArchive = currentFilter === 'archive';
 
+  const renderCard = r => {
+    const date    = fmtDate(r.date);
+    const regOpen = r.status.regEnabled;
+    const isDone  = r.status.archived || r.status.resultsPublished;
+    const badge = r.status.archived        ? `<span class="event-badge badge-done">✅ Завершено</span>` :
+                  r.status.resultsPublished ? `<span class="event-badge badge-live">🔴 Live результати</span>` :
+                  regOpen                  ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
+                                             `<span class="event-badge badge-soon">📅 Скоро</span>`;
+    const isSoon = !regOpen && !isDone;
+    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder${isSoon ? ' compact' : ''}" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
+    const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
+    return `<div class="event-card" onclick="${navCall}">
+      ${poster}
+      <div class="event-card-body">
+        ${badge}
+        <div class="event-title">${r.title}</div>
+        <div class="event-date">${date}</div>
+      </div>
+      ${(regOpen || isDone) ? `<div class="event-card-bottom">
+        ${regOpen ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Реєстрація</button>` : ''}
+        ${isDone  ? `<button class="btn-fill" onclick="event.stopPropagation();${navCall}">Результати</button>` : ''}
+      </div>` : ''}
+    </div>`;
+  };
+
   // Archive filter — тільки archived=TRUE
   let filtered = isArchive
     ? allRoundsCache.filter(r => r.status.archived)
@@ -492,32 +517,6 @@ function renderCalendar() {
     grid.style.display = '';
     grid.innerHTML = '<div class="loading">Подій не знайдено</div>';
   }
-
-  const renderCard = r => {
-    const date    = fmtDate(r.date);
-    const regOpen = r.status.regEnabled;
-    const isDone  = r.status.archived || r.status.resultsPublished;
-    const badge = r.status.archived       ? `<span class="event-badge badge-done">✅ Завершено</span>` :
-                  r.status.resultsPublished ? `<span class="event-badge badge-live">🔴 Live результати</span>` :
-                  regOpen                  ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
-                                             `<span class="event-badge badge-soon">📅 Скоро</span>`;
-    const isSoon = !regOpen && !isDone;
-    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder${isSoon ? ' compact' : ''}" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
-    const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
-    return `<div class="event-card" onclick="${navCall}">
-      ${poster}
-      <div class="event-card-body">
-        ${badge}
-        <div class="event-title">${r.title}</div>
-        <div class="event-date">${date}</div>
-      </div>
-      ${(regOpen || isDone) ? `<div class="event-card-bottom">
-        ${regOpen ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Реєстрація</button>` : ''}
-        ${isDone  ? `<button class="btn-fill" onclick="event.stopPropagation();${navCall}">Результати</button>` : ''}
-      </div>` : ''}
-    </div>`;
-  };
-
 }
 
 /* ── Event detail ── */
