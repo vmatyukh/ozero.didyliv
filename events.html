@@ -86,9 +86,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 320px; }
 
 /* ── EVENT DETAIL ── */
-.event-detail-poster { width: 100%; max-width: 480px; display: block; border-radius: 12px; margin-bottom: 20px; }
+.event-detail-poster { width: 100%; display: block; border-radius: 12px; margin-bottom: 20px; }
 .event-detail-title { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
 .event-detail-date { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+.event-detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.event-detail-layout .event-detail-poster { margin-bottom: 0; }
+@media (max-width: 680px) { .event-detail-layout { grid-template-columns: 1fr; } }
 .event-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .event-info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .ei-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
@@ -495,8 +498,9 @@ async function openEvent(params) {
 
   let html = '';
 
-  // Poster
+  html += `<div class="event-detail-layout">`;
   html += `<img class="event-detail-poster" src="posters/${roundKey}.jpg" alt="${title}" onerror="this.style.display='none'">`;
+  html += `<div class="event-detail-right">`;
 
   // Title + date
   html += `<div class="event-detail-title">${title}</div>
@@ -532,14 +536,16 @@ async function openEvent(params) {
     </div>`;
   }
 
+  html += `</div></div>`; // close event-detail-right and event-detail-layout
+
   // ZSU
   html += `<div class="zsu-line">🇺🇦 Частина внесків спрямовується на підтримку ЗСУ</div>`;
 
   // Rules link
   const rulesMap = {
     hyzha_liga:    { label:'Регламент Хижої Ліги',    url:'regulations/rules_hyzha_liga.html' },
-    balansir_fest: { label:'Регламент Балансир Фест',   url:'regulations/rules_balansir.html' },
-    poplavok_fest: { label:'Регламент Поплавок Фест',   url:'regulations/rules_poplavok.html' },
+    balansir_fest: { label:'Регламент Балансир Фест', url:'regulations/rules_balansir.html' },
+    poplavok_fest: { label:'Регламент Поплавок Фест', url:'regulations/rules_poplavok.html' },
   };
   const rulesKey = Object.keys(rulesMap).find(k => roundKey.includes(k));
   if (rulesKey) {
