@@ -96,7 +96,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 @media (max-width: 480px) { .event-info-grid { grid-template-columns: 1fr; } }
 .event-prize-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
 .prize-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-.prize-main { font-family: var(--font-display); font-size: 28px; font-weight: 600; color: var(--green-mid); margin-bottom: 10px; }
+.prize-main { font-family: var(--font-display); font-size: 28px; font-weight: 600; color: var(--green-mid); margin-bottom: 10px; text-align: center; }
 .prize-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .prize-pill { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.3); color: var(--text-muted); font-size: 12px; font-weight: 500; padding: 8px 12px; border-radius: 10px; text-align: center; }
 .rules-link { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
@@ -693,53 +693,6 @@ async function refreshParticipants(roundKey) {
 }
 
 /* ── Results ── */
-async function loadResults(roundKey, title, fromEvent) {
-  document.getElementById('resultsTitle').textContent = title || 'Результати';
-  document.getElementById('tourTabs').innerHTML = '';
-  document.getElementById('resultsContent').innerHTML = '<div class="loading">Завантаження...</div>';
-  const backBtn = document.getElementById('resultsBackBtn');
-  if (fromEvent) backBtn.onclick = () => history.back() || navigate('home');
-
-  try {
-    const res  = await fetch(`${API_URL}?action=roundResults&roundKey=${roundKey}`);
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
-
-    const results = data.results || [];
-    if (!results.length) {
-      document.getElementById('resultsContent').innerHTML = '<div class="loading">Результати ще не опубліковані</div>';
-      return;
-    }
-
-    const tabs = [
-      { key:'t1',    label:'Тур 1',           wKey:'t1_weight', pKey:'t1_points' },
-      { key:'t2',    label:'Тур 2',           wKey:'t2_weight', pKey:'t2_points' },
-      { key:'t3',    label:'Тур 3',           wKey:'t3_weight', pKey:'t3_points' },
-      { key:'t4',    label:'Тур 4',           wKey:'t4_weight', pKey:'t4_points' },
-      { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points' },
-    ];
-
-    const tabsEl = document.getElementById('tourTabs');
-    tabs.forEach((t, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'tour-tab' + (i === 4 ? ' active' : '');
-      btn.textContent = t.label;
-      btn.onclick = () => {
-        document.querySelectorAll('.tour-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderResultsTab(results, t);
-      };
-      tabsEl.appendChild(btn);
-    });
-    renderResultsTab(results, tabs[4]);
-
-  } catch(e) {
-    document.getElementById('resultsContent').innerHTML = `<div class="loading">Помилка: ${e.message}</div>`;
-  }
-}
-
-function renderResultsTab(results, tab) { renderResultsTo(results, tab, 'resultsContent'); }
-
 function renderResultsTo(results, tab, targetId) {
   const isTotal = tab.key === 'total';
   let html = '';
