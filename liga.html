@@ -177,14 +177,13 @@
       <div class="zsu-line">Частина внесків кожного етапу спрямовується на підтримку ЗСУ</div>
       <div class="btn-row">
         <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
-        <button class="btn-fill" onclick="navigate('reg')">Реєстрація</button>
       </div>
     </div>
   </div>
   <div class="home-footer">
     <div class="btn-row">
       <button class="btn-outline" onclick="navigate('rules')">Регламент</button>
-      <button class="btn-fill" onclick="navigate('reg')">Реєстрація</button>
+
     </div>
   </div>
   <div class="participants-wrap">
@@ -396,7 +395,7 @@
       <div class="r-footer-slava">Слава Україні! 🇺🇦</div>
       <div class="r-footer-btns">
         <button class="btn-outline" onclick="navigate('home')">На головну</button>
-        <button class="btn-fill" onclick="navigate('reg')">Зареєструватись</button>
+
       </div>
     </div>
   </div>
@@ -412,9 +411,12 @@
       <div class="page-title">Реєстрація</div>
     </div>
     <div class="reg-card" id="regCard">
-      <div class="field-label">Ім'я та прізвище</div>
-      <input type="text" id="fullname" placeholder="Іван Петренко" autocomplete="name" />
-      <div class="err-msg" id="fullname-err">Введіть ім'я та прізвище</div>
+      <div class="field-label">Прізвище</div>
+      <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
+      <div class="err-msg" id="lastName-err">Введіть прізвище</div>
+      <div class="field-label">Імʼя</div>
+      <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
+      <div class="err-msg" id="firstName-err">Введіть імʼя</div>
       <div class="field-label">Номер телефону</div>
       <input type="tel" id="phone" placeholder="+380 XX XXX XX XX" autocomplete="tel" />
       <div class="err-msg" id="phone-err">Введіть коректний номер</div>
@@ -425,7 +427,7 @@
 </div>
 
 <script>
-  const API_URL   = 'https://script.google.com/macros/s/AKfycbxWCGnqdCGZIo2hAKHRQFN2kJQMcBJC3fUmgYJtpL15tdVT6RZKFfs75lEyAQqQ5xTF/exec';
+  const API_URL   = 'https://script.google.com/macros/s/AKfycbzb_lzl63y9AIHRm0N10TsBXZRmC9gWaOp1l6J5wpjLoSOzYqvS8UPw1BaLksADp0ML/exec';
   const ROUND_KEY = 'hyzha_liga_2026_round_1';
   const BOT_TOKEN = (typeof TG_BOT_TOKEN !== 'undefined') ? TG_BOT_TOKEN : '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
   const CHAT_IDS  = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459515447', '592212598'];
@@ -480,11 +482,15 @@
   }
 
   async function handleSubmit() {
-    const name  = document.getElementById('fullname').value.trim();
-    const phone = document.getElementById('phone').value.trim();
+    const lastName  = document.getElementById('lastName').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const phone     = document.getElementById('phone').value.trim();
+    const name      = `${lastName} ${firstName}`;
+
     let ok = true;
-    if (name.length < 3)       { setErr('fullname', true); ok = false; } else setErr('fullname', false);
-    if (!validatePhone(phone)) { setErr('phone',    true); ok = false; } else setErr('phone',    false);
+    if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
+    if (firstName.length < 2)  { setErr('firstName', true); ok = false; } else setErr('firstName', false);
+    if (!validatePhone(phone)) { setErr('phone',     true); ok = false; } else setErr('phone',     false);
     if (!ok) return;
 
     const btn = document.getElementById('submitBtn');
