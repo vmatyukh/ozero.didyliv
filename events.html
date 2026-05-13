@@ -52,7 +52,6 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .home-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 @media (max-width: 680px) {
   .home-hero { padding: 16px 16px 0; }
-  .home-actions { display: none; }
   .wrap { padding: 0 16px 48px; }
 }
 
@@ -280,13 +279,17 @@ function navigate(page, params) {
 }
 
 /* ── Format date ── */
+const MONTHS_UA = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+
 function fmtDate(val) {
   if (!val) return '';
+  let d;
   if (typeof val === 'number') {
-    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
-    return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+    d = new Date(Math.round((val - 25569) * 86400 * 1000));
+  } else {
+    d = new Date(String(val).split('T')[0]);
   }
-  return String(val).split('T')[0].split('-').reverse().join('.');
+  return `${d.getUTCDate()} ${MONTHS_UA[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 /* ── Calendar ── */
@@ -326,13 +329,17 @@ async function loadCalendar() {
           <span>Афіша незабаром</span>
         </div>`;
 
-      return `<div class="event-card" onclick="navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})">
+      return `<div class="event-card">
         ${poster}
-        <div class="event-card-body">
+        <div class="event-card-body" onclick="navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})">
           ${badge}
           <div class="event-title">${r.title}</div>
           <div class="event-date">📅 ${date}</div>
         </div>
+        ${(regOpen || isDone) ? `<div class="event-card-bottom">
+          ${regOpen ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Реєстрація</button>` : ''}
+          ${isDone  ? `<button class="btn-outline" onclick="event.stopPropagation();navigate('results',{roundKey:'${r.roundKey}',title:'${r.title}',fromEvent:true})">Результати</button>` : ''}
+        </div>` : ''}
       </div>`;
     }).join('');
 
@@ -413,9 +420,56 @@ async function openEvent(params) {
     </div>`;
   }
 
+  // Results inline if done
+  if (isDone) {
+    html += `<div style="margin-top:24px">
+      <div class="section-title">Результати</div>
+      <div class="tour-tabs" id="tourTabsInline"></div>
+      <div id="resultsInline"><div class="loading">Завантаження...</div></div>
+    </div>`;
+  }
+
   document.getElementById('eventContent').innerHTML = html;
 
   if (regOpen) loadParticipants(roundKey);
+  if (isDone)  loadResultsInline(roundKey);
+}
+
+/* ── Results inline (inside event detail) ── */
+async function loadResultsInline(roundKey) {
+  try {
+    const res  = await fetch(`${API_URL}?action=roundResults&roundKey=${roundKey}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    const results = data.results || [];
+    if (!results.length) {
+      document.getElementById('resultsInline').innerHTML = '<div class="loading">Результати ще не опубліковані</div>';
+      return;
+    }
+    const tabs = [
+      { key:'t1',    label:'Тур 1',           wKey:'t1_weight', pKey:'t1_points' },
+      { key:'t2',    label:'Тур 2',           wKey:'t2_weight', pKey:'t2_points' },
+      { key:'t3',    label:'Тур 3',           wKey:'t3_weight', pKey:'t3_points' },
+      { key:'t4',    label:'Тур 4',           wKey:'t4_weight', pKey:'t4_points' },
+      { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points' },
+    ];
+    const tabsEl = document.getElementById('tourTabsInline');
+    tabs.forEach((t, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'tour-tab' + (i === 4 ? ' active' : '');
+      btn.textContent = t.label;
+      btn.onclick = () => {
+        document.querySelectorAll('#tourTabsInline .tour-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderResultsTo(results, t, 'resultsInline');
+      };
+      tabsEl.appendChild(btn);
+    });
+    renderResultsTo(results, tabs[4], 'resultsInline');
+  } catch(e) {
+    const el = document.getElementById('resultsInline');
+    if (el) el.innerHTML = `<div class="loading">Помилка: ${e.message}</div>`;
+  }
 }
 
 /* ── Participants ── */
@@ -497,7 +551,9 @@ async function loadResults(roundKey, title, fromEvent) {
   }
 }
 
-function renderResultsTab(results, tab) {
+function renderResultsTab(results, tab) { renderResultsTo(results, tab, 'resultsContent'); }
+
+function renderResultsTo(results, tab, targetId) {
   const isTotal = tab.key === 'total';
   let sorted;
   if (isTotal) {
@@ -544,7 +600,7 @@ function renderResultsTab(results, tab) {
     });
   }
   html += `</tbody></table></div>`;
-  document.getElementById('resultsContent').innerHTML = html;
+  document.getElementById(targetId).innerHTML = html;
 }
 
 /* ── Leaderboard ── */
