@@ -196,6 +196,7 @@ input.err { border-color: #e24b4a; }
       <button class="filter-tab" onclick="setFilter('spinning',this)">🎣 Спінінг</button>
       <button class="filter-tab" onclick="setFilter('float',this)">🪝 Поплавок</button>
       <button class="filter-tab" onclick="setFilter('other',this)">📌 Інше</button>
+      <button class="filter-tab" onclick="setFilter('archive',this)">📦 Архів</button>
     </div>
     <div class="section-title">Активні та майбутні події</div>
     <div class="cal-grid" id="calGrid"><div class="loading">Завантаження...</div></div>
@@ -378,21 +379,33 @@ async function loadCalendar() {
 }
 
 function renderCalendar() {
-  const all = currentFilter === 'all'
-    ? allRoundsCache
-    : allRoundsCache.filter(r => (r.category || 'other') === currentFilter);
+  const isArchive = currentFilter === 'archive';
 
-  const active = all.filter(r => r.status.regEnabled)
+  let filtered = isArchive
+    ? allRoundsCache.filter(r => r.status.archived || r.status.resultsPublished)
+    : currentFilter === 'all'
+      ? allRoundsCache
+      : allRoundsCache.filter(r => (r.category || 'other') === currentFilter);
+
+  const active = isArchive ? [] : filtered.filter(r => r.status.regEnabled)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
-  const soon   = all.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
+  const soon   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
-  const done   = all.filter(r => r.status.archived || r.status.resultsPublished)
-                    .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
+  const done   = isArchive
+    ? filtered.sort((a, b) => dateToSort(b.date) - dateToSort(a.date))
+    : filtered.filter(r => r.status.archived || r.status.resultsPublished)
+              .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
 
   const grid = document.getElementById('calGrid');
+  const archiveSection = document.getElementById('archiveSection');
+
+  // Update section title
+  document.querySelector('.calendar-wrap .section-title').textContent =
+    currentFilter === 'archive' ? 'Архів подій' : 'Активні та майбутні події';
+
   if (!active.length && !soon.length && !done.length) {
     grid.innerHTML = '<div class="loading">Подій не знайдено</div>';
-    document.getElementById('archiveSection').style.display = 'none';
+    archiveSection.style.display = 'none';
     return;
   }
 
@@ -419,15 +432,23 @@ function renderCalendar() {
     </div>`;
   };
 
+  if (currentFilter === 'archive') {
+    grid.innerHTML = done.length
+      ? done.map(renderCard).join('')
+      : '<div class="loading" style="color:var(--text-muted)">Архів порожній</div>';
+    archiveSection.style.display = 'none';
+    return;
+  }
+
   grid.innerHTML = [...active, ...soon].length
     ? [...active, ...soon].map(renderCard).join('')
     : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
 
   if (done.length) {
-    document.getElementById('archiveSection').style.display = 'block';
+    archiveSection.style.display = 'block';
     document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
   } else {
-    document.getElementById('archiveSection').style.display = 'none';
+    archiveSection.style.display = 'none';
   }
 }
 
