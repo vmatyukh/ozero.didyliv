@@ -279,26 +279,29 @@ function navigate(page, params) {
 }
 
 /* ── Format date ── */
-const MONTHS_UA = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+const MONTHS_UA   = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+const WEEKDAYS_UA = ['Неділя','Понеділок','Вівторок','Середа','Четвер','Пятниця','Субота'];
+
+function parseDate(val) {
+  if (!val) return null;
+  if (typeof val === 'number') return new Date(Math.round((val - 25569) * 86400 * 1000));
+  const d = new Date(String(val));
+  return isNaN(d.getTime()) ? null : d;
+}
 
 function fmtDate(val) {
-  if (!val) return '';
-  let day, month, year;
-  if (typeof val === 'number') {
-    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
-    day = d.getUTCDate(); month = d.getUTCMonth(); year = d.getUTCFullYear();
-  } else {
-    const parts = String(val).split('T')[0].split('-');
-    year = parseInt(parts[0]); month = parseInt(parts[1]) - 1; day = parseInt(parts[2]);
-  }
-  if (isNaN(day) || isNaN(month) || isNaN(year)) return String(val);
-  return `${day} ${MONTHS_UA[month]} ${year}`;
+  const d = parseDate(val);
+  if (!d) return String(val);
+  const day  = d.getDate();
+  const mon  = d.getMonth();
+  const year = d.getFullYear();
+  const dow  = WEEKDAYS_UA[d.getDay()];
+  return `${String(day).padStart(2,'0')}.${String(mon+1).padStart(2,'0')}.${year} · ${dow}`;
 }
 
 function dateToSort(val) {
-  if (!val) return '';
-  if (typeof val === 'number') return String(val);
-  return String(val).split('T')[0];
+  const d = parseDate(val);
+  return d ? d.getTime() : 0;
 }
 
 /* ── Calendar ── */
@@ -310,11 +313,11 @@ async function loadCalendar() {
 
     const all   = data.rounds || [];
     const active = all.filter(r => r.status.regEnabled)
-                      .sort((a, b) => dateToSort(a.date).localeCompare(dateToSort(b.date)));
+                      .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
     const soon   = all.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
-                      .sort((a, b) => dateToSort(a.date).localeCompare(dateToSort(b.date)));
+                      .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
     const done   = all.filter(r => r.status.archived || r.status.resultsPublished)
-                      .sort((a, b) => dateToSort(b.date).localeCompare(dateToSort(a.date)));
+                      .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
     const rounds = [...active, ...soon, ...done];
 
     const grid = document.getElementById('calGrid');
