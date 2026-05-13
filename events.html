@@ -708,9 +708,12 @@ function openReg(params) {
     <div class="reg-event-name">${params.title}</div>
     <div class="reg-event-date">📅 ${params.date}</div>`;
   document.getElementById('regCard').innerHTML = `
-    <div class="field-label">Ім'я та прізвище</div>
-    <input type="text" id="fullname" placeholder="Іван Петренко" autocomplete="name" />
-    <div class="err-msg" id="fullname-err">Введіть ім'я та прізвище</div>
+    <div class="field-label">Прізвище</div>
+    <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
+    <div class="err-msg" id="lastName-err">Введіть прізвище</div>
+    <div class="field-label">Імʼя</div>
+    <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
+    <div class="err-msg" id="firstName-err">Введіть імʼя</div>
     <div class="field-label">Номер телефону</div>
     <input type="tel" id="phone" placeholder="+380 XX XXX XX XX" autocomplete="tel" />
     <div class="err-msg" id="phone-err">Введіть коректний номер</div>
@@ -734,11 +737,15 @@ function setErr(id, show) {
 }
 
 async function handleSubmit() {
-  const name  = document.getElementById('fullname').value.trim();
-  const phone = document.getElementById('phone').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const firstName = document.getElementById('firstName').value.trim();
+  const phone     = document.getElementById('phone').value.trim();
+  const name      = `${lastName} ${firstName}`;
+
   let ok = true;
-  if (name.length < 3)       { setErr('fullname', true); ok = false; } else setErr('fullname', false);
-  if (!validatePhone(phone)) { setErr('phone',    true); ok = false; } else setErr('phone',    false);
+  if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
+  if (firstName.length < 2)  { setErr('firstName', true); ok = false; } else setErr('firstName', false);
+  if (!validatePhone(phone)) { setErr('phone',     true); ok = false; } else setErr('phone',     false);
   if (!ok) return;
 
   const btn = document.getElementById('submitBtn');
