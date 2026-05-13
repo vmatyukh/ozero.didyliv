@@ -281,10 +281,53 @@ function navigate(page, params) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   window.scrollTo(0, 0);
+
+  // Update hash
+  if (page === 'home')        history.pushState(null, '', '#');
+  if (page === 'leaderboard') history.pushState(null, '', '#leaderboard');
+  if (page === 'event' && params) history.pushState(null, '', `#event/${params.roundKey}`);
+  if (page === 'reg'   && params) history.pushState(null, '', `#reg/${params.roundKey}`);
+
   if (page === 'leaderboard') loadLeaderboard();
   if (page === 'reg'   && params) openReg(params);
   if (page === 'event' && params) openEvent(params);
 }
+
+/* ── Handle hash on load ── */
+async function handleHash() {
+  const hash = window.location.hash.replace('#', '');
+  if (!hash || hash === '/') return;
+
+  // Wait for rounds to load
+  if (!allRoundsCache.length) {
+    await loadCalendar();
+  }
+
+  if (hash === 'leaderboard') {
+    navigate('leaderboard');
+    return;
+  }
+
+  if (hash.startsWith('event/')) {
+    const roundKey = hash.replace('event/', '');
+    const r = allRoundsCache.find(r => r.roundKey === roundKey);
+    if (r) {
+      const date    = fmtDate(r.date);
+      const regOpen = r.status.regEnabled;
+      const isDone  = r.status.archived || r.status.resultsPublished;
+      navigate('event', { roundKey, title: r.title, date, regOpen, isDone });
+    }
+    return;
+  }
+}
+
+window.addEventListener('popstate', () => {
+  const hash = window.location.hash.replace('#', '');
+  if (!hash || hash === '/') {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-home').classList.add('active');
+  }
+});
 
 /* ── Format date ── */
 const MONTHS_UA   = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
@@ -733,7 +776,12 @@ async function handleSubmit() {
   }
 }
 
-loadCalendar();
+async function init() {
+  await loadCalendar();
+  await handleHash();
+}
+
+init();
 </script>
 </body>
 </html>
