@@ -72,6 +72,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-card:hover { border-color: var(--green-mid); }
 .event-poster { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px 14px 0 0; }
 .event-poster-placeholder { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.event-poster-placeholder.compact { aspect-ratio: unset; height: 100px; }
 .event-poster-placeholder svg { width: 40px; height: 40px; opacity: 0.3; }
 .event-card-body { padding: 14px 16px 16px; }
 .event-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
@@ -230,8 +231,12 @@ input.err { border-color: #e24b4a; }
       <button class="filter-tab" onclick="setFilter('other',this)">📌 Інше</button>
       <button class="filter-tab" onclick="setFilter('archive',this)">📦 Архів</button>
     </div>
-    <div class="section-title">Активні та майбутні події</div>
+    <div class="section-title">Активні події</div>
     <div class="cal-grid" id="calGrid"><div class="loading">Завантаження...</div></div>
+    <div id="soonSection" style="display:none;margin-top:32px">
+      <div class="section-title">Майбутні події</div>
+      <div class="cal-grid" id="soonGrid"></div>
+    </div>
     <div id="archiveSection" style="display:none;margin-top:40px">
       <div class="section-title" style="color:var(--text-muted);font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
         <span>📦</span> Архів
@@ -453,7 +458,8 @@ function renderCalendar() {
                   r.status.resultsPublished ? `<span class="event-badge badge-live">🔴 Live результати</span>` :
                   regOpen                  ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
                                              `<span class="event-badge badge-soon">📅 Скоро</span>`;
-    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
+    const isSoon = !regOpen && !isDone;
+    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder${isSoon ? ' compact' : ''}" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
     const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
     return `<div class="event-card" onclick="${navCall}">
       ${poster}
@@ -477,9 +483,17 @@ function renderCalendar() {
     return;
   }
 
-  grid.innerHTML = [...active, ...live, ...soon].length
-    ? [...active, ...live, ...soon].map(renderCard).join('')
+  grid.innerHTML = [...active, ...live].length
+    ? [...active, ...live].map(renderCard).join('')
     : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
+
+  const soonSection = document.getElementById('soonSection');
+  if (soon.length) {
+    soonSection.style.display = 'block';
+    document.getElementById('soonGrid').innerHTML = soon.map(renderCard).join('');
+  } else {
+    soonSection.style.display = 'none';
+  }
 
   if (done.length) {
     archiveSection.style.display = 'block';
