@@ -83,14 +83,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 320px; }
 
 /* ── EVENT DETAIL ── */
-.event-detail-poster { width: 100%; max-width: 400px; display: block; border-radius: 12px; margin-bottom: 20px; }
+.event-detail-poster { width: 100%; max-width: 480px; display: block; border-radius: 12px; margin-bottom: 20px; }
+.event-detail-title { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
+.event-detail-date { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
 .event-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .event-info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .ei-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
 .ei-value { font-size: 14px; font-weight: 500; }
-.event-prize-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
-.ep-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-.ep-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--green-mid); }
+.event-prize-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+.ep-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.ep-value { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); }
 .event-fish-section { margin-bottom: 16px; }
 .event-fish-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
 .fish-pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -425,55 +427,51 @@ function renderCalendar() {
 /* ── Event detail ── */
 async function openEvent(params) {
   const { roundKey, title, date, regOpen, isDone } = params;
-  currentEventRoundKey = roundKey;
   document.getElementById('eventTitle').textContent = title;
+
+  const r = allRoundsCache.find(x => x.roundKey === roundKey) || params;
 
   let html = '';
 
   // Poster
   html += `<img class="event-detail-poster" src="posters/${roundKey}.jpg" alt="${title}" onerror="this.style.display='none'">`;
 
-  // Prize block (for hyzha_liga only)
-  if (roundKey.includes('hyzha_liga')) {
-    html += `<div class="event-prize-block">
-      <div><div class="ep-label">Призовий фонд раунду</div><div class="ep-value">12 000 грн</div></div>
-      <div style="width:1px;background:var(--border);flex-shrink:0"></div>
-      <div><div class="ep-label">Призовий фонд фіналу</div><div class="ep-value">60 000 грн</div></div>
-    </div>`;
-  }
+  // Title + date
+  html += `<div class="event-detail-title">${title}</div>
+           <div class="event-detail-date">📅 ${date}</div>`;
 
   // Info grid
-  html += `<div class="event-info-grid">
-    <div class="event-info-card"><div class="ei-label">Формат</div><div class="ei-value">Індивідуальний залік</div></div>
-    <div class="event-info-card"><div class="ei-label">Тури</div><div class="ei-value">4 × 75 хвилин</div></div>
-    <div class="event-info-card"><div class="ei-label">Дата</div><div class="ei-value">${date}</div></div>
-    <div class="event-info-card"><div class="ei-label">Місце</div><div class="ei-value">Озеро Дідилів</div></div>
-  </div>`;
+  const infoItems = [
+    r.format ? { label:'Формат', value: r.format } : null,
+    r.tours  ? { label:'Тури',   value: r.tours  } : null,
+    r.fish   ? { label:'Риба',   value: r.fish   } : null,
+    { label:'Місце', value:'Озеро Дідилів' },
+  ].filter(Boolean);
 
-  // Fish
-  html += `<div class="event-fish-section">
-    <div class="event-fish-label">Залікова риба</div>
-    <div class="fish-pills">
-      <span class="fish-pill">🐟 Щука</span>
-      <span class="fish-pill">🐟 Окунь</span>
-      <span class="fish-pill">🐟 Судак</span>
-    </div>
-  </div>`;
+  html += `<div class="event-info-grid">${infoItems.map(i =>
+    `<div class="event-info-card"><div class="ei-label">${i.label}</div><div class="ei-value">${i.value}</div></div>`
+  ).join('')}</div>`;
+
+  // Prize
+  if (r.prize) {
+    html += `<div class="event-prize-block">
+      <div class="ep-label">🏆 Призовий фонд</div>
+      <div class="ep-value">${r.prize}</div>
+    </div>`;
+  }
 
   // ZSU
   html += `<div class="zsu-line">🇺🇦 Частина внесків спрямовується на підтримку ЗСУ</div>`;
 
   // Action buttons
-  html += `<div class="event-action-btns">`;
-  if (regOpen) {
-    html += `<button class="btn-fill" onclick="navigate('reg',{roundKey:'${roundKey}',title:'${title}',date:'${date}'})">Зареєструватися</button>`;
+  if (regOpen || isDone) {
+    html += `<div class="event-action-btns">
+      ${regOpen ? `<button class="btn-fill" onclick="navigate('reg',{roundKey:'${roundKey}',title:'${title}',date:'${date}'})">Зареєструватися</button>` : ''}
+      ${isDone  ? `<button class="btn-outline" onclick="scrollToResults()">Результати ↓</button>` : ''}
+    </div>`;
   }
-  if (isDone) {
-    html += `<button class="btn-fill" onclick="navigate('results',{roundKey:'${roundKey}',title:'${title}',fromEvent:true})">Результати</button>`;
-  }
-  html += `</div>`;
 
-  // Participants (only if reg open)
+  // Participants
   if (regOpen) {
     html += `<div class="participants-section">
       <div class="participants-header">
@@ -494,9 +492,9 @@ async function openEvent(params) {
     </div>`;
   }
 
-  // Results inline if done
+  // Results inline
   if (isDone) {
-    html += `<div style="margin-top:24px">
+    html += `<div id="resultsSection" style="margin-top:28px">
       <div class="section-title">Результати</div>
       <div class="tour-tabs" id="tourTabsInline"></div>
       <div id="resultsInline"><div class="loading">Завантаження...</div></div>
@@ -507,6 +505,11 @@ async function openEvent(params) {
 
   if (regOpen) loadParticipants(roundKey);
   if (isDone)  loadResultsInline(roundKey);
+}
+
+function scrollToResults() {
+  const el = document.getElementById('resultsSection');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
 
 /* ── Results inline (inside event detail) ── */
