@@ -917,7 +917,7 @@ function openReg(params) {
     <div class="reg-event-date">📅 ${params.date}</div>
     <div style="display:flex;gap:16px;margin-top:10px">
       <a href="#" style="font-size:13px;color:var(--text-muted);text-decoration:none" onclick="event.preventDefault();document.getElementById('regBackBtn').click()">← Деталі події</a>
-      ${rulesKey ? `<a href="${rulesMap[rulesKey]}" target="_blank" style="font-size:13px;color:var(--text-muted);text-decoration:none">📋 Регламент</a>` : ''}
+      ${rulesKey ? `<a href="${rulesMap[rulesKey]}" style="font-size:13px;color:var(--text-muted);text-decoration:none">📋 Регламент</a>` : ''}
     </div>`;
   document.getElementById('regCard').innerHTML = `
     <div class="field-label">Імʼя</div>
