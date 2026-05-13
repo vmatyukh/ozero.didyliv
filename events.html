@@ -536,11 +536,6 @@ async function openEvent(params) {
     </div>`;
   }
 
-  html += `</div></div>`; // close event-detail-right and event-detail-layout
-
-  // ZSU
-  html += `<div class="zsu-line">🇺🇦 Частина внесків спрямовується на підтримку ЗСУ</div>`;
-
   // Rules link
   const rulesMap = {
     hyzha_liga:    { label:'Регламент Хижої Ліги',    url:'regulations/rules_hyzha_liga.html' },
@@ -555,7 +550,9 @@ async function openEvent(params) {
     </a>`;
   }
 
-  // Action buttons
+  html += `</div></div>`; // close event-detail-right and event-detail-layout
+
+  // ZSU
   if (regOpen || isDone) {
     html += `<div class="event-action-btns">
       ${regOpen ? `<button class="btn-fill" onclick="navigate('reg',{roundKey:'${roundKey}',title:'${title}',date:'${date}'})">Зареєструватися</button>` : ''}
