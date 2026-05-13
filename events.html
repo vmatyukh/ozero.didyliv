@@ -420,34 +420,77 @@ async function loadCalendar() {
 function renderCalendar() {
   const isArchive = currentFilter === 'archive';
 
+  // Archive filter — тільки archived=TRUE
   let filtered = isArchive
-    ? allRoundsCache.filter(r => r.status.archived || r.status.resultsPublished)
+    ? allRoundsCache.filter(r => r.status.archived)
     : currentFilter === 'all'
       ? allRoundsCache
       : allRoundsCache.filter(r => (r.category || 'other') === currentFilter);
 
   const active = isArchive ? [] : filtered.filter(r => r.status.regEnabled)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
-  const soon   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
-                    .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const live   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && r.status.resultsPublished)
+                    .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
+  const soon   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const done   = isArchive
     ? filtered.sort((a, b) => dateToSort(b.date) - dateToSort(a.date))
     : filtered.filter(r => r.status.archived)
               .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
 
-  const grid = document.getElementById('calGrid');
+  const grid          = document.getElementById('calGrid');
   const archiveSection = document.getElementById('archiveSection');
+  const soonSection    = document.getElementById('soonSection');
+  const activeTitle    = document.querySelector('.calendar-wrap .section-title');
 
-  // Update section title
-  document.querySelector('.calendar-wrap .section-title').textContent =
-    currentFilter === 'archive' ? 'Архів подій' : 'Активні та майбутні події';
-
-  if (!active.length && !soon.length && !done.length) {
-    grid.innerHTML = '<div class="loading">Подій не знайдено</div>';
-    archiveSection.style.display = 'none';
+  if (isArchive) {
+    activeTitle.style.display = 'none';
+    grid.style.display = 'none';
+    soonSection.style.display = 'none';
+    document.querySelector('#archiveSection .section-title').textContent = 'Архів подій';
+    if (done.length) {
+      archiveSection.style.display = 'block';
+      document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
+    } else {
+      archiveSection.style.display = 'block';
+      document.getElementById('archiveGrid').innerHTML = '<div class="loading" style="color:var(--text-muted)">Архів порожній</div>';
+    }
     return;
+  }
+
+  // Non-archive filters
+  activeTitle.style.display = '';
+  grid.style.display = '';
+  activeTitle.textContent = 'Активні події';
+
+  const activeCards = [...active, ...live];
+  if (activeCards.length) {
+    activeTitle.style.display = '';
+    grid.style.display = '';
+    grid.innerHTML = activeCards.map(renderCard).join('');
+  } else {
+    activeTitle.style.display = 'none';
+    grid.style.display = 'none';
+  }
+
+  if (soon.length) {
+    soonSection.style.display = 'block';
+    document.getElementById('soonGrid').innerHTML = soon.map(renderCard).join('');
+  } else {
+    soonSection.style.display = 'none';
+  }
+
+  if (done.length) {
+    archiveSection.style.display = 'block';
+    document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
+  } else {
+    archiveSection.style.display = 'none';
+  }
+
+  if (!activeCards.length && !soon.length && !done.length) {
+    activeTitle.style.display = '';
+    grid.style.display = '';
+    grid.innerHTML = '<div class="loading">Подій не знайдено</div>';
   }
 
   const renderCard = r => {
@@ -475,32 +518,6 @@ function renderCalendar() {
     </div>`;
   };
 
-  if (currentFilter === 'archive') {
-    grid.innerHTML = done.length
-      ? done.map(renderCard).join('')
-      : '<div class="loading" style="color:var(--text-muted)">Архів порожній</div>';
-    archiveSection.style.display = 'none';
-    return;
-  }
-
-  grid.innerHTML = [...active, ...live].length
-    ? [...active, ...live].map(renderCard).join('')
-    : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
-
-  const soonSection = document.getElementById('soonSection');
-  if (soon.length) {
-    soonSection.style.display = 'block';
-    document.getElementById('soonGrid').innerHTML = soon.map(renderCard).join('');
-  } else {
-    soonSection.style.display = 'none';
-  }
-
-  if (done.length) {
-    archiveSection.style.display = 'block';
-    document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
-  } else {
-    archiveSection.style.display = 'none';
-  }
 }
 
 /* ── Event detail ── */
