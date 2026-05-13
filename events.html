@@ -546,26 +546,56 @@ async function loadResultsInline(roundKey) {
       document.getElementById('resultsInline').innerHTML = '<div class="loading">Результати ще не опубліковані</div>';
       return;
     }
-    const tabs = [
-      { key:'t1',    label:'Тур 1',           wKey:'t1_weight', pKey:'t1_points' },
-      { key:'t2',    label:'Тур 2',           wKey:'t2_weight', pKey:'t2_points' },
-      { key:'t3',    label:'Тур 3',           wKey:'t3_weight', pKey:'t3_points' },
-      { key:'t4',    label:'Тур 4',           wKey:'t4_weight', pKey:'t4_points' },
-      { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points' },
-    ];
-    const tabsEl = document.getElementById('tourTabsInline');
-    tabs.forEach((t, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'tour-tab' + (i === 4 ? ' active' : '');
-      btn.textContent = t.label;
-      btn.onclick = () => {
-        document.querySelectorAll('#tourTabsInline .tour-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderResultsTo(results, t, 'resultsInline');
-      };
-      tabsEl.appendChild(btn);
-    });
-    renderResultsTo(results, tabs[4], 'resultsInline');
+
+    // Detect format: has tours or simple weight/points
+    const hasTours = results[0] && 't1_weight' in results[0];
+
+    if (hasTours) {
+      const tabs = [
+        { key:'t1',    label:'Тур 1',           wKey:'t1_weight', pKey:'t1_points' },
+        { key:'t2',    label:'Тур 2',           wKey:'t2_weight', pKey:'t2_points' },
+        { key:'t3',    label:'Тур 3',           wKey:'t3_weight', pKey:'t3_points' },
+        { key:'t4',    label:'Тур 4',           wKey:'t4_weight', pKey:'t4_points' },
+        { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points' },
+      ];
+      const tabsEl = document.getElementById('tourTabsInline');
+      tabs.forEach((t, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'tour-tab' + (i === 4 ? ' active' : '');
+        btn.textContent = t.label;
+        btn.onclick = () => {
+          document.querySelectorAll('#tourTabsInline .tour-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderResultsTo(results, t, 'resultsInline');
+        };
+        tabsEl.appendChild(btn);
+      });
+      renderResultsTo(results, tabs[4], 'resultsInline');
+    } else {
+      // Simple format: place/name/weight/points
+      const sorted = [...results].sort((a, b) =>
+        Number(a.points || 0) - Number(b.points || 0) ||
+        Number(b.weight || 0) - Number(a.weight || 0)
+      );
+      let html = `<div class="results-table-wrap"><table class="results-table">
+        <thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Вага (г)</th><th>Бали</th></tr></thead><tbody>`;
+      sorted.forEach((r, i) => {
+        const place = i + 1;
+        const w = Number(r.weight || 0);
+        const p = Number(r.points || 0);
+        const placeEl = place <= 3
+          ? `<span class="medal medal-${place}">${place}</span>`
+          : `<span class="place-num">${place}</span>`;
+        html += `<tr>
+          <td>${placeEl}</td>
+          <td style="font-weight:500">${r.name || r.Name || ''}</td>
+          <td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td>
+          <td><span class="points-badge">${p}</span></td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+      document.getElementById('resultsInline').innerHTML = html;
+    }
   } catch(e) {
     const el = document.getElementById('resultsInline');
     if (el) el.innerHTML = `<div class="loading">Помилка: ${e.message}</div>`;
