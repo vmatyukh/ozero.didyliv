@@ -53,6 +53,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
   .wrap { padding: 0 16px 48px; }
 }
 
+/* ── FILTER TABS ── */
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-tab { padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); transition: all 0.15s; font-family: var(--font-display); letter-spacing: 0.02em; }
+.filter-tab:hover { border-color: var(--green-mid); color: var(--text); }
+.filter-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
+
 /* ── CALENDAR ── */
 .calendar-wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 48px; }
 @media (max-width: 680px) { .calendar-wrap { padding: 24px 16px 48px; } }
@@ -175,6 +181,12 @@ input.err { border-color: #e24b4a; }
     </div>
   </div>
   <div class="calendar-wrap">
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" onclick="setFilter('all',this)">Всі</button>
+      <button class="filter-tab" onclick="setFilter('spinning',this)">🎣 Спінінг</button>
+      <button class="filter-tab" onclick="setFilter('float',this)">🪝 Поплавок</button>
+      <button class="filter-tab" onclick="setFilter('other',this)">📌 Інше</button>
+    </div>
     <div class="section-title">Активні та майбутні події</div>
     <div class="cal-grid" id="calGrid"><div class="loading">Завантаження...</div></div>
     <div id="archiveSection" style="display:none;margin-top:40px">
@@ -252,6 +264,16 @@ const CHAT_IDS  = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['84595
 let activeRegRoundKey    = null;
 let activeRegTitle       = null;
 let activeRegDate        = null;
+let allRoundsCache       = [];
+let currentFilter        = 'all';
+
+/* ── Filter ── */
+function setFilter(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCalendar();
+}
 
 /* ── Navigation ── */
 function navigate(page, params) {
@@ -295,55 +317,64 @@ async function loadCalendar() {
     const res  = await fetch(`${API_URL}?action=rounds`);
     const data = await res.json();
     if (!data.ok) throw new Error(data.error);
-
-    const all   = data.rounds || [];
-    const active = all.filter(r => r.status.regEnabled)
-                      .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
-    const soon   = all.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
-                      .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
-    const done   = all.filter(r => r.status.archived || r.status.resultsPublished)
-                      .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
-
-    const grid = document.getElementById('calGrid');
-    if (!active.length && !soon.length && !done.length) { grid.innerHTML = '<div class="loading">Подій не знайдено</div>'; return; }
-
-    const renderCard = r => {
-      const date    = fmtDate(r.date);
-      const regOpen = r.status.regEnabled;
-      const isDone  = r.status.archived || r.status.resultsPublished;
-      const badge = isDone  ? `<span class="event-badge badge-done">✅ Завершено</span>` :
-                    regOpen ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
-                              `<span class="event-badge badge-soon">📅 Скоро</span>`;
-      const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
-      const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
-      return `<div class="event-card" onclick="${navCall}">
-        ${poster}
-        <div class="event-card-body">
-          ${badge}
-          <div class="event-title">${r.title}</div>
-          <div class="event-date">${date}</div>
-        </div>
-        ${(regOpen || isDone) ? `<div class="event-card-bottom">
-          ${regOpen ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Реєстрація</button>` : ''}
-          ${isDone  ? `<button class="btn-fill" onclick="event.stopPropagation();${navCall}">Результати</button>` : ''}
-        </div>` : ''}
-      </div>`;
-    };
-
-    // Active + soon
-    const activeCards = [...active, ...soon];
-    grid.innerHTML = activeCards.length
-      ? activeCards.map(renderCard).join('')
-      : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
-
-    // Archive
-    if (done.length) {
-      document.getElementById('archiveSection').style.display = 'block';
-      document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
-    }
-
+    allRoundsCache = data.rounds || [];
+    renderCalendar();
   } catch(e) {
     document.getElementById('calGrid').innerHTML = `<div class="loading">Помилка завантаження</div>`;
+  }
+}
+
+function renderCalendar() {
+  const all = currentFilter === 'all'
+    ? allRoundsCache
+    : allRoundsCache.filter(r => (r.category || 'other') === currentFilter);
+
+  const active = all.filter(r => r.status.regEnabled)
+                    .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
+  const soon   = all.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
+                    .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
+  const done   = all.filter(r => r.status.archived || r.status.resultsPublished)
+                    .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
+
+  const grid = document.getElementById('calGrid');
+  if (!active.length && !soon.length && !done.length) {
+    grid.innerHTML = '<div class="loading">Подій не знайдено</div>';
+    document.getElementById('archiveSection').style.display = 'none';
+    return;
+  }
+
+  const renderCard = r => {
+    const date    = fmtDate(r.date);
+    const regOpen = r.status.regEnabled;
+    const isDone  = r.status.archived || r.status.resultsPublished;
+    const badge = isDone  ? `<span class="event-badge badge-done">✅ Завершено</span>` :
+                  regOpen ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
+                            `<span class="event-badge badge-soon">📅 Скоро</span>`;
+    const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
+    const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
+    return `<div class="event-card" onclick="${navCall}">
+      ${poster}
+      <div class="event-card-body">
+        ${badge}
+        <div class="event-title">${r.title}</div>
+        <div class="event-date">${date}</div>
+      </div>
+      ${(regOpen || isDone) ? `<div class="event-card-bottom">
+        ${regOpen ? `<button class="btn-fill" onclick="event.stopPropagation();navigate('reg',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}'})">Реєстрація</button>` : ''}
+        ${isDone  ? `<button class="btn-fill" onclick="event.stopPropagation();${navCall}">Результати</button>` : ''}
+      </div>` : ''}
+    </div>`;
+  };
+
+  grid.innerHTML = [...active, ...soon].length
+    ? [...active, ...soon].map(renderCard).join('')
+    : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
+
+  if (done.length) {
+    document.getElementById('archiveSection').style.display = 'block';
+    document.getElementById('archiveGrid').innerHTML = done.map(renderCard).join('');
+  } else {
+    document.getElementById('archiveSection').style.display = 'none';
   }
 }
 
