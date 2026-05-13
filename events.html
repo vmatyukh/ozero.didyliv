@@ -267,10 +267,11 @@ input.err { border-color: #e24b4a; }
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbzb_lzl63y9AIHRm0N10TsBXZRmC9gWaOp1l6J5wpjLoSOzYqvS8UPw1BaLksADp0ML/exec';
-const SEASON  = '2026';
-const BOT_TOKEN = (typeof TG_BOT_TOKEN !== 'undefined') ? TG_BOT_TOKEN : '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
-const CHAT_IDS  = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459515447', '592212598'];
+const API_URL    = 'https://script.google.com/macros/s/AKfycbzb_lzl63y9AIHRm0N10TsBXZRmC9gWaOp1l6J5wpjLoSOzYqvS8UPw1BaLksADp0ML/exec';
+const FB_URL     = 'https://didyliv-be39d-default-rtdb.europe-west1.firebasedatabase.app';
+const SEASON     = '2026';
+const BOT_TOKEN  = (typeof TG_BOT_TOKEN !== 'undefined') ? TG_BOT_TOKEN : '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
+const CHAT_IDS   = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459515447', '592212598'];
 
 let activeRegRoundKey    = null;
 let activeRegTitle       = null;
@@ -368,10 +369,11 @@ function dateToSort(val) {
 /* ── Calendar ── */
 async function loadCalendar() {
   try {
-    const res  = await fetch(`${API_URL}?action=rounds`);
+    const res  = await fetch(`${FB_URL}/rounds.json`);
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
-    allRoundsCache = data.rounds || [];
+    if (!data) throw new Error('No data');
+    // Firebase returns object keyed by roundKey
+    allRoundsCache = Object.values(data).filter(r => r && r.roundKey);
     renderCalendar();
   } catch(e) {
     document.getElementById('calGrid').innerHTML = `<div class="loading">Помилка завантаження</div>`;
@@ -626,9 +628,9 @@ async function loadResultsInline(roundKey) {
 /* ── Participants ── */
 async function loadParticipants(roundKey) {
   try {
-    const res  = await fetch(`${API_URL}?action=publicRegistrations&roundKey=${roundKey}`);
-    const data = await res.json();
-    const names = (data.ok && data.names) ? data.names : [];
+    const res   = await fetch(`${FB_URL}/registrations/${roundKey}.json`);
+    const data  = await res.json();
+    const names = data ? Object.values(data).map(v => v.name).filter(Boolean) : [];
     const count = names.length;
     const pCount = document.getElementById('pCount');
     if (pCount) pCount.textContent =
