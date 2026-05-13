@@ -90,9 +90,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .ei-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
 .ei-value { font-size: 14px; font-weight: 500; }
-.event-prize-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
-.ep-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.ep-value { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); }
+.event-prize-block { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+.prize-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.prize-row:last-child { border-bottom: none; }
+.prize-row-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
+.prize-row-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.prize-row-value { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text); }
+.rules-link { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
+.rules-link:hover { border-color: var(--green-mid); }
+.rules-link-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+.rules-link-arrow { color: var(--text-muted); font-size: 18px; }
 .event-fish-section { margin-bottom: 16px; }
 .event-fish-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
 .fish-pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -129,8 +136,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .lb-empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
 
 /* ── RESULTS ── */
-.tour-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
-.tour-tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); transition: all 0.15s; font-family: var(--font-display); }
+.tour-tabs { display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; margin-bottom: 20px; }
+.tour-tabs::-webkit-scrollbar { display: none; }
+.tour-tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); transition: all 0.15s; font-family: var(--font-display); white-space: nowrap; flex-shrink: 0; }
 .tour-tab:hover { border-color: var(--green-mid); color: var(--text); }
 .tour-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
 .results-table-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
@@ -427,7 +435,7 @@ function renderCalendar() {
 /* ── Event detail ── */
 async function openEvent(params) {
   const { roundKey, title, date, regOpen, isDone } = params;
-  document.getElementById('eventTitle').textContent = title;
+  document.getElementById('eventTitle').textContent = '';
 
   const r = allRoundsCache.find(x => x.roundKey === roundKey) || params;
 
@@ -440,28 +448,46 @@ async function openEvent(params) {
   html += `<div class="event-detail-title">${title}</div>
            <div class="event-detail-date">📅 ${date}</div>`;
 
-  // Info grid
+  // Info grid (no Місце)
   const infoItems = [
-    r.format ? { label:'Формат', value: r.format } : null,
-    r.tours  ? { label:'Тури',   value: r.tours  } : null,
-    r.fish   ? { label:'Риба',   value: r.fish   } : null,
-    { label:'Місце', value:'Озеро Дідилів' },
+    r.format ? { label:'Формат',       value: r.format } : null,
+    r.tours  ? { label:'Тури',          value: r.tours  } : null,
+    r.fish   ? { label:'Залікова риба', value: r.fish   } : null,
   ].filter(Boolean);
 
-  html += `<div class="event-info-grid">${infoItems.map(i =>
-    `<div class="event-info-card"><div class="ei-label">${i.label}</div><div class="ei-value">${i.value}</div></div>`
-  ).join('')}</div>`;
+  if (infoItems.length) {
+    html += `<div class="event-info-grid">${infoItems.map(i =>
+      `<div class="event-info-card"><div class="ei-label">${i.label}</div><div class="ei-value">${i.value}</div></div>`
+    ).join('')}</div>`;
+  }
 
-  // Prize
+  // Prize — split by | into rows
   if (r.prize) {
-    html += `<div class="event-prize-block">
-      <div class="ep-label">🏆 Призовий фонд</div>
-      <div class="ep-value">${r.prize}</div>
-    </div>`;
+    const prizeIcons = ['🏆','🎁','🎣','🥇','💰'];
+    const rows = r.prize.split('|').map(p => p.trim()).filter(Boolean);
+    html += `<div class="event-prize-block">${rows.map((p, i) => `
+      <div class="prize-row">
+        <div class="prize-row-icon">${prizeIcons[i] || '🏅'}</div>
+        <div class="prize-row-value">${p}</div>
+      </div>`).join('')}</div>`;
   }
 
   // ZSU
   html += `<div class="zsu-line">🇺🇦 Частина внесків спрямовується на підтримку ЗСУ</div>`;
+
+  // Rules link
+  const rulesMap = {
+    hyzha_liga:    { label:'Регламент Хижої Ліги',      url:'liga.html' },
+    balansir_fest: { label:'Регламент Балансир Фест',   url:'rules_balansir.html' },
+    poplavok_fest: { label:'Регламент Поплавок Фест',   url:'rules_poplavok.html' },
+  };
+  const rulesKey = Object.keys(rulesMap).find(k => roundKey.includes(k));
+  if (rulesKey) {
+    html += `<a class="rules-link" href="${rulesMap[rulesKey].url}">
+      <div class="rules-link-left">📋 ${rulesMap[rulesKey].label}</div>
+      <div class="rules-link-arrow">→</div>
+    </a>`;
+  }
 
   // Action buttons
   if (regOpen || isDone) {
