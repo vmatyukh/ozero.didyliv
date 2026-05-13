@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Events — Озеро Дідилів</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="config.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,9 +71,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .badge-soon { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
 .event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
 .event-date { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
-.event-btns { display: flex; gap: 8px; }
-.event-btns .btn-fill,
-.event-btns .btn-outline { height: 38px; font-size: 13px; flex: 1; }
+.event-card-bottom { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: center; }
+.event-card-bottom .btn-fill,
+.event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 120px; flex: none; }
 
 /* ── EVENT DETAIL ── */
 .event-detail-poster { width: 100%; max-width: 400px; display: block; border-radius: 12px; margin-bottom: 20px; }
@@ -215,20 +213,6 @@ input.err { border-color: #e24b4a; }
   </div>
 </div>
 
-<!-- ══ RESULTS ══ -->
-<div id="page-results" class="page">
-  <div class="wrap">
-    <div class="top-bar">
-      <button class="back-btn" id="resultsBackBtn" onclick="navigate('home')">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="page-title" id="resultsTitle">Результати</div>
-    </div>
-    <div class="tour-tabs" id="tourTabs"></div>
-    <div id="resultsContent"><div class="loading">Завантаження...</div></div>
-  </div>
-</div>
-
 <!-- ══ REGISTRATION ══ -->
 <div id="page-reg" class="page">
   <div class="wrap">
@@ -260,12 +244,9 @@ const SEASON  = '2026';
 const BOT_TOKEN = (typeof TG_BOT_TOKEN !== 'undefined') ? TG_BOT_TOKEN : '8225797469:AAH0oL4ARwNwXZZXf3j44kudhbGJ0mUs3KY';
 const CHAT_IDS  = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459515447', '592212598'];
 
-firebase.initializeApp(firebaseConfig);
-
-let activeRegRoundKey = null;
-let activeRegTitle    = null;
-let activeRegDate     = null;
-let currentEventRoundKey = null;
+let activeRegRoundKey    = null;
+let activeRegTitle       = null;
+let activeRegDate        = null;
 
 /* ── Navigation ── */
 function navigate(page, params) {
@@ -273,9 +254,8 @@ function navigate(page, params) {
   document.getElementById('page-' + page).classList.add('active');
   window.scrollTo(0, 0);
   if (page === 'leaderboard') loadLeaderboard();
-  if (page === 'results' && params) loadResults(params.roundKey, params.title, params.fromEvent);
-  if (page === 'reg'     && params) openReg(params);
-  if (page === 'event'   && params) openEvent(params);
+  if (page === 'reg'   && params) openReg(params);
+  if (page === 'event' && params) openEvent(params);
 }
 
 /* ── Format date ── */
