@@ -71,10 +71,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .event-card-body { padding: 14px 16px 16px; flex: 1; }
 .event-card:hover { border-color: var(--green-mid); }
 .event-poster { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px 14px 0 0; }
-.event-poster-placeholder { width: 100%; flex: 1; min-height: 120px; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
-.event-poster-placeholder.compact { min-height: 80px; flex: unset; height: 80px; }
+.event-poster-placeholder { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.event-poster-placeholder.compact { aspect-ratio: 16/5; }
 .event-poster-placeholder svg { width: 40px; height: 40px; opacity: 0.3; }
-.event-poster { width: 100%; display: block; border-radius: 14px 14px 0 0; }
 .event-card-body { padding: 14px 16px 16px; }
 .event-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
 .badge-reg  { background: rgba(0,136,141,0.15); color: var(--green-mid); border: 1px solid rgba(0,136,141,0.3); }
@@ -418,6 +417,32 @@ async function loadCalendar() {
   }
 }
 
+function equalizePosters(gridId) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('.event-poster-placeholder').forEach(el => el.style.height = '');
+  const cards = Array.from(grid.querySelectorAll('.event-card'));
+  const rows = {};
+  cards.forEach(card => {
+    const top = Math.round(card.getBoundingClientRect().top);
+    if (!rows[top]) rows[top] = [];
+    rows[top].push(card);
+  });
+  Object.values(rows).forEach(rowCards => {
+    let maxH = 0;
+    rowCards.forEach(card => {
+      const img = card.querySelector('.event-poster');
+      if (img && img.offsetHeight > 0) maxH = Math.max(maxH, img.offsetHeight);
+    });
+    if (maxH > 0) {
+      rowCards.forEach(card => {
+        const ph = card.querySelector('.event-poster-placeholder');
+        if (ph) ph.style.height = maxH + 'px';
+      });
+    }
+  });
+}
+
 function renderCalendar() {
   const isArchive = currentFilter === 'archive';
 
@@ -518,6 +543,9 @@ function renderCalendar() {
     grid.style.display = '';
     grid.innerHTML = '<div class="loading">Подій не знайдено</div>';
   }
+
+  const doEqualize = () => ['calGrid','soonGrid','archiveGrid'].forEach(equalizePosters);
+  setTimeout(doEqualize, 300);
 }
 
 /* ── Event detail ── */
