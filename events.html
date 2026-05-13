@@ -91,10 +91,11 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .ei-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
 .ei-value { font-size: 14px; font-weight: 500; }
 @media (max-width: 480px) { .event-info-grid { grid-template-columns: 1fr; } }
-.event-prize-block { margin-bottom: 16px; }
-.prize-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-.prize-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-.prize-pill { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.3); color: var(--green-mid); font-size: 13px; font-weight: 500; padding: 5px 14px; border-radius: 20px; }
+.event-prize-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.prize-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.prize-main { font-family: var(--font-display); font-size: 28px; font-weight: 600; color: var(--green-mid); margin-bottom: 10px; }
+.prize-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.prize-pill { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.3); color: var(--text-muted); font-size: 12px; font-weight: 500; padding: 8px 12px; border-radius: 10px; text-align: center; }
 .rules-link { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
 .rules-link:hover { border-color: var(--green-mid); }
 .rules-link-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
@@ -487,12 +488,16 @@ async function openEvent(params) {
     ).join('')}</div>`;
   }
 
-  // Prize pills
+  // Prize — first item big if contains digits (money), else all pills
   if (r.prize) {
     const rows = r.prize.split('|').map(p => p.trim()).filter(Boolean);
+    const firstIsMoney = /\d/.test(rows[0]);
+    const main = firstIsMoney ? rows[0] : null;
+    const rest = firstIsMoney ? rows.slice(1) : rows;
     html += `<div class="event-prize-block">
       <div class="prize-label">🏆 Призовий фонд</div>
-      <div class="prize-pills">${rows.map(p => `<span class="prize-pill">${p}</span>`).join('')}</div>
+      ${main ? `<div class="prize-main">${main}</div>` : ''}
+      ${rest.length ? `<div class="prize-pills">${rest.map(p => `<span class="prize-pill">${p}</span>`).join('')}</div>` : ''}
     </div>`;
   }
 
