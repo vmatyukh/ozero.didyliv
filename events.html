@@ -76,6 +76,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .badge-reg  { background: rgba(0,136,141,0.15); color: var(--green-mid); border: 1px solid rgba(0,136,141,0.3); }
 .badge-done { background: rgba(255,215,0,0.08); color: #d4b84a; border: 1px solid rgba(255,215,0,0.2); }
 .badge-soon { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-live { background: rgba(220,50,50,0.12); color: #e05555; border: 1px solid rgba(220,50,50,0.3); }
 .event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
 .event-date { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 .event-card-bottom { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: center; }
@@ -419,9 +420,11 @@ function renderCalendar() {
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const soon   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
+  const live   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && r.status.resultsPublished)
+                    .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const done   = isArchive
     ? filtered.sort((a, b) => dateToSort(b.date) - dateToSort(a.date))
-    : filtered.filter(r => r.status.archived || r.status.resultsPublished)
+    : filtered.filter(r => r.status.archived)
               .sort((a, b) => dateToSort(b.date) - dateToSort(a.date));
 
   const grid = document.getElementById('calGrid');
@@ -441,9 +444,10 @@ function renderCalendar() {
     const date    = fmtDate(r.date);
     const regOpen = r.status.regEnabled;
     const isDone  = r.status.archived || r.status.resultsPublished;
-    const badge = isDone  ? `<span class="event-badge badge-done">✅ Завершено</span>` :
-                  regOpen ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
-                            `<span class="event-badge badge-soon">📅 Скоро</span>`;
+    const badge = r.status.archived       ? `<span class="event-badge badge-done">✅ Завершено</span>` :
+                  r.status.resultsPublished ? `<span class="event-badge badge-live">🔴 Live результати</span>` :
+                  regOpen                  ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
+                                             `<span class="event-badge badge-soon">📅 Скоро</span>`;
     const poster = `<img class="event-poster" src="posters/${r.roundKey}.jpg" alt="${r.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="event-poster-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Афіша незабаром</span></div>`;
     const navCall = `navigate('event',{roundKey:'${r.roundKey}',title:'${r.title}',date:'${date}',regOpen:${regOpen},isDone:${isDone}})`;
     return `<div class="event-card" onclick="${navCall}">
@@ -468,8 +472,8 @@ function renderCalendar() {
     return;
   }
 
-  grid.innerHTML = [...active, ...soon].length
-    ? [...active, ...soon].map(renderCard).join('')
+  grid.innerHTML = [...active, ...live, ...soon].length
+    ? [...active, ...live, ...soon].map(renderCard).join('')
     : '<div class="loading" style="color:var(--text-muted)">Немає активних подій</div>';
 
   if (done.length) {
@@ -904,12 +908,12 @@ function openReg(params) {
     <div class="reg-event-name">${params.title}</div>
     <div class="reg-event-date">📅 ${params.date}</div>`;
   document.getElementById('regCard').innerHTML = `
-    <div class="field-label">Прізвище</div>
-    <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
-    <div class="err-msg" id="lastName-err">Введіть прізвище</div>
     <div class="field-label">Імʼя</div>
     <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
     <div class="err-msg" id="firstName-err">Введіть імʼя</div>
+    <div class="field-label">Прізвище</div>
+    <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
+    <div class="err-msg" id="lastName-err">Введіть прізвище</div>
     <div class="field-label">Номер телефону</div>
     <input type="tel" id="phone" placeholder="+380XXXXXXXXX" value="+380" autocomplete="tel" />
     <div class="err-msg" id="phone-err">Введіть коректний номер</div>
@@ -953,7 +957,7 @@ async function handleSubmit() {
   const lastName  = document.getElementById('lastName').value.trim();
   const firstName = document.getElementById('firstName').value.trim();
   const phone     = document.getElementById('phone').value.trim();
-  const name      = `${lastName} ${firstName}`;
+  const name      = `${firstName} ${lastName}`;
 
   let ok = true;
   if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
