@@ -153,8 +153,21 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .tour-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; gap: 24px; flex-wrap: wrap; }
 .ts-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
 .ts-value { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--green-mid); }
+/* ── TOUR STATS CARDS ── */
+.tour-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.ts-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.ts-card-total { border-color: rgba(0,136,141,0.4); }
+.ts-zone-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.ts-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; }
+.ts-bigfish { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+.ts-bf-val { font-size: 13px; font-weight: 600; color: var(--text); }
+.ts-bf-name { font-size: 11px; color: var(--text-muted); width: 100%; }
+@media (max-width: 480px) { .tour-stats { grid-template-columns: 1fr 1fr; } .ts-card-total { grid-column: span 2; } }
 
-/* ── TWO ZONES ── */
+.bigfish-winner { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.4); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
+.bfw-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.bfw-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; flex: 1; }
+.bfw-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); white-space: nowrap; }
 .two-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .zone-block { min-width: 0; }
 .zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
@@ -740,14 +753,21 @@ function renderResultsTo(results, tab, targetId) {
     const bigFishTotal = sorted.reduce((m, r) => Math.max(m, Number(r.big_fish || 0)), 0);
     const bigFishWinner = bigFishTotal > 0 ? sorted.find(r => Number(r.big_fish || 0) === bigFishTotal) : null;
 
+    if (bigFishWinner) {
+      html += `<div class="bigfish-winner">
+        <div class="bfw-label">🐟 Big Fish змагань</div>
+        <div class="bfw-name">${bigFishWinner.name}</div>
+        <div class="bfw-weight">${bigFishTotal.toLocaleString('uk-UA')} г</div>
+      </div>`;
+    }
+
     html += `<div class="results-table-wrap"><table class="results-table">
-      <thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Бали</th><th>Вага (г)</th><th>🐟</th></tr></thead><tbody>`;
+      <thead><tr><th style="width:44px">#</th><th>Учасник</th><th>Бали</th><th>Вага (г)</th></tr></thead><tbody>`;
     sorted.forEach((r, i) => {
       const p = i + 1;
       const pl = p <= 3 ? `<span class="medal medal-${p}">${p}</span>` : `<span class="place-num">${p}</span>`;
       const w = Number(r.total_weight || 0);
-      const bf = Number(r.big_fish || 0);
-      html += `<tr><td>${pl}</td><td style="font-weight:500">${r.name}</td><td><span class="points-badge">${r.total_points}</span></td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td><td class="${bf > 0 ? 'weight-val' : 'zero-weight'}" style="font-size:12px">${bf > 0 ? bf.toLocaleString('uk-UA') : '—'}</td></tr>`;
+      html += `<tr><td>${pl}</td><td style="font-weight:500">${r.name}</td><td><span class="points-badge">${r.total_points}</span></td><td class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td></tr>`;
     });
     html += `</tbody></table></div>`;
 
@@ -764,13 +784,24 @@ function renderResultsTo(results, tab, targetId) {
       const bfKey  = tab.key + '_big_fish';
       const bigA   = zoneA.reduce((m, r) => Math.max(m, Number(r[bfKey] || 0)), 0);
       const bigB   = zoneB.reduce((m, r) => Math.max(m, Number(r[bfKey] || 0)), 0);
+      const bigAName = bigA > 0 ? (zoneA.find(r => Number(r[bfKey]||0) === bigA)||{}).name || '' : '';
+      const bigBName = bigB > 0 ? (zoneB.find(r => Number(r[bfKey]||0) === bigB)||{}).name || '' : '';
 
-      html += `<div class="tour-summary">
-        <div><div class="ts-label">Зона А</div><div class="ts-value">${(totalA/1000).toFixed(2)} кг</div></div>
-        <div><div class="ts-label">Зона Б</div><div class="ts-value">${(totalB/1000).toFixed(2)} кг</div></div>
-        <div><div class="ts-label">Разом</div><div class="ts-value">${((totalA+totalB)/1000).toFixed(2)} кг</div></div>
-        ${bigA ? `<div><div class="ts-label">🐟 Big Fish А</div><div class="ts-value">${bigA.toLocaleString('uk-UA')} г</div></div>` : ''}
-        ${bigB ? `<div><div class="ts-label">🐟 Big Fish Б</div><div class="ts-value">${bigB.toLocaleString('uk-UA')} г</div></div>` : ''}
+      html += `<div class="tour-stats">
+        <div class="ts-card">
+          <div class="ts-zone-label">Зона А</div>
+          <div class="ts-weight">${(totalA/1000).toFixed(2)} кг</div>
+          ${bigA ? `<div class="ts-bigfish"><span class="ts-bf-icon">🐟</span><span class="ts-bf-val">${bigA.toLocaleString('uk-UA')} г</span><span class="ts-bf-name">${bigAName}</span></div>` : ''}
+        </div>
+        <div class="ts-card">
+          <div class="ts-zone-label">Зона Б</div>
+          <div class="ts-weight">${(totalB/1000).toFixed(2)} кг</div>
+          ${bigB ? `<div class="ts-bigfish"><span class="ts-bf-icon">🐟</span><span class="ts-bf-val">${bigB.toLocaleString('uk-UA')} г</span><span class="ts-bf-name">${bigBName}</span></div>` : ''}
+        </div>
+        <div class="ts-card ts-card-total">
+          <div class="ts-zone-label">Разом</div>
+          <div class="ts-weight">${((totalA+totalB)/1000).toFixed(2)} кг</div>
+        </div>
       </div>`;
 
       const maxRows = Math.max(zoneA.length, zoneB.length);
