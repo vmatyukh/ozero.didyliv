@@ -66,20 +66,22 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; align-items: stretch; }
 
 /* ── EVENT CARD ── */
-.event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s; cursor: pointer; display: flex; flex-direction: column; height: 100%; }
+.event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s; cursor: pointer; display: flex; flex-direction: column; }
 .event-card:hover { border-color: var(--green-mid); }
-.event-card-body { padding: 14px 16px 16px; height: 140px; display: flex; flex-direction: column; }
+.event-card-body { padding: 14px 16px 16px; flex: 1; }
+.event-card:hover { border-color: var(--green-mid); }
 .event-poster { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px 14px 0 0; }
-.event-poster-placeholder { width: 100%; flex: 1; min-height: 120px; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
-.event-poster-placeholder.compact { min-height: 120px; }
+.event-poster-placeholder { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+.event-poster-placeholder.compact { aspect-ratio: 16/5; }
 .event-poster-placeholder svg { width: 40px; height: 40px; opacity: 0.3; }
+.event-card-body { padding: 14px 16px 16px; }
 .event-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
 .badge-reg  { background: rgba(0,136,141,0.15); color: var(--green-mid); border: 1px solid rgba(0,136,141,0.3); }
 .badge-done { background: rgba(255,215,0,0.08); color: #d4b84a; border: 1px solid rgba(255,215,0,0.2); }
 .badge-soon { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
 .badge-live { background: rgba(220,50,50,0.12); color: #e05555; border: 1px solid rgba(220,50,50,0.3); }
-.event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 0; flex: 1; }
-.event-date { font-size: 13px; color: var(--text-muted); margin-top: auto; padding-top: 4px; }
+.event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.event-date { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 .event-card-bottom { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: center; }
 .event-card-bottom .btn-fill,
 .event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 320px; }
@@ -160,7 +162,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .ts-value { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--green-mid); }
 /* ── TOUR STATS CARDS ── */
 .tour-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-.ts-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.ts-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .ts-card-total { border-color: rgba(0,136,141,0.4); }
 .ts-zone-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 .ts-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; }
@@ -169,13 +171,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .ts-bf-name { font-size: 11px; color: var(--text-muted); width: 100%; }
 @media (max-width: 480px) { .tour-stats { grid-template-columns: 1fr 1fr; } .ts-card-total { grid-column: span 2; } }
 
-.bigfish-winner { background: rgba(0,83,86,0.15); border: 1px solid rgba(0,136,141,0.4); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
+.bigfish-winner { border: 1px solid rgba(0,136,141,0.4); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
 .bfw-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .bfw-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; flex: 1; }
 .bfw-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); white-space: nowrap; }
 .two-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .zone-block { min-width: 0; }
-.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
+.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; margin-bottom: 8px; text-align: center; border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
 .zone-tabs { display: none; gap: 6px; margin-bottom: 12px; }
 .zone-tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-display); text-align: center; transition: all 0.15s; }
 .zone-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
@@ -807,7 +809,7 @@ function renderResultsTo(results, tab, targetId) {
         <div class="zone-block active" id="zone-a-${targetId}">
           <div class="zone-header">Зона А</div>
           <div class="results-table-wrap"><table class="results-table">
-            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Бали</th></tr></thead><tbody>`;
       let plA = 0;
       zoneA.forEach(r => {
         const w = Number(r[tab.wKey] || 0);
@@ -822,7 +824,7 @@ function renderResultsTo(results, tab, targetId) {
         <div class="zone-block" id="zone-b-${targetId}">
           <div class="zone-header">Зона Б</div>
           <div class="results-table-wrap"><table class="results-table">
-            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Бали</th></tr></thead><tbody>`;
       let plB = 0;
       zoneB.forEach(r => {
         const w = Number(r[tab.wKey] || 0);
