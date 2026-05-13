@@ -276,10 +276,6 @@ input.err { border-color: #e24b4a; }
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <div class="page-title">Реєстрація</div>
-      <div style="display:flex;gap:14px;margin-left:auto">
-        <a id="regDetailsLink" href="#" style="font-size:13px;color:var(--text-muted);text-decoration:none;align-self:center" onclick="event.preventDefault();document.getElementById('regBackBtn').click()">Деталі</a>
-        <a id="regRulesLink" href="#" target="_blank" style="font-size:13px;color:var(--text-muted);text-decoration:none;align-self:center">Регламент</a>
-      </div>
     </div>
     <div class="reg-wrap">
       <div class="reg-event-info" id="regEventInfo"></div>
@@ -539,9 +535,9 @@ async function openEvent(params) {
 
   // Rules link
   const rulesMap = {
-    hyzha_liga:    { label:'Регламент Хижої Ліги',      url:'liga.html' },
-    balansir_fest: { label:'Регламент Балансир Фест',   url:'rules_balansir.html' },
-    poplavok_fest: { label:'Регламент Поплавок Фест',   url:'rules_poplavok.html' },
+    hyzha_liga:    { label:'Регламент Хижої Ліги',    url:'regulations/rules_hyzha_liga.html' },
+    balansir_fest: { label:'Регламент Балансир Фест',   url:'regulations/rules_balansir.html' },
+    poplavok_fest: { label:'Регламент Поплавок Фест',   url:'regulations/rules_poplavok.html' },
   };
   const rulesKey = Object.keys(rulesMap).find(k => roundKey.includes(k));
   if (rulesKey) {
@@ -908,9 +904,21 @@ function openReg(params) {
   activeRegRoundKey = params.roundKey;
   activeRegTitle    = params.title;
   activeRegDate     = params.date;
+  // Rules link
+  const rulesMap = {
+    hyzha_liga:    'regulations/rules_hyzha_liga.html',
+    balansir_fest: 'regulations/rules_balansir.html',
+    poplavok_fest: 'regulations/rules_poplavok.html',
+  };
+  const rulesKey = Object.keys(rulesMap).find(k => params.roundKey.includes(k));
+
   document.getElementById('regEventInfo').innerHTML = `
     <div class="reg-event-name">${params.title}</div>
-    <div class="reg-event-date">📅 ${params.date}</div>`;
+    <div class="reg-event-date">📅 ${params.date}</div>
+    <div style="display:flex;gap:16px;margin-top:10px">
+      <a href="#" style="font-size:13px;color:var(--text-muted);text-decoration:none" onclick="event.preventDefault();document.getElementById('regBackBtn').click()">← Деталі події</a>
+      ${rulesKey ? `<a href="${rulesMap[rulesKey]}" target="_blank" style="font-size:13px;color:var(--text-muted);text-decoration:none">📋 Регламент</a>` : ''}
+    </div>`;
   document.getElementById('regCard').innerHTML = `
     <div class="field-label">Імʼя</div>
     <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
@@ -930,17 +938,6 @@ function openReg(params) {
     regOpen: true,
     isDone: false,
   });
-
-  // Rules link
-  const rulesMap = {
-    hyzha_liga:    'rules_hyzha_liga.html',
-    balansir_fest: 'rules_balansir.html',
-    poplavok_fest: 'rules_poplavok.html',
-  };
-  const rulesKey = Object.keys(rulesMap).find(k => params.roundKey.includes(k));
-  const rulesLink = document.getElementById('regRulesLink');
-  if (rulesKey) { rulesLink.href = rulesMap[rulesKey]; rulesLink.style.display = ''; }
-  else { rulesLink.style.display = 'none'; }
 
   // Phone auto-format
   const phoneInput = document.getElementById('phone');
