@@ -283,13 +283,22 @@ const MONTHS_UA = ['січня','лютого','березня','квітня','
 
 function fmtDate(val) {
   if (!val) return '';
-  let d;
+  let day, month, year;
   if (typeof val === 'number') {
-    d = new Date(Math.round((val - 25569) * 86400 * 1000));
+    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+    day = d.getUTCDate(); month = d.getUTCMonth(); year = d.getUTCFullYear();
   } else {
-    d = new Date(String(val).split('T')[0]);
+    const parts = String(val).split('T')[0].split('-');
+    year = parseInt(parts[0]); month = parseInt(parts[1]) - 1; day = parseInt(parts[2]);
   }
-  return `${d.getUTCDate()} ${MONTHS_UA[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return String(val);
+  return `${day} ${MONTHS_UA[month]} ${year}`;
+}
+
+function dateToSort(val) {
+  if (!val) return '';
+  if (typeof val === 'number') return String(val);
+  return String(val).split('T')[0];
 }
 
 /* ── Calendar ── */
@@ -300,11 +309,12 @@ async function loadCalendar() {
     if (!data.ok) throw new Error(data.error);
 
     const all   = data.rounds || [];
-    const active = all.filter(r => r.status.regEnabled);
+    const active = all.filter(r => r.status.regEnabled)
+                      .sort((a, b) => dateToSort(a.date).localeCompare(dateToSort(b.date)));
     const soon   = all.filter(r => !r.status.regEnabled && !r.status.archived && !r.status.resultsPublished)
-                      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+                      .sort((a, b) => dateToSort(a.date).localeCompare(dateToSort(b.date)));
     const done   = all.filter(r => r.status.archived || r.status.resultsPublished)
-                      .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+                      .sort((a, b) => dateToSort(b.date).localeCompare(dateToSort(a.date)));
     const rounds = [...active, ...soon, ...done];
 
     const grid = document.getElementById('calGrid');
