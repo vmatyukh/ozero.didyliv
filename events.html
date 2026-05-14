@@ -550,14 +550,11 @@ async function openEvent(params) {
            <div class="event-detail-date">📅 ${date}</div>`;
 
   // Info grid (no Місце)
-  const regTo = r.status && r.status.regOpenTo ? parseDate(r.status.regOpenTo) : null;
-  const regToStr = regTo ? `до ${String(regTo.getDate()).padStart(2,'0')}.${String(regTo.getMonth()+1).padStart(2,'0')}` : null;
-
   const infoItems = [
     r.format  ? { label:'Формат',            value: r.format   } : null,
     r.tours   ? { label:'Тури',               value: r.tours    } : null,
     r.fish    ? { label:'Залікова риба',      value: r.fish     } : null,
-    regToStr  ? { label:'Реєстрація',         value: regToStr   } : null,
+    r.price  ? { label:'Вартість участі',         value: r.price   } : null,
   ].filter(Boolean);
 
   if (infoItems.length) {
