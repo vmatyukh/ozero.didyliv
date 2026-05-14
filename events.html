@@ -130,16 +130,19 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 
 /* ── LEADERBOARD ── */
 .lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.lb-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .lb-header { background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%); padding: 20px 20px 16px; }
 .lb-header-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 4px; }
 .lb-header-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
 .lb-table { width: 100%; border-collapse: collapse; }
+.lb-table thead tr { background: rgba(0,83,86,0.4); }
+.lb-table thead th { padding: 10px 16px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); font-family: var(--font-display); }
 .lb-table td { padding: 12px 16px; font-size: 14px; border-top: 1px solid var(--border); vertical-align: middle; }
 .lb-table tr:hover td { background: rgba(0,83,86,0.08); }
 .lb-name { font-weight: 500; }
 .lb-points { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--green-mid); text-align: right; }
-.lb-weight { font-size: 12px; color: var(--text-muted); text-align: right; }
-.lb-events { font-size: 12px; color: var(--text-muted); text-align: center; }
+.lb-weight { font-size: 12px; color: var(--text-muted); text-align: right; padding: 0 !important;}
+.lb-events { font-size: 12px; color: var(--text-muted); text-align: center;  padding: 0 !important; }
 .lb-empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
 
 /* ── RESULTS ── */
@@ -177,7 +180,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .bfw-weight { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-mid); white-space: nowrap; }
 .two-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .zone-block { min-width: 0; }
-.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; margin-bottom: 8px; text-align: center; border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
+.zone-header { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--green-mid); margin-bottom: 8px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
 .zone-tabs { display: none; gap: 6px; margin-bottom: 12px; }
 .zone-tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-display); text-align: center; transition: all 0.15s; }
 .zone-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
@@ -809,7 +812,7 @@ function renderResultsTo(results, tab, targetId) {
         <div class="zone-block active" id="zone-a-${targetId}">
           <div class="zone-header">Зона А</div>
           <div class="results-table-wrap"><table class="results-table">
-            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Бали</th></tr></thead><tbody>`;
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
       let plA = 0;
       zoneA.forEach(r => {
         const w = Number(r[tab.wKey] || 0);
@@ -824,7 +827,7 @@ function renderResultsTo(results, tab, targetId) {
         <div class="zone-block" id="zone-b-${targetId}">
           <div class="zone-header">Зона Б</div>
           <div class="results-table-wrap"><table class="results-table">
-            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Бали</th></tr></thead><tbody>`;
+            <thead><tr><th style="width:32px">#</th><th>Учасник</th><th>Вага</th><th>Б</th></tr></thead><tbody>`;
       let plB = 0;
       zoneB.forEach(r => {
         const w = Number(r[tab.wKey] || 0);
@@ -879,18 +882,35 @@ function switchZone(btn, showId, hideId) {
 async function loadLeaderboard() {
   document.getElementById('lbContent').innerHTML = '<div class="loading">Завантаження...</div>';
   try {
-    const res  = await fetch(`${API_URL}?action=seasonRating&season=${SEASON}`);
+    const res  = await fetch(`${FB_URL}/season_rating/2026.json`);
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
-    const rating = data.rating || [];
+    if (!data) { document.getElementById('lbContent').innerHTML = '<div class="lb-empty">Рейтинг ще не сформовано</div>'; return; }
+    const rating = Object.values(data).filter(r => r && r.name).sort((a, b) => Number(a.place) - Number(b.place));
     if (!rating.length) { document.getElementById('lbContent').innerHTML = '<div class="lb-empty">Рейтинг ще не сформовано</div>'; return; }
-    let html = `<table class="lb-table"><tbody>`;
+    let html = `<div class="lb-table-wrap"><table class="lb-table">
+      <thead><tr>
+        <th style="width:44px"></th>
+        <th style="text-align:left">Учасник</th>
+        <th style="text-align:center;font-size:11px;color:rgba(255,255,255,0.7)">Раунди</th>
+        <th style="text-align:right;font-size:11px;color:rgba(255,255,255,0.7)">Вага</th>
+        <th style="text-align:right;font-size:11px;color:rgba(255,255,255,0.7)">Бали</th>
+      </tr></thead>
+      <tbody>`;
     rating.forEach(r => {
-      const p = Number(r.place);
+      const p  = Number(r.place);
       const pl = p <= 3 ? `<span class="medal medal-${p}">${p}</span>` : `<span class="place-num">${p}</span>`;
-      html += `<tr><td style="width:44px">${pl}</td><td class="lb-name">${r.name}</td><td class="lb-events">${r.eventsCount} ет.</td><td class="lb-weight">${Number(r.totalWeight||0).toLocaleString('uk-UA')} г</td><td class="lb-points">${r.totalPoints} б</td></tr>`;
+      const pts = Number(r.totalPoints || 0);
+      const w   = Number(r.totalWeight || 0);
+      const ev  = Number(r.eventsCount || 0);
+      html += `<tr>
+        <td style="width:44px">${pl}</td>
+        <td class="lb-name">${r.name}</td>
+        <td class="lb-events">${ev}</td>
+        <td class="lb-weight">${w > 0 ? w.toLocaleString('uk-UA') + ' г' : '—'}</td>
+        <td class="lb-points">${pts} б</td>
+      </tr>`;
     });
-    html += `</tbody></table>`;
+    html += `</tbody></table></div>`;
     document.getElementById('lbContent').innerHTML = html;
   } catch(e) {
     document.getElementById('lbContent').innerHTML = '<div class="lb-empty">Помилка завантаження</div>';
