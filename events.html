@@ -593,9 +593,16 @@ async function openEvent(params) {
   html += `</div></div>`; // close event-detail-right and event-detail-layout
 
   // ZSU
-  if (regOpen || isDone) {
+  const regPlanned = r.status && r.status.regPlanned;
+  const regOpenFrom2 = r.status && r.status.regOpenFrom ? parseDate(r.status.regOpenFrom) : null;
+  const regOpenFromStr2 = (regPlanned && regOpenFrom2)
+    ? ` з ${String(regOpenFrom2.getDate()).padStart(2,'0')}.${String(regOpenFrom2.getMonth()+1).padStart(2,'0')} о ${String(regOpenFrom2.getHours()).padStart(2,'0')}:${String(regOpenFrom2.getMinutes()).padStart(2,'0')}`
+    : '';
+
+  if (regOpen || isDone || regPlanned) {
     html += `<div class="event-action-btns">
       ${regOpen ? `<button class="btn-fill" onclick="navigate('reg',{roundKey:'${roundKey}',title:'${title}',date:'${date}'})">Зареєструватися</button>` : ''}
+      ${regPlanned ? `<button class="btn-fill" disabled>🔔 Реєстрація${regOpenFromStr2}</button>` : ''}
       ${isDone  ? `<button class="btn-outline" onclick="scrollToResults()">Результати ↓</button>` : ''}
     </div>`;
   }
