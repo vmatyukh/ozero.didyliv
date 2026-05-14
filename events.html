@@ -370,6 +370,16 @@ async function handleHash() {
     }
     return;
   }
+
+  // Short hash: #r2, #balansir etc → find by code field
+  const byCode = allRoundsCache.find(r => r.code === hash);
+  if (byCode) {
+    const date    = fmtDate(byCode.date);
+    const regOpen = byCode.status.regEnabled;
+    const isDone  = byCode.status.archived || byCode.status.resultsPublished;
+    navigate('event', { roundKey: byCode.roundKey, title: byCode.title, date, regOpen, isDone });
+    return;
+  }
 }
 
 window.addEventListener('popstate', () => {
