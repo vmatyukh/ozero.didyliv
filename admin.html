@@ -407,7 +407,15 @@ function buildTextLines(d){
       :d.abonName?`Абонемент: ${d.abonName}`:'Безкоштовно';
     lines.push(label);
   }
-  lines.push(`Сума: ${d.free?'Безкоштовно':d.amount+' грн'}`);
+  // Якщо безкоштовний але є оренда — показуємо суму оренди
+  const rentAmount = (d.pidsak?PRICE_PIDSAK:0) + (d.instrument?PRICE_INSTRUMENT:0);
+  if(d.free && rentAmount>0){
+    lines.push(`Риболовля: Безкоштовно`);
+    lines.push(`Оренда: ${rentAmount} грн`);
+    lines.push(`Сума: ${rentAmount} грн`);
+  } else {
+    lines.push(`Сума: ${d.free?'Безкоштовно':d.amount+' грн'}`);
+  }
   lines.push('—————————————————','Гарного кльову!');
   return lines;
 }
