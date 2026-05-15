@@ -220,9 +220,17 @@ input.err { border-color: #e24b4a; }
 <!-- ══ HOME ══ -->
 <div id="page-home" class="page active">
   <div class="home-hero">
-    <div class="home-title">Події — Озеро Дідилів</div>
-    <div class="home-sub">Хижа Ліга та інші змагання · 2026</div>
-    <div class="home-actions">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+      <div>
+        <div class="home-title">Події — Озеро Дідилів</div>
+        <div class="home-sub" style="margin-bottom:0">Хижа Ліга та інші змагання · 2026</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:16px">
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Партнер ліги</div>
+        <img src="partners/upstream.png" alt="Upstream" style="height:32px;opacity:0.85" />
+      </div>
+    </div>
+    <div class="home-actions" style="margin-top:20px">
       <button class="btn-fill" style="width:100%" onclick="navigate('leaderboard')">🏆 Лідерборд Хижа Ліга 2026</button>
     </div>
   </div>
