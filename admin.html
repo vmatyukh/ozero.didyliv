@@ -762,8 +762,8 @@ function renderFloatTable(){
       const currentEmail = firebase.auth().currentUser?.email||'';
       const canCancel = isAdmin || b.createdBy === currentEmail;
       const payment = b.payment || '';
-      const payIcon = payment==='card'?'💳':payment==='cash'?'💵':'💰';
-      const payLabel = payment==='card'?'Картка':payment==='cash'?'Готівка':'Оплата';
+      const payIcon = payment==='card'?'💳':payment==='cash'?'💵':payment==='free'?'🆓':'💰';
+      const payLabel = payment==='card'?'Картка':payment==='cash'?'Готівка':payment==='free'?'Безкоштовно':'Оплата';
       actCell=`${canCancel?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
                <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
                <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>
@@ -791,19 +791,25 @@ function renderFloatTable(){
       <td class="act-btns">${actCell}</td>
       <td></td>`;
 
-    // Чекбокс доступності — тільки адмін
+    // Чекбокс доступності — тільки для вільних секторів і тільки адмін
     const availCell = tr.querySelectorAll('td')[6];
-    const chk = document.createElement('input');
-    chk.type='checkbox'; chk.checked=isAvailable;
-    chk.style.width='18px'; chk.style.height='18px';
-    if(isAdmin){
-      chk.style.cursor='pointer';
-      chk.onchange = e => toggleSectorAvailability(i, e.target.checked);
-    } else {
-      chk.disabled = true;
-      chk.style.cursor='not-allowed'; chk.style.opacity='0.5';
+    if(!isBooked && !isBlocked){
+      const chk = document.createElement('input');
+      chk.type='checkbox'; chk.checked=isAvailable;
+      chk.style.width='16px'; chk.style.height='16px';
+      if(isAdmin){
+        chk.style.cursor='pointer';
+        chk.onchange = e => toggleSectorAvailability(i, e.target.checked);
+      } else {
+        chk.disabled = true;
+        chk.style.cursor='not-allowed'; chk.style.opacity='0.5';
+      }
+      const label = document.createElement('label');
+      label.style.cssText='display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:'+(isAvailable?'#2a7a2a':'#c0392b');
+      label.appendChild(chk);
+      label.appendChild(document.createTextNode(isAvailable?'Так':'Ні'));
+      availCell.appendChild(label);
     }
-    availCell.appendChild(chk);
 
     if(!isBooked && !isBlocked){
       tbody.appendChild(tr);
@@ -817,6 +823,7 @@ function renderFloatTable(){
           <select id="mpay_${i}" style="padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px">
             <option value="cash">💵 Готівка</option>
             <option value="card">💳 Картка</option>
+            <option value="free">🆓 Безкоштовно</option>
           </select>
           <button class="primary" onclick="adminBook(${i})">✅ Підтвердити</button>
           <button class="secondary" onclick="hideManualBook(${i})">Скасувати</button>
@@ -828,10 +835,12 @@ function renderFloatTable(){
     }
   }
 
+  const revenue = Object.values(sectorMap).reduce((sum, b)=>
+    sum + (b.payment==='free' ? 0 : SESSION_PRICES[floatSession]), 0);
   $('floatStats').innerHTML=`
     <div class="stat-card"><strong>${11-bookedCount}</strong>Вільних</div>
     <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
-    <div class="stat-card"><strong>${Object.keys(sectorMap).length*SESSION_PRICES[floatSession]} грн</strong>Виручка</div>`;
+    <div class="stat-card"><strong>${revenue} грн</strong>Виручка</div>`;
 
 
 }
@@ -869,11 +878,14 @@ async function togglePayment(key, session, currentPayment){
     <div style="background:#fff;border-radius:14px;padding:24px;min-width:260px;box-shadow:0 8px 32px #0003;text-align:center">
       <h3 style="margin:0 0 16px;color:#005356;font-size:16px">💰 Спосіб оплати</h3>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button id="pay_cash" style="padding:12px;font-size:15px;border:2px solid ${currentPayment!=='card'?'#005356':'#ccc'};border-radius:10px;background:${currentPayment!=='card'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
+        <button id="pay_cash" style="padding:12px;font-size:15px;border:2px solid ${currentPayment==='cash'?'#005356':'#ccc'};border-radius:10px;background:${currentPayment==='cash'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
           💵 Готівка
         </button>
         <button id="pay_card" style="padding:12px;font-size:15px;border:2px solid ${currentPayment==='card'?'#005356':'#ccc'};border-radius:10px;background:${currentPayment==='card'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
           💳 Картка
+        </button>
+        <button id="pay_free" style="padding:12px;font-size:15px;border:2px solid ${currentPayment==='free'?'#005356':'#ccc'};border-radius:10px;background:${currentPayment==='free'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
+          🆓 Безкоштовно
         </button>
         <button id="pay_cancel" style="padding:8px;font-size:13px;border:none;border-radius:8px;background:#eee;cursor:pointer;margin-top:4px">
           Скасувати
@@ -887,12 +899,13 @@ async function togglePayment(key, session, currentPayment){
     dialog.remove();
     try{
       await db.ref(`bookings/${date}/${session}/${key}`).update({payment});
-      setStatusFloat(`✅ Оплата: ${payment==='card'?'💳 Картка':'💵 Готівка'}`);
+      setStatusFloat(`✅ Оплата: ${payment==='card'?'💳 Картка':payment==='free'?'🆓 Безкоштовно':'💵 Готівка'}`);
     }catch(e){setStatusFloat('Помилка: '+e.message);}
   };
 
   dialog.querySelector('#pay_cash').onclick   = ()=> save('cash');
   dialog.querySelector('#pay_card').onclick   = ()=> save('card');
+  dialog.querySelector('#pay_free').onclick   = ()=> save('free');
   dialog.querySelector('#pay_cancel').onclick = ()=> dialog.remove();
   dialog.onclick = e=>{ if(e.target===dialog) dialog.remove(); };
 }
@@ -912,6 +925,8 @@ async function adminCancel(key,sectorNum,session){
   const date=$('floatDate').value;
   try{
     await db.ref(`bookings/${date}/${s}/${key}`).remove();
+    // Відновлюємо доступність якщо сектор був недоступним
+    await db.ref(`sectorAvailability/${date}/${s}/${sectorNum}`).set(null);
     setStatusFloat(`Сектор ${sectorNum} звільнено`);
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 }
@@ -1331,8 +1346,8 @@ function renderAllBookings(){
         <td>${b.name||'—'}</td>
         <td>${b.phone||'—'}</td>
         <td style="font-size:12px">${createdAt}</td>
-        <td>${b.price||SESSION_PRICES[b.sessionKey]||'—'} грн</td>
-        <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':'—'}</td>
+        <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
+        <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':b.payment==='free'?'🆓 Безкоштовно':'—'}</td>
         <td>${b.buyFish?'🐟':'—'}</td>
         <td>
           <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
@@ -1355,7 +1370,7 @@ function renderAllBookings(){
     });
 
     // Підсумок
-    const total = rows.reduce((s,b)=>s+(b.price||SESSION_PRICES[b.sessionKey]||0),0);
+    const total = rows.reduce((s,b)=>s+(b.payment==='free'?0:(b.price||SESSION_PRICES[b.sessionKey]||0)),0);
     const tfoot = document.createElement('tr');
     tfoot.className='total-row';
     tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td><td></td><td></td>`;
