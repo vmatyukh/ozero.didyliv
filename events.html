@@ -68,7 +68,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 /* ── EVENT CARD ── */
 .event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s; cursor: pointer; display: flex; flex-direction: column; }
 .event-card:hover { border-color: var(--green-mid); }
-.event-card-body { padding: 14px 16px 16px; flex: 1; }
+.event-card-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; }
 .event-card:hover { border-color: var(--green-mid); }
 .event-poster { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px 14px 0 0; }
 .event-poster-placeholder { width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg2) 0%, var(--surface) 100%); border-radius: 14px 14px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
@@ -80,8 +80,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .badge-done { background: rgba(255,215,0,0.08); color: #d4b84a; border: 1px solid rgba(255,215,0,0.2); }
 .badge-soon { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
 .badge-live { background: rgba(220,50,50,0.12); color: #e05555; border: 1px solid rgba(220,50,50,0.3); }
-.event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-.event-date { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+.event-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 4px; flex: 1; }
+.event-date { font-size: 13px; color: var(--text-muted); margin-top: auto; margin-bottom: 12px; }
 .event-card-bottom { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: center; }
 .event-card-bottom .btn-fill,
 .event-card-bottom .btn-outline { height: 38px; font-size: 13px; min-width: 160px; flex: 1; max-width: 320px; }
