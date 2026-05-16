@@ -761,9 +761,15 @@ function renderFloatTable(){
       nameCell=b.name||'—'; phoneCell=b.phone||'—'; timeCell=createdAt;
       const currentEmail = firebase.auth().currentUser?.email||'';
       const canCancel = isAdmin || b.createdBy === currentEmail;
+      const payment = b.payment || '';
+      const payIcon = payment==='card'?'💳':payment==='cash'?'💵':'💰';
+      const payLabel = payment==='card'?'Картка':payment==='cash'?'Готівка':'Оплата';
       actCell=`${canCancel?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
                <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
-               <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
+               <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>
+               <button onclick="togglePayment('${b.key}','${floatSession}','${payment}')"
+                 style="padding:5px 10px;font-size:12px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}"
+                 title="Спосіб оплати">${payIcon} ${payLabel}</button>`;
       if(b.buyFish) nameCell += ' 🐟';
     } else if(isBlocked){
       const bl=floatBlocked[i];
@@ -808,6 +814,10 @@ function renderFloatTable(){
         <div class="manual-form">
           <input type="text" id="mname_${i}" placeholder="Імʼя">
           <input type="tel" id="mphone_${i}" placeholder="Телефон">
+          <select id="mpay_${i}" style="padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px">
+            <option value="cash">💵 Готівка</option>
+            <option value="card">💳 Картка</option>
+          </select>
           <button class="primary" onclick="adminBook(${i})">✅ Підтвердити</button>
           <button class="secondary" onclick="hideManualBook(${i})">Скасувати</button>
         </div>
@@ -833,16 +843,58 @@ async function adminBook(i){
   const date=$('floatDate').value;
   const name=($(`mname_${i}`)?.value||'').trim()||'Адмін';
   const phone=($(`mphone_${i}`)?.value||'').trim()||'—';
+  const payment=$(`mpay_${i}`)?.value||'cash';
   const currentUser = firebase.auth().currentUser;
   try{
     await db.ref(`bookings/${date}/${floatSession}`).push({
       sector:i, name, phone, session:floatSession,
       price:SESSION_PRICES[floatSession], date,
-      createdBy: currentUser?.email||'',
+      payment, createdBy: currentUser?.email||'',
       createdAt:new Date().toISOString()
     });
     setStatusFloat(`✅ Сектор ${i} заброньовано`);
   }catch(e){setStatusFloat('Помилка: '+e.message);}
+}
+
+async function togglePayment(key, session, currentPayment){
+  const date = $('floatDate').value;
+  // Показуємо діалог вибору
+  const existing = document.getElementById('paymentDialog');
+  if(existing) existing.remove();
+
+  const dialog = document.createElement('div');
+  dialog.id = 'paymentDialog';
+  dialog.style.cssText='position:fixed;inset:0;background:#0005;z-index:999;display:flex;align-items:center;justify-content:center';
+  dialog.innerHTML=`
+    <div style="background:#fff;border-radius:14px;padding:24px;min-width:260px;box-shadow:0 8px 32px #0003;text-align:center">
+      <h3 style="margin:0 0 16px;color:#005356;font-size:16px">💰 Спосіб оплати</h3>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button id="pay_cash" style="padding:12px;font-size:15px;border:2px solid ${currentPayment!=='card'?'#005356':'#ccc'};border-radius:10px;background:${currentPayment!=='card'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
+          💵 Готівка
+        </button>
+        <button id="pay_card" style="padding:12px;font-size:15px;border:2px solid ${currentPayment==='card'?'#005356':'#ccc'};border-radius:10px;background:${currentPayment==='card'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
+          💳 Картка
+        </button>
+        <button id="pay_cancel" style="padding:8px;font-size:13px;border:none;border-radius:8px;background:#eee;cursor:pointer;margin-top:4px">
+          Скасувати
+        </button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(dialog);
+
+  const save = async(payment)=>{
+    dialog.remove();
+    try{
+      await db.ref(`bookings/${date}/${session}/${key}`).update({payment});
+      setStatusFloat(`✅ Оплата: ${payment==='card'?'💳 Картка':'💵 Готівка'}`);
+    }catch(e){setStatusFloat('Помилка: '+e.message);}
+  };
+
+  dialog.querySelector('#pay_cash').onclick   = ()=> save('cash');
+  dialog.querySelector('#pay_card').onclick   = ()=> save('card');
+  dialog.querySelector('#pay_cancel').onclick = ()=> dialog.remove();
+  dialog.onclick = e=>{ if(e.target===dialog) dialog.remove(); };
 }
 
 async function earlyLeave(key, session, sectorNum){
@@ -1264,7 +1316,7 @@ function renderAllBookings(){
     const table = document.createElement('table');
     table.className='spinning-table';
     table.innerHTML=`<thead><tr>
-      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th>🐟</th><th></th>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th>Оплата</th><th>🐟</th><th></th>
     </tr></thead>`;
     const tbody = document.createElement('tbody');
 
@@ -1280,6 +1332,7 @@ function renderAllBookings(){
         <td>${b.phone||'—'}</td>
         <td style="font-size:12px">${createdAt}</td>
         <td>${b.price||SESSION_PRICES[b.sessionKey]||'—'} грн</td>
+        <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':'—'}</td>
         <td>${b.buyFish?'🐟':'—'}</td>
         <td>
           <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
@@ -1305,7 +1358,7 @@ function renderAllBookings(){
     const total = rows.reduce((s,b)=>s+(b.price||SESSION_PRICES[b.sessionKey]||0),0);
     const tfoot = document.createElement('tr');
     tfoot.className='total-row';
-    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td><td></td>`;
+    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td><td></td><td></td>`;
     tbody.appendChild(tfoot);
 
     table.appendChild(tbody);
