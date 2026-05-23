@@ -524,6 +524,14 @@ async function qrRaster(){
 
 $('printBtn').onclick=async()=>{
   if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
+
+  // Перевірка: якщо тип "абонемент" — має бути вибраний конкретний абонемент
+  const missingAbon = participants.filter(p=>p.freeType==='abon' && !p.abonKey);
+  if(missingAbon.length){
+    setStatus(`❌ Учасник #${missingAbon[0].id}: оберіть абонемент зі списку`);
+    return;
+  }
+
   // Зберігаємо статистику і списуємо абонементи одразу — незалежно від принтера
   await saveStats(participants).catch(()=>{});
   for(const p of participants){
@@ -1581,6 +1589,8 @@ function initAdmin(){
   // Ховаємо форму додавання абонементів для не-адміна
   const abonAdd = document.getElementById('abonAddFieldset');
   if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
+  const allBookings = document.getElementById('allBookingsFieldset');
+  if(allBookings) allBookings.style.display = isAdmin ? '' : 'none';
   const spinningStats = document.getElementById('spinningStatsFieldset');
   if(spinningStats) spinningStats.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
