@@ -156,7 +156,7 @@ button.danger{background:#fdd}
   <pre id="status"></pre>
 
   <!-- Таблиця за сьогодні -->
-  <fieldset style="margin-top:16px">
+  <fieldset id="spinningStatsFieldset" style="margin-top:16px">
     <legend id="spinningStatsLegend">📋 Сьогодні надруковано</legend>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
       <div style="position:relative;display:inline-block">
@@ -212,7 +212,7 @@ button.danger{background:#fdd}
   <pre id="statusFloat"></pre>
 
   <!-- Всі бронювання за день -->
-  <fieldset style="margin-top:16px">
+  <fieldset id="allBookingsFieldset" style="margin-top:16px">
     <legend id="allBookingsLegend">📋 Всі бронювання за день</legend>
     <div id="allBookingsTable"></div>
   </fieldset>
@@ -1581,6 +1581,8 @@ function initAdmin(){
   // Ховаємо форму додавання абонементів для не-адміна
   const abonAdd = document.getElementById('abonAddFieldset');
   if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
+  const spinningStats = document.getElementById('spinningStatsFieldset');
+  if(spinningStats) spinningStats.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
   if(statsDateEl){
     statsDateEl.value = tgDateStr();
