@@ -310,8 +310,12 @@ function renderList(){
           <option value="birthday" ${p.freeType==='birthday'?'selected':''}>🎂 День народження</option>
         </select>
         <span class="abon-search" style="display:${p.freeType==='abon'?'flex':'none'};align-items:center;gap:4px">
-          <input type="text" placeholder="Пошук..." style="padding:4px 8px;border:1px solid #ccc;border-radius:6px;font-size:13px;width:130px" value="${p.abonName||''}">
-          <span class="abon-results" style="position:relative"></span>
+          <span style="position:relative">
+            <input type="text" placeholder="🔍 Введіть ім'я абонемента"
+              style="padding:4px 8px;border:2px solid ${p.abonKey?'#ccc':'#e74c3c'};border-radius:6px;font-size:13px;width:190px"
+              value="${p.abonName||''}">
+            <span class="abon-results"></span>
+          </span>
         </span>
       </span>
       <span class="sum">${calcSum(p)} грн</span>
@@ -337,38 +341,49 @@ function renderList(){
       updateTotals();
     };
 
-    // Пошук по абонементах
+    // Select абонементів
     const abonInput = row.querySelector('.abon-search input');
     const abonResults = row.querySelector('.abon-results');
     if(abonInput){
-      abonInput.oninput=()=>{
-        const q = abonInput.value.toLowerCase();
+      // Стиль дропдауну результатів
+      abonResults.style.cssText='position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 12px #0002;z-index:100;display:none;max-height:200px;overflow-y:auto';
+
+      const showResults = (q)=>{
+        const data = Object.entries(window._abonData||{});
+        const matches = q
+          ? data.filter(([,v])=>v.name&&v.name.toLowerCase().includes(q.toLowerCase()))
+          : data;
+        if(!matches.length){ abonResults.style.display='none'; return; }
         abonResults.innerHTML='';
-        if(!q){ p.abonKey=''; p.abonName=''; return; }
-        const matches = Object.entries(window._abonData||{})
-          .filter(([,v])=>v.name&&v.name.toLowerCase().includes(q))
-          .slice(0,5);
-        if(!matches.length) return;
-        const dd = document.createElement('div');
-        dd.style.cssText='position:absolute;top:100%;left:0;background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 12px #0002;z-index:100;min-width:180px';
-        matches.forEach(([key,val])=>{
-          const item = document.createElement('div');
+        matches.slice(0,8).forEach(([key,val])=>{
+          const visits=val.visits||0;
+          const monthlyLeft=Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
+          const info=visits>0?`${visits} разових`:monthlyLeft>0?`${monthlyLeft}/${val.monthlyLimit} міс`:'';
+          const item=document.createElement('div');
           item.style.cssText='padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee';
-          const visits = val.visits||0;
-          const monthlyLeft = Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
-          item.textContent = `${val.name} (${visits>0?`${visits} разових`:''}${monthlyLeft>0?` ${monthlyLeft} міс.`:''})`;
+          item.innerHTML=`<strong>${val.name}</strong>${info?` <span style="color:#888;font-size:12px">(${info})</span>`:''}`;
           item.onmousedown=()=>{
             p.abonKey=key; p.abonName=val.name;
             abonInput.value=val.name;
-            abonResults.innerHTML='';
+            abonInput.style.borderColor='#ccc';
+            abonResults.style.display='none';
+            row.querySelector('.sum').textContent=calcSum(p)+' грн';
+            updateTotals();
           };
           item.onmouseover=()=>item.style.background='#e0f0f0';
           item.onmouseout=()=>item.style.background='';
-          dd.appendChild(item);
+          abonResults.appendChild(item);
         });
-        abonResults.appendChild(dd);
+        abonResults.style.display='block';
       };
-      abonInput.onblur=()=>setTimeout(()=>abonResults.innerHTML='',200);
+
+      abonInput.onfocus=()=>showResults(abonInput.value);
+      abonInput.oninput=()=>{
+        p.abonKey=''; p.abonName='';
+        abonInput.style.borderColor='#e74c3c';
+        showResults(abonInput.value);
+      };
+      abonInput.onblur=()=>setTimeout(()=>{ abonResults.style.display='none'; },200);
     }
 
     // Кнопка видалення конкретного учасника
@@ -1580,6 +1595,8 @@ db.ref('abonements').on('value', snap=>{
   if(data){
     Object.entries(data).forEach(([key,val])=>checkMonthlyReset(key,val));
   }
+  // Оновлюємо всі select абонементів
+  document.querySelectorAll('.abon-select').forEach(s=>s._fill&&s._fill());
   renderAbonList(data);
 });
 
