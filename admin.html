@@ -150,6 +150,7 @@ button.danger{background:#fdd}
     <div class="row">
       <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
     </div>
+    <div id="printError" style="display:none;margin-top:10px;color:#c0392b;font-weight:700;font-size:14px"></div>
   </fieldset>
   <h3>Превʼю чеків</h3>
   <div id="preview" class="previewWrap"></div>
@@ -528,9 +529,12 @@ $('printBtn').onclick=async()=>{
   // Перевірка: якщо тип "абонемент" — має бути вибраний конкретний абонемент
   const missingAbon = participants.filter(p=>p.freeType==='abon' && !p.abonKey);
   if(missingAbon.length){
-    setStatus(`❌ Учасник #${missingAbon[0].id}: оберіть абонемент зі списку`);
+    const errEl = document.getElementById('printError');
+    if(errEl){ errEl.textContent=`❌ Учасник #${missingAbon[0].id}: оберіть абонемент зі списку`; errEl.style.display='block'; }
+    setTimeout(()=>{ if(errEl) errEl.style.display='none'; }, 5000);
     return;
   }
+  document.getElementById('printError')?.style && (document.getElementById('printError').style.display='none');
 
   // Зберігаємо статистику і списуємо абонементи одразу — незалежно від принтера
   await saveStats(participants).catch(()=>{});
@@ -1589,8 +1593,6 @@ function initAdmin(){
   // Ховаємо форму додавання абонементів для не-адміна
   const abonAdd = document.getElementById('abonAddFieldset');
   if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
-  const allBookings = document.getElementById('allBookingsFieldset');
-  if(allBookings) allBookings.style.display = isAdmin ? '' : 'none';
   const spinningStats = document.getElementById('spinningStatsFieldset');
   if(spinningStats) spinningStats.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
