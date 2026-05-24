@@ -36,8 +36,8 @@
   .zone-start { display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; }
   .zs-lbl { font-size: 8.5pt; font-weight: 600; color: #888; }
   .zs-val { font-size: 20pt; font-weight: 900; line-height: 1; }
-  .zone-a .zs-val { color: #005356; }
-  .zone-b .zs-val { color: #1a7a50; }
+  .zone-a .zs-val { color: #005356; opacity: 0.45; }
+  .zone-b .zs-val { color: #1a7a50; opacity: 0.45; }
   @media print {
     #ui { display: none !important; }
     #pages { padding: 0; background: none; }
@@ -84,8 +84,8 @@ const PCSS=`* { box-sizing: border-box; margin: 0; padding: 0; }
     .zone-start { display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; }
     .zs-lbl { font-size: 8.5pt; font-weight: 600; color: #888; }
     .zs-val { font-size: 20pt; font-weight: 900; line-height: 1; }
-    .zone-a .zs-val { color: #005356; }
-    .zone-b .zs-val { color: #1a7a50; }`;
+    .zone-a .zs-val { color: #005356; opacity: 0.45; }
+    .zone-b .zs-val { color: #1a7a50; opacity: 0.45; }`;
 const PER_PAGE=20;
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
