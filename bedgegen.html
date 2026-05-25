@@ -41,13 +41,12 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .preview{padding:2rem;overflow-x:auto;display:flex;flex-direction:column;align-items:center;gap:1.5rem}
 .preview-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;align-self:flex-start}
 
-.a4-sheet{width:595px;background:#fff;padding:6mm 8mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 2px 16px rgba(0,0,0,.12);flex-shrink:0;position:relative}
+.a4-sheet{width:595px;background:#fff;padding:6mm 12mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 2px 16px rgba(0,0,0,.12);flex-shrink:0;position:relative}
 .a4-sheet::after{content:'';position:absolute;top:6mm;bottom:6mm;left:50%;width:0;border-left:1px dashed #bbb;pointer-events:none}
 
 /* BADGE */
 .badge{width:100%;height:265px;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 20px;border-top:.5px solid var(--brand);border-bottom:.5px solid var(--brand);border-left:none;border-right:none;overflow:hidden}
-.badge:nth-child(odd){border-left:.5px solid var(--brand)}
-.badge:nth-child(even){border-right:.5px solid var(--brand)}
+
 .b-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:var(--brand)}
 .b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1}
 .b-num{font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:var(--brand);letter-spacing:-1px;flex-shrink:0}
@@ -172,7 +171,7 @@ function badgeHtml(p, idx) {
     ? `<img style="height:110px;max-width:180px;object-fit:contain;display:block" src="${logoDataUrl}" alt="">`
     : '';
   const isOdd = idx % 2 === 0;
-  const extraBorder = isOdd ? 'border-left:.5px solid #005356;' : 'border-right:.5px solid #005356;';
+  const extraBorder = '';
   return `<div style="background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 20px;border-top:.5px solid #005356;border-bottom:.5px solid #005356;${extraBorder}width:115mm;height:70mm;overflow:visible"><div style="position:absolute;top:0;left:0;right:0;height:5px;background:#005356"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1"><div style="font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:#005356;letter-spacing:-1px;flex-shrink:0">${p.num}</div><div style="flex-shrink:0">${logo}</div></div><div style="padding-top:2px"><div style="font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:#005356;text-transform:uppercase;letter-spacing:.03em;word-break:break-word">${p.surname}</div><div style="font-size:11px;font-weight:600;color:#005356;opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word">${p.firstname}</div></div></div>`;
 }
 
@@ -191,7 +190,7 @@ function printAll() {
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4;margin:0}body{margin:0}.page{width:210mm;min-height:297mm;background:#fff;padding:6mm 8mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;page-break-after:always;position:relative}.page::after{content:'';position:absolute;top:6mm;bottom:6mm;left:50%;width:0;border-left:1px dashed #bbb;pointer-events:none}</style>
+  <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4;margin:0}body{margin:0}.page{width:210mm;min-height:297mm;background:#fff;padding:6mm 12mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;page-break-after:always;position:relative}.page::after{content:'';position:absolute;top:6mm;bottom:6mm;left:50%;width:0;border-left:1px dashed #bbb;pointer-events:none}</style>
   </head><body>${body}</body></html>`);
   win.document.close();
   setTimeout(() => { win.focus(); win.print(); }, 800);
