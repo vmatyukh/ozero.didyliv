@@ -45,7 +45,9 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .a4-sheet::after{content:'';position:absolute;top:6mm;bottom:6mm;left:50%;width:0;border-left:1px dashed #bbb;pointer-events:none}
 
 /* BADGE */
-.badge{width:100%;height:265px;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 4px;border-top:.5px solid var(--brand);border-bottom:.5px solid var(--brand);border-left:none;border-right:none;overflow:hidden}
+.badge{width:100%;height:265px;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 20px;border-top:.5px solid var(--brand);border-bottom:.5px solid var(--brand);border-left:none;border-right:none;overflow:hidden}
+.badge:nth-child(odd){border-left:.5px solid var(--brand)}
+.badge:nth-child(even){border-right:.5px solid var(--brand)}
 .b-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:var(--brand)}
 .b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1}
 .b-num{font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:var(--brand);letter-spacing:-1px;flex-shrink:0}
@@ -165,11 +167,13 @@ function render() {
     ? `${players.length} учасників · ${pages} ${pages === 1 ? 'аркуш' : pages < 5 ? 'аркуші' : 'аркушів'} А4` : '';
 }
 
-function badgeHtml(p) {
+function badgeHtml(p, idx) {
   const logo = logoDataUrl
     ? `<img style="height:110px;max-width:180px;object-fit:contain;display:block" src="${logoDataUrl}" alt="">`
     : '';
-  return `<div style="background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 4px;border-top:.5px solid #005356;border-bottom:.5px solid #005356;border-left:none;border-right:none;width:115mm;height:70mm;overflow:visible"><div style="position:absolute;top:0;left:0;right:0;height:5px;background:#005356"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1"><div style="font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:#005356;letter-spacing:-1px;flex-shrink:0">${p.num}</div><div style="flex-shrink:0">${logo}</div></div><div style="padding-top:2px"><div style="font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:#005356;text-transform:uppercase;letter-spacing:.03em;word-break:break-word">${p.surname}</div><div style="font-size:11px;font-weight:600;color:#005356;opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word">${p.firstname}</div></div></div>`;
+  const isOdd = idx % 2 === 0;
+  const extraBorder = isOdd ? 'border-left:.5px solid #005356;' : 'border-right:.5px solid #005356;';
+  return `<div style="background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 20px;border-top:.5px solid #005356;border-bottom:.5px solid #005356;${extraBorder}width:115mm;height:70mm;overflow:visible"><div style="position:absolute;top:0;left:0;right:0;height:5px;background:#005356"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1"><div style="font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:#005356;letter-spacing:-1px;flex-shrink:0">${p.num}</div><div style="flex-shrink:0">${logo}</div></div><div style="padding-top:2px"><div style="font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:#005356;text-transform:uppercase;letter-spacing:.03em;word-break:break-word">${p.surname}</div><div style="font-size:11px;font-weight:600;color:#005356;opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word">${p.firstname}</div></div></div>`;
 }
 
 function printAll() {
@@ -180,7 +184,7 @@ function printAll() {
   let body = '';
   for (let pg = 0; pg < pages; pg++) {
     const slice = players.slice(pg * perPage, pg * perPage + perPage);
-    const cells = slice.map(p => badgeHtml(p)).join('');
+    const cells = slice.map((p, i) => badgeHtml(p, pg * perPage + i)).join('');
     const empties = Array(perPage - slice.length).fill(`<div style="width:115mm;height:70mm;border:.5px dashed #ddd;margin:-.25px"></div>`).join('');
     body += `<div class="page">${cells}${empties}</div>`;
   }
