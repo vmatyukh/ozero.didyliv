@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Хижа Ліга — Генератор бейджиків</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--brand:#005356;--brand-dark:#003d40;--brand-light:#e6f0f0}
+body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min-height:100vh}
+
+.app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:#fff;border-right:1px solid #e0e0e0;padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding-bottom:1rem;border-bottom:1px solid #eee}
+.sidebar-logo svg{width:32px;height:32px}
+.sidebar-logo span{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.05em;color:var(--brand)}
+
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:8px 10px;border:1px solid #ddd;background:#fafafa;color:#222;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand)}
+.field textarea{resize:vertical;min-height:120px;font-size:13px}
+.field .hint{font-size:11px;color:#999;margin-top:2px}
+
+.logo-preview-wrap{display:flex;align-items:center;gap:10px;margin-top:4px}
+.logo-thumb{width:48px;height:48px;border:1px solid #ddd;background:#fff;object-fit:contain;display:none}
+.logo-thumb.vis{display:block}
+
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;padding:10px 18px;border:none;cursor:pointer;letter-spacing:.04em;transition:background .15s}
+.btn-primary{background:var(--brand);color:#fff;width:100%}
+.btn-primary:hover{background:var(--brand-dark)}
+.btn-secondary{background:#eee;color:#444;width:100%}
+.btn-secondary:hover{background:#ddd}
+
+.stat{font-size:13px;color:var(--brand);font-weight:700;text-align:center;min-height:18px}
+
+/* PREVIEW AREA */
+.preview{padding:2rem;overflow-x:auto;display:flex;flex-direction:column;align-items:center;gap:1.5rem}
+.preview-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;align-self:flex-start}
+
+.a4-sheet{width:595px;background:#fff;padding:8mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 2px 16px rgba(0,0,0,.12);flex-shrink:0}
+
+/* BADGE */
+.badge{width:100%;aspect-ratio:115/70;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:6px 10px 8px;border:.5px solid var(--brand);margin:-.25px}
+.b-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:var(--brand)}
+.b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1}
+.b-num{font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;color:var(--brand);letter-spacing:-1px;flex-shrink:0}
+.b-logo-wrap{flex-shrink:0}
+.b-logo-img{height:75px;max-width:130px;object-fit:contain;display:block}
+.b-logo-svg{width:75px;height:75px;display:block}
+.b-name-block{padding-top:2px}
+.b-surname{font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:var(--brand);text-transform:uppercase;letter-spacing:.03em;word-break:break-word;white-space:normal}
+.b-firstname{font-size:11px;font-weight:600;color:var(--brand);opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word;white-space:normal}
+.b-empty{background:#fff;border:.5px dashed #ddd;margin:-.25px}
+
+@media print{
+  .sidebar{display:none}
+  .preview{padding:0}
+  .preview-label{display:none}
+  .a4-sheet{box-shadow:none;width:210mm;padding:8mm;page-break-after:always}
+  @page{size:A4;margin:0}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" fill="#005356" opacity=".15"/>
+        <ellipse cx="20" cy="22" rx="10" ry="8" fill="#005356"/>
+        <ellipse cx="12" cy="18" rx="4.5" ry="5" fill="#005356"/>
+        <ellipse cx="28" cy="18" rx="4.5" ry="5" fill="#005356"/>
+        <circle cx="20" cy="14" r="7" fill="#005356"/>
+        <circle cx="17" cy="13" r="1.8" fill="#fff"/>
+        <circle cx="23" cy="13" r="1.8" fill="#fff"/>
+        <ellipse cx="20" cy="17" rx="3" ry="2" fill="#003d40"/>
+        <rect x="15" y="16" width="10" height="3" rx="1.5" fill="#003d40"/>
+        <ellipse cx="10" cy="22" rx="2.5" ry="4" fill="#003d40"/>
+        <ellipse cx="30" cy="22" rx="2.5" ry="4" fill="#003d40"/>
+        <path d="M13 28 Q20 32 27 28" stroke="#003d40" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <circle cx="20" cy="4" r="3" fill="#005356" opacity=".9"/>
+      </svg>
+      <span>Хижа Ліга</span>
+    </div>
+
+    <div class="field">
+      <label>Логотип (PNG / SVG)</label>
+      <div class="logo-preview-wrap">
+        <input type="file" id="logoFile" accept="image/*" onchange="loadLogo(this)" style="flex:1;font-size:12px">
+        <img id="logoThumb" class="logo-thumb" alt="logo">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Учасники</label>
+      <textarea id="pasteData" placeholder="Вставте з Excel:&#10;63&#9;Шевченко&#9;Тарас&#10;64&#9;Франко&#9;Іван" oninput="render()"></textarea>
+      <span class="hint">Три колонки через Tab: Номер · Прізвище · Ім'я</span>
+    </div>
+
+    <div id="stat" class="stat"></div>
+
+    <button class="btn btn-primary" onclick="printAll()">🖨 Друкувати</button>
+    <button class="btn btn-secondary" onclick="loadDemo()">Демо-дані</button>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="preview" id="previewArea">
+    <div class="preview-label">Прев'ю — перший аркуш А4</div>
+    <div class="a4-sheet" id="sheet"></div>
+  </main>
+
+</div>
+
+<script>
+let logoDataUrl = null;
+
+function loadLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    logoDataUrl = e.target.result;
+    const t = document.getElementById('logoThumb');
+    t.src = logoDataUrl;
+    t.classList.add('vis');
+    render();
+  };
+  r.readAsDataURL(file);
+}
+
+function parseData() {
+  const raw = document.getElementById('pasteData').value.trim();
+  if (!raw) return [];
+  return raw.split('\n').map(l => {
+    const p = l.split(/\t|;/);
+    return { num: (p[0]||'').trim(), surname: (p[1]||'').trim(), firstname: (p[2]||'').trim() };
+  }).filter(p => p.num);
+}
+
+const defSvg = `<svg class="b-logo-svg" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="#005356" opacity=".12"/><ellipse cx="20" cy="22" rx="10" ry="8" fill="#005356"/><ellipse cx="12" cy="18" rx="4.5" ry="5" fill="#005356"/><ellipse cx="28" cy="18" rx="4.5" ry="5" fill="#005356"/><circle cx="20" cy="14" r="7" fill="#005356"/><circle cx="17" cy="13" r="1.8" fill="#fff"/><circle cx="23" cy="13" r="1.8" fill="#fff"/><ellipse cx="20" cy="17" rx="3" ry="2" fill="#003d40"/><rect x="15" y="16" width="10" height="3" rx="1.5" fill="#003d40"/><ellipse cx="10" cy="22" rx="2.5" ry="4" fill="#003d40"/><ellipse cx="30" cy="22" rx="2.5" ry="4" fill="#003d40"/><path d="M13 28 Q20 32 27 28" stroke="#003d40" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="20" cy="4" r="3" fill="#005356" opacity=".9"/></svg>`;
+
+function makeBadgeEl(p, empty) {
+  const div = document.createElement('div');
+  if (empty) { div.className = 'badge b-empty'; return div; }
+  const logo = logoDataUrl ? `<img class="b-logo-img" src="${logoDataUrl}" alt="logo">` : defSvg;
+  div.className = 'badge';
+  div.innerHTML = `<div class="b-stripe"></div><div class="b-top"><div class="b-num">${p.num}</div><div class="b-logo-wrap">${logo}</div></div><div class="b-name-block"><div class="b-surname">${p.surname}</div><div class="b-firstname">${p.firstname}</div></div>`;
+  return div;
+}
+
+function render() {
+  const players = parseData();
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = '';
+  players.slice(0, 8).forEach(p => sheet.appendChild(makeBadgeEl(p, false)));
+  for (let i = 0; i < 8 - Math.min(players.length, 8); i++) sheet.appendChild(makeBadgeEl(null, true));
+  const pages = Math.ceil(players.length / 8) || 1;
+  document.getElementById('stat').textContent = players.length
+    ? `${players.length} учасників · ${pages} ${pages === 1 ? 'аркуш' : pages < 5 ? 'аркуші' : 'аркушів'} А4` : '';
+}
+
+function badgeHtml(p) {
+  const logo = logoDataUrl
+    ? `<img style="height:75px;max-width:130px;object-fit:contain;display:block" src="${logoDataUrl}" alt="">`
+    : `<svg width="75" height="75" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="#005356" opacity=".12"/><ellipse cx="20" cy="22" rx="10" ry="8" fill="#005356"/><ellipse cx="12" cy="18" rx="4.5" ry="5" fill="#005356"/><ellipse cx="28" cy="18" rx="4.5" ry="5" fill="#005356"/><circle cx="20" cy="14" r="7" fill="#005356"/><circle cx="17" cy="13" r="1.8" fill="#fff"/><circle cx="23" cy="13" r="1.8" fill="#fff"/><ellipse cx="20" cy="17" rx="3" ry="2" fill="#003d40"/><rect x="15" y="16" width="10" height="3" rx="1.5" fill="#003d40"/><ellipse cx="10" cy="22" rx="2.5" ry="4" fill="#003d40"/><ellipse cx="30" cy="22" rx="2.5" ry="4" fill="#003d40"/><path d="M13 28 Q20 32 27 28" stroke="#003d40" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="20" cy="4" r="3" fill="#005356" opacity=".9"/></svg>`;
+  return `<div style="background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:6px 10px 8px;border:.5px solid #005356;width:115mm;height:70mm;margin:-.25px"><div style="position:absolute;top:0;left:0;right:0;height:5px;background:#005356"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1"><div style="font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;color:#005356;letter-spacing:-1px;flex-shrink:0">${p.num}</div><div style="flex-shrink:0">${logo}</div></div><div style="padding-top:2px"><div style="font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:#005356;text-transform:uppercase;letter-spacing:.03em;word-break:break-word">${p.surname}</div><div style="font-size:11px;font-weight:600;color:#005356;opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word">${p.firstname}</div></div></div>`;
+}
+
+function printAll() {
+  const players = parseData();
+  if (!players.length) { alert('Додайте учасників!'); return; }
+  const perPage = 8;
+  const pages = Math.ceil(players.length / perPage);
+  let body = '';
+  for (let pg = 0; pg < pages; pg++) {
+    const slice = players.slice(pg * perPage, pg * perPage + perPage);
+    const cells = slice.map(p => badgeHtml(p)).join('');
+    const empties = Array(perPage - slice.length).fill(`<div style="width:115mm;height:70mm;border:.5px dashed #ddd;margin:-.25px"></div>`).join('');
+    body += `<div class="page">${cells}${empties}</div>`;
+  }
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4;margin:0}body{margin:0}.page{width:210mm;min-height:297mm;background:#fff;padding:8mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;page-break-after:always}</style>
+  </head><body>${body}</body></html>`);
+  win.document.close();
+  setTimeout(() => { win.focus(); win.print(); }, 800);
+}
+
+function loadDemo() {
+  document.getElementById('pasteData').value =
+    '1\tШевченко\tТарас\n2\tФранко\tІван\n3\tУкраїнка\tЛеся\n4\tКоцюбинський\tМихайло\n5\tСтефаник\tВасиль\n6\tНечуй-Левицький\tІван\n7\tМирний\tПанас\n8\tМаковей\tОсип';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
