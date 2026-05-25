@@ -33,13 +33,13 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .stat{font-size:13px;color:var(--brand);font-weight:700;text-align:center;min-height:18px}
 
 /* PREVIEW */
-.preview{padding:2rem;overflow-x:auto;display:flex;flex-direction:column;align-items:center;gap:1.5rem}
-.preview-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;align-self:flex-start}
+.preview{padding:2rem;overflow-x:auto;display:flex;flex-direction:column;align-items:center;gap:1.5rem;background:#888}
+.preview-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#ccc;align-self:center}
 
-/* A4 sheet — no padding, badges fill edge to edge */
-.a4-sheet{width:595px;background:#fff;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 2px 16px rgba(0,0,0,.12);flex-shrink:0;position:relative}
-/* vertical cut line */
-.a4-sheet::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:0;border-left:1px dashed #ccc;pointer-events:none;z-index:10}
+/* A4 sheet preview — looks like a real page */
+.a4-sheet{width:595px;min-height:842px;background:#fff;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 4px 24px rgba(0,0,0,.4);flex-shrink:0;position:relative}
+/* vertical cut line — on top via z-index, use box-shadow trick to appear above badges */
+.a4-sheet::after{content:'';position:absolute;top:0;bottom:0;left:calc(50% - 0.5px);width:1px;background:repeating-linear-gradient(to bottom,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;z-index:10}
 
 /* BADGE — full width of its grid cell, content padded inside */
 .badge{width:100%;height:265px;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;
@@ -177,8 +177,8 @@ function printAll() {
       rows += `<div style="display:flex;width:210mm">${a ? badgeHtml(a) : '<div style="width:50%;height:70mm;border-bottom:.5px dashed #eee"></div>'}${b ? badgeHtml(b) : '<div style="width:50%;height:70mm;border-bottom:.5px dashed #eee"></div>'}</div>`;
     }
     body += `<div style="width:210mm;min-height:297mm;background:#fff;position:relative;page-break-after:always">
-      <div style="position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed #ccc;pointer-events:none"></div>
       ${rows}
+      <div style="position:absolute;top:0;bottom:0;left:calc(50% - 0.5px);width:1px;background:repeating-linear-gradient(to bottom,#999 0,#999 4px,transparent 4px,transparent 8px);pointer-events:none;z-index:99"></div>
     </div>`;
   }
   const win = window.open('', '_blank');
