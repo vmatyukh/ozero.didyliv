@@ -7,9 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--brand:#005356;--brand-dark:#003d40;--brand-light:#e6f0f0}
+:root{--brand:#005356;--brand-dark:#003d40}
 body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min-height:100vh}
-
 .app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
 
 /* SIDEBAR */
@@ -17,52 +16,52 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .sidebar-logo{display:flex;align-items:center;gap:10px;padding-bottom:1rem;border-bottom:1px solid #eee}
 .sidebar-logo svg{width:32px;height:32px}
 .sidebar-logo span{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.05em;color:var(--brand)}
-
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.06em}
-.field input,.field select,.field textarea{font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:8px 10px;border:1px solid #ddd;background:#fafafa;color:#222;outline:none;transition:border-color .15s}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand)}
+.field input,.field textarea{font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:8px 10px;border:1px solid #ddd;background:#fafafa;color:#222;outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--brand)}
 .field textarea{resize:vertical;min-height:120px;font-size:13px}
 .field .hint{font-size:11px;color:#999;margin-top:2px}
-
 .logo-preview-wrap{display:flex;align-items:center;gap:10px;margin-top:4px}
 .logo-thumb{width:48px;height:48px;border:1px solid #ddd;background:#fff;object-fit:contain;display:none}
 .logo-thumb.vis{display:block}
-
-.btn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;padding:10px 18px;border:none;cursor:pointer;letter-spacing:.04em;transition:background .15s}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;padding:10px 18px;border:none;cursor:pointer;letter-spacing:.04em}
 .btn-primary{background:var(--brand);color:#fff;width:100%}
 .btn-primary:hover{background:var(--brand-dark)}
 .btn-secondary{background:#eee;color:#444;width:100%}
 .btn-secondary:hover{background:#ddd}
-
 .stat{font-size:13px;color:var(--brand);font-weight:700;text-align:center;min-height:18px}
 
-/* PREVIEW AREA */
+/* PREVIEW */
 .preview{padding:2rem;overflow-x:auto;display:flex;flex-direction:column;align-items:center;gap:1.5rem}
 .preview-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;align-self:flex-start}
 
-.a4-sheet{width:595px;background:#fff;padding:6mm 12mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 2px 16px rgba(0,0,0,.12);flex-shrink:0;position:relative}
-.a4-sheet::after{content:'';position:absolute;top:6mm;bottom:6mm;left:50%;width:0;border-left:1px dashed #bbb;pointer-events:none}
+/* A4 sheet — no padding, badges fill edge to edge */
+.a4-sheet{width:595px;background:#fff;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;box-shadow:0 2px 16px rgba(0,0,0,.12);flex-shrink:0;position:relative}
+/* vertical cut line */
+.a4-sheet::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:0;border-left:1px dashed #ccc;pointer-events:none;z-index:10}
 
-/* BADGE */
-.badge{width:100%;height:265px;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 20px;border-top:.5px solid var(--brand);border-bottom:.5px solid var(--brand);border-left:none;border-right:none;overflow:hidden}
-
+/* BADGE — full width of its grid cell, content padded inside */
+.badge{width:100%;height:265px;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;
+  /* 10mm left/right inner padding so print won't clip */
+  padding:4px 10px 6px 28px;
+  border-top:.5px solid var(--brand);border-bottom:.5px solid var(--brand);border-left:none;border-right:none;overflow:hidden}
 .b-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:var(--brand)}
 .b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1}
 .b-num{font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:var(--brand);letter-spacing:-1px;flex-shrink:0}
 .b-logo-wrap{flex-shrink:0}
 .b-logo-img{height:110px;max-width:180px;object-fit:contain;display:block}
-.b-logo-svg{width:110px;height:110px;display:block}
 .b-name-block{padding-top:2px}
 .b-surname{font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:var(--brand);text-transform:uppercase;letter-spacing:.03em;word-break:break-word;white-space:normal}
 .b-firstname{font-size:11px;font-weight:600;color:var(--brand);opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word;white-space:normal}
-.b-empty{background:#fff;border:.5px dashed #ddd;margin:-.25px}
+.b-empty{background:#fff;border-top:.5px dashed #ddd;border-bottom:.5px dashed #ddd;height:265px}
 
 @media print{
-  .sidebar{display:none}
+  .sidebar,.preview-label{display:none}
   .preview{padding:0}
-  .preview-label{display:none}
-  .a4-sheet{box-shadow:none;width:210mm;padding:8mm;page-break-after:always}
+  .a4-sheet{box-shadow:none;width:210mm;page-break-after:always}
+  .badge{height:70mm}
+  .b-empty{height:70mm}
   @page{size:A4;margin:0}
   body{background:#fff}
 }
@@ -70,8 +69,6 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 </head>
 <body>
 <div class="app">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <svg viewBox="0 0 40 40" fill="none">
@@ -91,7 +88,6 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
       </svg>
       <span>Хижа Ліга</span>
     </div>
-
     <div class="field">
       <label>Логотип (PNG / SVG)</label>
       <div class="logo-preview-wrap">
@@ -99,25 +95,20 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
         <img id="logoThumb" class="logo-thumb" alt="logo">
       </div>
     </div>
-
     <div class="field">
       <label>Учасники</label>
       <textarea id="pasteData" placeholder="Вставте з Excel:&#10;63&#9;Шевченко&#9;Тарас&#10;64&#9;Франко&#9;Іван" oninput="render()"></textarea>
       <span class="hint">Три колонки через Tab: Номер · Прізвище · Ім'я</span>
     </div>
-
     <div id="stat" class="stat"></div>
-
     <button class="btn btn-primary" onclick="printAll()">🖨 Друкувати</button>
     <button class="btn btn-secondary" onclick="loadDemo()">Демо-дані</button>
   </aside>
 
-  <!-- PREVIEW -->
-  <main class="preview" id="previewArea">
+  <main class="preview">
     <div class="preview-label">Прев'ю — перший аркуш А4</div>
     <div class="a4-sheet" id="sheet"></div>
   </main>
-
 </div>
 
 <script>
@@ -127,23 +118,14 @@ function loadLogo(input) {
   const file = input.files[0];
   if (!file) return;
   const r = new FileReader();
-  r.onload = e => {
-    logoDataUrl = e.target.result;
-    const t = document.getElementById('logoThumb');
-    t.src = logoDataUrl;
-    t.classList.add('vis');
-    render();
-  };
+  r.onload = e => { logoDataUrl = e.target.result; document.getElementById('logoThumb').src = logoDataUrl; document.getElementById('logoThumb').classList.add('vis'); render(); };
   r.readAsDataURL(file);
 }
 
 function parseData() {
   const raw = document.getElementById('pasteData').value.trim();
   if (!raw) return [];
-  return raw.split('\n').map(l => {
-    const p = l.split(/\t|;/);
-    return { num: (p[0]||'').trim(), surname: (p[1]||'').trim(), firstname: (p[2]||'').trim() };
-  }).filter(p => p.num);
+  return raw.split('\n').map(l => { const p = l.split(/\t|;/); return { num:(p[0]||'').trim(), surname:(p[1]||'').trim(), firstname:(p[2]||'').trim() }; }).filter(p => p.num);
 }
 
 function makeBadgeEl(p, empty) {
@@ -162,17 +144,22 @@ function render() {
   players.slice(0, 8).forEach(p => sheet.appendChild(makeBadgeEl(p, false)));
   for (let i = 0; i < 8 - Math.min(players.length, 8); i++) sheet.appendChild(makeBadgeEl(null, true));
   const pages = Math.ceil(players.length / 8) || 1;
-  document.getElementById('stat').textContent = players.length
-    ? `${players.length} учасників · ${pages} ${pages === 1 ? 'аркуш' : pages < 5 ? 'аркуші' : 'аркушів'} А4` : '';
+  document.getElementById('stat').textContent = players.length ? `${players.length} учасників · ${pages} ${pages===1?'аркуш':pages<5?'аркуші':'аркушів'} А4` : '';
 }
 
-function badgeHtml(p, idx) {
-  const logo = logoDataUrl
-    ? `<img style="height:110px;max-width:180px;object-fit:contain;display:block" src="${logoDataUrl}" alt="">`
-    : '';
-  const isOdd = idx % 2 === 0;
-  const extraBorder = '';
-  return `<div style="background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 8px 5px 20px;border-top:.5px solid #005356;border-bottom:.5px solid #005356;${extraBorder}width:115mm;height:70mm;overflow:visible"><div style="position:absolute;top:0;left:0;right:0;height:5px;background:#005356"></div><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1"><div style="font-family:'Bebas Neue',sans-serif;font-size:90px;line-height:1;color:#005356;letter-spacing:-1px;flex-shrink:0">${p.num}</div><div style="flex-shrink:0">${logo}</div></div><div style="padding-top:2px"><div style="font-family:'Bebas Neue',sans-serif;font-size:21px;line-height:1.05;color:#005356;text-transform:uppercase;letter-spacing:.03em;word-break:break-word">${p.surname}</div><div style="font-size:11px;font-weight:600;color:#005356;opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word">${p.firstname}</div></div></div>`;
+function badgeHtml(p) {
+  const logo = logoDataUrl ? `<img style="height:110px;max-width:180px;object-fit:contain;display:block" src="${logoDataUrl}" alt="">` : '';
+  return `<div style="width:50%;height:70mm;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:4px 10px 6px 28px;border-top:.5px solid #005356;border-bottom:.5px solid #005356;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:5px;background:#005356"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex:1">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;color:#005356;letter-spacing:-1px;flex-shrink:0">${p.num}</div>
+      <div style="flex-shrink:0">${logo}</div>
+    </div>
+    <div style="padding-top:2px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1.05;color:#005356;text-transform:uppercase;letter-spacing:.03em;word-break:break-word">${p.surname}</div>
+      <div style="font-size:10px;font-weight:600;color:#005356;opacity:.7;text-transform:uppercase;letter-spacing:.08em;word-break:break-word">${p.firstname}</div>
+    </div>
+  </div>`;
 }
 
 function printAll() {
@@ -183,22 +170,28 @@ function printAll() {
   let body = '';
   for (let pg = 0; pg < pages; pg++) {
     const slice = players.slice(pg * perPage, pg * perPage + perPage);
-    const cells = slice.map((p, i) => badgeHtml(p, pg * perPage + i)).join('');
-    const empties = Array(perPage - slice.length).fill(`<div style="width:115mm;height:70mm;border:.5px dashed #ddd;margin:-.25px"></div>`).join('');
-    body += `<div class="page">${cells}${empties}</div>`;
+    let rows = '';
+    for (let r = 0; r < 4; r++) {
+      const a = slice[r*2];
+      const b = slice[r*2+1];
+      rows += `<div style="display:flex;width:210mm">${a ? badgeHtml(a) : '<div style="width:50%;height:70mm;border-bottom:.5px dashed #eee"></div>'}${b ? badgeHtml(b) : '<div style="width:50%;height:70mm;border-bottom:.5px dashed #eee"></div>'}</div>`;
+    }
+    body += `<div style="width:210mm;min-height:297mm;background:#fff;position:relative;page-break-after:always">
+      <div style="position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed #ccc;pointer-events:none"></div>
+      ${rows}
+    </div>`;
   }
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4;margin:0}body{margin:0}.page{width:210mm;min-height:297mm;background:#fff;padding:6mm 12mm;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start;page-break-after:always;position:relative}.page::after{content:'';position:absolute;top:6mm;bottom:6mm;left:50%;width:0;border-left:1px dashed #bbb;pointer-events:none}</style>
+  <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4;margin:0}body{margin:0}</style>
   </head><body>${body}</body></html>`);
   win.document.close();
   setTimeout(() => { win.focus(); win.print(); }, 800);
 }
 
 function loadDemo() {
-  document.getElementById('pasteData').value =
-    '1\tШевченко\tТарас\n2\tФранко\tІван\n3\tУкраїнка\tЛеся\n4\tКоцюбинський\tМихайло\n5\tСтефаник\tВасиль\n6\tНечуй-Левицький\tІван\n7\tМирний\tПанас\n8\tМаковей\tОсип';
+  document.getElementById('pasteData').value = '1\tШевченко\tТарас\n2\tФранко\tІван\n3\tУкраїнка\tЛеся\n4\tКоцюбинський\tМихайло\n5\tСтефаник\tВасиль\n6\tНечуй-Левицький\tІван\n7\tМирний\tПанас\n8\tМаковей\tОсип';
   render();
 }
 
