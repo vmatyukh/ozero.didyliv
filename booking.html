@@ -330,9 +330,9 @@ const MONTHS_UA = ['січня','лютого','березня','квітня','
    ============================================================ */
 const CONFIG = {
   sessions: [
-    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:350, endHour:13 },
-    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:350, endHour:21 },
-    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:600, endHour:21 },
+    { key:'morning', icon:'🌅', name:'Ранкова',     time:'6:00 – 13:00',  price:350, priceWE:400, endHour:13 },
+    { key:'evening', icon:'🌆', name:'Вечірня',     time:'14:00 – 21:00', price:350, priceWE:400, endHour:21 },
+    { key:'fullday', icon:'☀️', name:'Повний день', time:'6:00 – 21:00',  price:600, priceWE:700, endHour:21 },
   ]
 };
 
@@ -340,12 +340,16 @@ const CONFIG = {
 const SESSION_LABELS = Object.fromEntries(
   CONFIG.sessions.map(s=>[ s.key, `${s.name} (${s.time})` ])
 );
-const SESSION_PRICES = Object.fromEntries(
-  CONFIG.sessions.map(s=>[ s.key, s.price ])
-);
-const SESSION_END = Object.fromEntries(
-  CONFIG.sessions.map(s=>[ s.key, s.endHour ])
-);
+const SESSION_PRICES = Object.fromEntries(CONFIG.sessions.map(s=>[ s.key, s.price ]));
+const SESSION_END    = Object.fromEntries(CONFIG.sessions.map(s=>[ s.key, s.endHour ]));
+
+function getSessionPrice(sessionKey, dateStr){
+  const d = dateStr ? new Date(dateStr) : new Date();
+  const dow = d.getDay();
+  const isWeekend = dow===0||dow===5||dow===6;
+  const s = CONFIG.sessions.find(s=>s.key===sessionKey);
+  return s ? (isWeekend ? s.priceWE : s.price) : 0;
+}
 
 // Перевіряємо чи сесія ще доступна для бронювання
 function isSessionAvailable(sessionKey, dateStr){
@@ -366,7 +370,7 @@ function renderSessionCards(){
       <div class="icon">${s.icon}</div>
       <div class="name">${s.name}</div>
       <div class="time">${s.time}</div>
-      <div class="price">${available?s.price+' грн':'<span style="font-size:11px;color:#c0392b">Сесія завершена</span>'}</div>
+      <div class="price">${available?getSessionPrice(s.key, dateStr)+' грн':'<span style="font-size:11px;color:#c0392b">Сесія завершена</span>'}</div>
     </div>`;
   }).join('');
 }
@@ -564,7 +568,7 @@ function updateSummary(){
     <strong>📅 Дата:</strong> ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}<br>
     <strong>🕐 Сесія:</strong> ${SESSION_LABELS[selectedSession]}<br>
     <strong>🎣 Сектор:</strong> ${selectedSector}<br>
-    <strong>💰 Сума:</strong> ${SESSION_PRICES[selectedSession]} грн${buyFish?'<br><strong>🐟 Викуп риби:</strong> так':''}`;
+    <strong>💰 Сума:</strong> ${getSessionPrice(selectedSession, document.getElementById('inputDate').value)} грн${buyFish?'<br><strong>🐟 Викуп риби:</strong> так':''}`;
 }
 
 /* ===== Підтвердження ===== */
@@ -602,7 +606,7 @@ async function submitBooking(){
     }
     await db.ref(`bookings/${date}/${selectedSession}`).push({
       sector:selectedSector, name, phone,
-      session:selectedSession, price:SESSION_PRICES[selectedSession],
+      session:selectedSession, price:getSessionPrice(selectedSession, document.getElementById('inputDate').value),
       buyFish, date, createdAt:new Date().toISOString()
     });
 
@@ -612,7 +616,7 @@ async function submitBooking(){
       `📅 Дата: ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}\n`+
       `🕐 Сесія: ${SESSION_LABELS[selectedSession]}\n`+
       `🎯 Сектор: ${selectedSector}\n`+
-      `💰 Сума: ${SESSION_PRICES[selectedSession]} грн\n`+
+      `💰 Сума: ${getSessionPrice(selectedSession, document.getElementById('inputDate').value)} грн\n`+
       `👤 Імʼя: ${name}\n`+
       `📞 Телефон: ${phone}`+
       (buyFish?'\n🐟 Планує викупляти рибу':'');
