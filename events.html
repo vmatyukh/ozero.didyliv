@@ -1035,18 +1035,22 @@ function openReg(params) {
         <input type="tel" id="m1Phone" placeholder="+380XXXXXXXXX" value="+380" />
         <div class="err-msg" id="m1Phone-err">Введіть коректний номер</div>
       </div>
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:10px">Учасник 2 <span style="font-weight:400;font-size:12px">(опційно)</span></div>
+      <div id="member2Block" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:13px;font-weight:600;color:var(--text-muted)">Учасник 2 <span style="font-weight:400;font-size:12px">(опційно)</span></span>
+          <button type="button" onclick="removeMember2()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;line-height:1;padding:0">×</button>
+        </div>
         <div class="field-label" style="margin-top:0">Імʼя</div>
         <input type="text" id="m2First" placeholder="Василь" />
         <div class="field-label">Прізвище</div>
         <input type="text" id="m2Last" placeholder="Коваль" />
         <div class="field-label">Номер телефону</div>
         <input type="tel" id="m2Phone" placeholder="+380XXXXXXXXX" value="+380" />
+        <div class="err-msg" id="m2Phone-err">Введіть коректний номер</div>
       </div>
-      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()" style="margin-top:20px">Зареєструватись</button>`;
+      <button type="button" id="addMember2Btn" class="btn-outline" style="width:100%;margin-top:16px;height:40px;font-size:14px" onclick="showMember2()">+ Додати учасника 2</button>
+      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()" style="margin-top:12px">Зареєструватись</button>`;
     setupPhoneInput('m1Phone');
-    setupPhoneInput('m2Phone');
   } else {
     document.getElementById('regCard').innerHTML = `
       <div class="field-label">Імʼя</div>
@@ -1103,6 +1107,20 @@ function setErr(id, show) {
   if (err) err.classList.toggle('show', show);
 }
 
+function showMember2() {
+  document.getElementById('member2Block').style.display = 'block';
+  document.getElementById('addMember2Btn').style.display = 'none';
+  setupPhoneInput('m2Phone');
+}
+
+function removeMember2() {
+  document.getElementById('member2Block').style.display = 'none';
+  document.getElementById('addMember2Btn').style.display = '';
+  const f = document.getElementById('m2First'); if(f) f.value = '';
+  const l = document.getElementById('m2Last');  if(l) l.value = '';
+  const p = document.getElementById('m2Phone'); if(p) p.value = '+380';
+}
+
 async function handleSubmit() {
   if (activeRegTeamFormat) {
     const teamName = document.getElementById('teamName').value.trim();
@@ -1124,8 +1142,15 @@ async function handleSubmit() {
     if (!ok) return;
 
     const member1Name  = `${m1First} ${m1Last}`;
-    const member2Name  = (m2First && m2Last) ? `${m2First} ${m2Last}` : '';
-    const member2Phone = (m2Phone && m2Phone !== '+380') ? m2Phone : '';
+    const m2Visible = document.getElementById('member2Block') && document.getElementById('member2Block').style.display !== 'none';
+    if (m2Visible) {
+      if (m2First.length < 2) { const el = document.getElementById('m2First'); if(el) el.style.borderColor='#e24b4a'; ok = false; } else { const el = document.getElementById('m2First'); if(el) el.style.borderColor=''; }
+      if (m2Last.length < 2)  { const el = document.getElementById('m2Last');  if(el) el.style.borderColor='#e24b4a'; ok = false; } else { const el = document.getElementById('m2Last');  if(el) el.style.borderColor=''; }
+      if (!validatePhone(m2Phone)) { setErr('m2Phone', true); ok = false; } else setErr('m2Phone', false);
+    }
+    if (!ok) return;
+    const member2Name  = (m2Visible && m2First && m2Last) ? `${m2First} ${m2Last}` : '';
+    const member2Phone = (m2Visible && m2Phone && m2Phone !== '+380') ? m2Phone : '';
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
@@ -1171,8 +1196,6 @@ async function handleSubmit() {
     if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
     if (firstName.length < 2)  { setErr('firstName', true); ok = false; } else setErr('firstName', false);
     if (!validatePhone(phone)) { setErr('phone',     true); ok = false; } else setErr('phone',     false);
-    if (!ok) return;
-
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-sm"></span>Надсилаємо...';
