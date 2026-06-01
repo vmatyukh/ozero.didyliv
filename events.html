@@ -1165,8 +1165,9 @@ async function handleSubmit() {
       if (!data.ok) throw new Error(data.error || 'Помилка');
 
       const ts      = new Date().toLocaleString('uk-UA', { hour12: false });
-      const members = member2Name ? `${member1Name}, ${member2Name}` : member1Name;
-      const text    = `🎣 *Нова реєстрація команди — ${activeRegTitle}*\n\n🤝 ${teamName}\n👥 ${members}\n📅 ${activeRegDate}\n🕐 ${ts}`;
+      const m1str = `${member1Name} (${m1Phone})`;
+      const m2str = member2Name ? `\n👤 ${member2Name} (${member2Phone})` : '';
+      const text    = `🎣 *Нова реєстрація команди — ${activeRegTitle}*\n\n🤝 ${teamName}\n👤 ${m1str}${m2str}\n📅 ${activeRegDate}\n🕐 ${ts}`;
       CHAT_IDS.forEach(chat_id =>
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
