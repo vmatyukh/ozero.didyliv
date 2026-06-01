@@ -1218,10 +1218,7 @@ async function handleSubmit() {
 function validatePhone(v) {
   return /^\+380\d{9}$/.test(v.replace(/\s/g, ''));
 }
-function setErr(id, show) {
-  document.getElementById(id).classList.toggle('err', show);
-  document.getElementById(id + '-err').classList.toggle('show', show);
-}
+
 
 async function handleSubmit() {
   // For team format, read first member from dynamic form
