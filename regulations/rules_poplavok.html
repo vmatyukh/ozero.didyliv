@@ -2,90 +2,490 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Регламент — Дідилівський поплавок 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Дідилівський Поплавок 2026 — Регламент</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --green: #005356; --green-dark: #003a3c; --green-mid: #00888d;
-    --bg: #011516; --bg2: #02292a; --surface: #032e2f;
-    --border: rgba(0,83,86,0.35); --text: #f0f4f1; --text-muted: #8aab96;
-    --font-display: 'Oswald', sans-serif; --font-body: 'Inter', sans-serif;
-  }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green:      #005356;
+  --green-dark: #003a3c;
+  --green-mid:  #00888d;
+  --green-light:#00b8bf;
+  --bg:         #011516;
+  --bg2:        #02292a;
+  --surface:    #032e2f;
+  --border:     rgba(0,136,141,0.25);
+  --text:       #f0f4f1;
+  --muted:      #7aaa96;
+  --accent:     #f0a500;
+  --display:    'Oswald', sans-serif;
+  --body:       'Inter', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
 
-  .top-bar { display: flex; align-items: center; gap: 10px; padding: 16px 24px 20px; max-width: 860px; margin: 0 auto; }
-  .back-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; text-decoration: none; }
-  .back-btn svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .page-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text); }
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(160deg, #003a3c 0%, #011516 60%);
+  border-bottom: 1px solid var(--border);
+  padding: 48px 24px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,184,191,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  background: rgba(0,136,141,0.2);
+  border: 1px solid var(--green-mid);
+  color: var(--green-light);
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(28px, 7vw, 52px);
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.hero h1 span { color: var(--green-light); }
+.hero-sub {
+  font-family: var(--display);
+  font-size: clamp(13px, 3vw, 16px);
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 24px;
+}
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.tag {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+.tag strong { color: var(--text); }
+.hero-desc {
+  max-width: 540px;
+  margin: 16px auto 0;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-style: italic;
+}
 
-  .rules-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
-  .r-hero { text-align: center; padding: 0 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-  .r-hero-title { font-family: var(--font-display); font-size: 32px; font-weight: 600; color: var(--green-mid); letter-spacing: 0.02em; margin-bottom: 6px; }
-  .r-hero-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
-  .r-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
-  .r-nav a { font-size: 12px; color: var(--text-muted); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; cursor: pointer; background: var(--surface); transition: all 0.15s; text-decoration: none; white-space: nowrap; }
-  .r-nav a:hover { background: var(--green); color: #fff; border-color: var(--green); }
-  .r-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
-  .r-body .r-section:nth-child(1), .r-body .r-section:nth-child(2), .r-body .r-section:nth-child(3) { grid-column: 1 / -1; }
-  @media (max-width: 680px) { .r-body { grid-template-columns: 1fr; } .top-bar { padding: 16px 16px 20px; } .rules-wrap { padding: 0 16px 60px; } }
-  .r-section { margin-bottom: 28px; }
-  .r-sec-title { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.09em; border-left: 3px solid var(--green); padding-left: 10px; margin-bottom: 12px; }
-  .r-list { list-style: none; border-top: 1px solid var(--border); }
-  .r-list li { font-size: 14px; color: var(--text); line-height: 1.6; padding: 9px 4px 9px 20px; border-bottom: 1px solid var(--border); position: relative; }
-  .r-list li:last-child { border-bottom: none; }
-  .r-list li::before { content: ""; position: absolute; left: 4px; top: 17px; width: 6px; height: 6px; border-radius: 50%; background: var(--green-mid); }
-  .r-subhead { font-size: 11px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.07em; margin: 10px 0 2px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-  .r-table-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .r-table { width: 100%; border-collapse: collapse; }
-  .r-table thead tr { background: var(--green); }
-  .r-table thead td { font-family: var(--font-display); font-size: 13px; color: #fff; padding: 10px 14px; letter-spacing: 0.05em; }
-  .r-table tbody tr { border-bottom: 1px solid var(--border); }
-  .r-table tbody tr:last-child { border-bottom: none; }
-  .r-table tbody tr:nth-child(even) { background: rgba(0,83,86,0.07); }
-  .r-table tbody td { padding: 9px 14px; font-size: 13px; color: var(--text); vertical-align: top; }
-  .r-table tbody td:first-child { font-family: var(--font-display); color: var(--green-mid); white-space: nowrap; }
-  .r-table tbody td.muted { color: var(--text-muted); }
-  .fish-pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; }
-  .fish-pill { background: rgba(0,83,86,0.2); border: 1px solid var(--border); color: var(--green-mid); font-size: 12px; font-weight: 500; padding: 3px 12px; border-radius: 20px; }
-  .award-list { border-top: 1px solid var(--border); }
-  .award-row { display: flex; gap: 12px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border); }
-  .award-row:last-child { border-bottom: none; }
-  .medal { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 600; }
-  .m1 { background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.35); color: #FFD700; }
-  .m2 { background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.25); color: #C0C0C0; }
-  .m3 { background: rgba(205,127,50,0.12); border: 1px solid rgba(205,127,50,0.3); color: #CD7F32; }
-  .award-text { font-size: 14px; color: var(--text); }
-  .r-note { background: rgba(0,83,86,0.1); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 10px 12px; font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-top: 10px; }
-  .r-footer { text-align: center; padding: 24px 0 32px; border-top: 1px solid var(--border); margin-top: 8px; }
-  .r-footer-slava { font-family: var(--font-display); font-size: 16px; color: var(--green-mid); letter-spacing: 0.05em; margin-bottom: 16px; }
-  .btn-outline { height: 52px; border-radius: 10px; font-size: 16px; font-weight: 500; border: 1.5px solid var(--green); background: transparent; color: var(--green); cursor: pointer; font-family: var(--font-display); letter-spacing: 0.03em; transition: background 0.15s; padding: 0 24px; }
-  .btn-outline:hover { background: rgba(0,83,86,0.12); }
+/* ── SERIES ── */
+.series {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px 0;
+}
+.section-label {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--green-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.series-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+.series-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.series-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--green-mid), var(--green-light));
+}
+.series-card .num {
+  font-family: var(--display);
+  font-size: 11px;
+  color: var(--green-light);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.series-card .name {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.series-card .date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── MAIN CONTENT ── */
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+/* ── SECTION ── */
+.reg-section {
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.reg-section-head {
+  background: var(--surface);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.reg-section-head .num {
+  background: var(--green-mid);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 600;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.reg-section-head h2 {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+.reg-section-body {
+  padding: 16px 18px;
+  background: var(--bg2);
+}
+
+/* ── SCHEDULE TABLE ── */
+.sched-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.sched-table tr {
+  border-bottom: 1px solid rgba(0,83,86,0.2);
+}
+.sched-table tr:last-child { border-bottom: none; }
+.sched-table td {
+  padding: 8px 6px;
+  vertical-align: top;
+  font-size: 13.5px;
+}
+.sched-table td:first-child {
+  font-family: var(--display);
+  font-size: 13px;
+  color: var(--green-light);
+  white-space: nowrap;
+  padding-right: 16px;
+  width: 1%;
+}
+.sched-table tr.highlight td { color: #fff; font-weight: 500; }
+.sched-table tr.special td:first-child { color: var(--accent); }
+.sched-warn {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  padding: 8px 10px;
+  background: rgba(0,83,86,0.15);
+  border-left: 2px solid var(--green-mid);
+  border-radius: 0 4px 4px 0;
+}
+
+/* ── LISTS ── */
+.reg-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.reg-list li {
+  padding-left: 18px;
+  position: relative;
+  font-size: 13.5px;
+  color: #dde8e0;
+}
+.reg-list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: var(--green-mid);
+}
+.reg-list li strong { color: #fff; }
+
+.rules-block { margin-bottom: 16px; }
+.rules-block-title {
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--green-light);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.rules-block-title.warn { color: #e05555; }
+
+/* ── NOMINATIONS ── */
+.nominations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.nom-icon { font-size: 22px; flex-shrink: 0; }
+.nom-text { font-size: 13.5px; color: #dde8e0; }
+.nom-text strong { color: #fff; display: block; font-size: 14px; margin-bottom: 1px; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 24px 16px 40px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+footer strong { color: var(--green-light); }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0 16px;
+}
 </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <a class="back-btn" href="javascript:history.back()">
-    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-  </a>
-  <div class="page-title">Назад</div>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">РЕГЛАМЕНТ ФЕСТИВАЛЮ</div>
+  <h1>ДІДИЛІВСЬКИЙ<br><span>ПОПЛАВОК</span> 2026</h1>
+  <div class="hero-sub">ОЗЕРО ДІДИЛІВ • ОЗЕРО №2</div>
+  <div class="hero-tags">
+    <div class="tag">🎣 <strong>Поплавок</strong></div>
+    <div class="tag">⏱ <strong>5–6 год</strong> ловлі</div>
+    <div class="tag">🏆 <strong>Командний залік</strong></div>
+    <div class="tag">🐟 <strong>Catch &amp; Release</strong></div>
+    <div class="tag">📍 <strong>11 секторів</strong></div>
+  </div>
 </div>
 
-<div class="rules-wrap">
-  <div class="r-hero">
-    <div class="r-hero-title">Дідилівський поплавок 2026</div>
-    <div class="r-hero-sub">Регламент змагань зі спортивної ловлі на поплавок · Озеро Дідилів</div>
+
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- 1. Загальні положення -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">1</div><h2>Загальні положення</h2></div>
+    <div class="reg-section-body">
+      <ul class="reg-list">
+        <li>«Дідилівський Поплавок 2026» — відкритий фестиваль з ловлі мирної риби на поплавкову вудку командами 1–2 учасники: пара, друзі або батько/мати з дитиною.</li>
+        <li><strong>Місце проведення</strong> — Озеро Дідилів (озеро №2).</li>
+        <li><strong>Формат</strong> — командний залік (1–2 учасники в команді).</li>
+        <li><strong>Тривалість ловлі</strong> — 5–6 годин (один тур).</li>
+        <li><strong>Принцип</strong> — «Спіймав — Зважив — Відпустив» (Catch &amp; Release).</li>
+        <li><strong>Кількість секторів</strong> — 11 (один сектор може займати один або двоє учасників).</li>
+        <li><strong>Загальна тривалість заходу</strong> — орієнтовно 8–9 годин.</li>
+      </ul>
+    </div>
   </div>
-  <div class="r-body">
-Регламент згодом буде додано. Слідкуйте за оновленнями на сайті та в наших соцмережах!
+
+  <!-- 2. Розклад -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">2</div><h2>Розклад фестивалю</h2></div>
+    <div class="reg-section-body">
+      <table class="sched-table">
+        <tr><td>06:00</td><td>Збір учасників</td></tr>
+        <tr><td>06:15</td><td>Відкриття фестивалю, інструктаж та жеребкування</td></tr>
+        <tr><td>06:45</td><td>Вхід в сектори</td></tr>
+        <tr class="highlight"><td>07:00</td><td>⚡ Старт ловлі</td></tr>
+        <tr class="special"><td>09:00</td><td>🕯 Хвилина мовчання (під час ловлі)</td></tr>
+        <tr><td>09:00 / 10:00 / 11:00 / 12:00</td><td>Контрольне зважування суддею (щогодини)</td></tr>
+        <tr class="highlight"><td>13:00</td><td>🏁 Фініш. Підсумкове зважування</td></tr>
+        <tr><td>13:30</td><td>Підбиття підсумків та нагородження переможців</td></tr>
+        <tr><td>14:00</td><td>🍽 Спільне частування, спілкування</td></tr>
+      </table>
+      <div class="sched-warn">⚠ Розклад може коригуватися організатором. Актуальний час оголошується на інструктажі.</div>
+    </div>
   </div>
-  <div class="r-footer">
-    <div class="r-footer-slava">Слава Україні! 🇺🇦</div>
-    <button class="btn-outline" onclick="history.back()">← Назад</button>
+
+  <!-- 3. Учасники -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">3</div><h2>Учасники, безпека та поведінка</h2></div>
+    <div class="reg-section-body">
+      <ul class="reg-list">
+        <li>До участі допускаються особи, які попередньо зареєструвалися через офіційний канал, отримали підтвердження організатором та сплатили внески.</li>
+        <li>Неповнолітні допускаються лише у супроводі дорослих (батьків, довірених осіб).</li>
+        <li>Кожен учасник несе особисту відповідальність за власну безпеку.</li>
+        <li>Учасник зобов'язаний: дотримуватися правил техніки безпеки біля води. Не заходити у воду. При виникненні нещасного випадку — негайно повідомити організатора або суддю.</li>
+      </ul>
+      <div class="divider"></div>
+      <div class="rules-block">
+        <div class="rules-block-title warn">Заборонено</div>
+        <ul class="reg-list">
+          <li>Вживання алкоголю або наркотичних речовин під час туру.</li>
+          <li>Смітити, пошкоджувати природне середовище або угіддя.</li>
+          <li>Навмисне перешкоджання, конфлікти з іншими учасниками та суддями, нецензурні вирази.</li>
+        </ul>
+      </div>
+      <div class="sched-warn">⚠ Організатор не несе відповідальності за шкоду, завдану здоров'ю чи майну учасників.</div>
+    </div>
   </div>
+
+  <!-- 4. Снасті -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">4</div><h2>Снасті та обладнання</h2></div>
+    <div class="reg-section-body">
+      <div class="rules-block">
+        <div class="rules-block-title">Дозволено</div>
+        <ul class="reg-list">
+          <li>Поплавкова вудка — максимум <strong>2 вудилища на команду</strong>.</li>
+          <li>На кожній снасті — не більше <strong>одного гачка</strong>.</li>
+          <li>Поплавкова оснастка з фіксованим або ковзаючим поплавком.</li>
+          <li>Натуральні насадки та прикорм — без обмежень (в межах сектору).</li>
+          <li>Підсак та екстрактор для безпечного поводження з рибою — <strong>обов'язкові</strong>.</li>
+        </ul>
+      </div>
+      <div class="divider"></div>
+      <div class="rules-block">
+        <div class="rules-block-title warn">Заборонено</div>
+        <ul class="reg-list">
+          <li>Навмисна ловля на «лежачий» поплавець (перетворює на донну).</li>
+          <li>Штучні насадки: пінопласт, штучний мотиль, штучна кукурудза тощо.</li>
+          <li>Металеві садки, відра та інші ємності для зберігання риби.</li>
+          <li>Ехолоти та електронні прилади для визначення місцезнаходження риби.</li>
+          <li>Будь-яка допомога сторонніх осіб під час туру.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Правила туру -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">5</div><h2>Правила проведення туру</h2></div>
+    <div class="reg-section-body">
+      <ul class="reg-list">
+        <li>До сигналу «Старт» стартовий закорм та ловля <strong>заборонені</strong>.</li>
+        <li>Закорм здійснюється виключно в межах власного сектору.</li>
+        <li>Після сигналу «Фініш» ловля припиняється негайно.</li>
+        <li>Передача риби між учасниками — заборонена.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6. Залік -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">6</div><h2>Залік улову та фіксація результатів</h2></div>
+    <div class="reg-section-body">
+      <ul class="reg-list">
+        <li><strong>Зарахована риба:</strong> вся мирна риба.</li>
+        <li>Мінімальний розмір не встановлюється.</li>
+        <li>Риба зберігається в тканинному садку та після зважування суддею відпускається назад у водойму. <strong>Садок надається організатором.</strong></li>
+        <li>Суддя проводить контрольне зважування щогодини, обходячи сектори.</li>
+        <li>Результат визначається за <strong>загальною вагою улову</strong> команди.</li>
+        <li>У разі однакової ваги — <strong>жереб</strong>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7. Нагородження -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">7</div><h2>Нагородження та номінації</h2></div>
+    <div class="reg-section-body">
+      <div class="nominations">
+        <div class="nom">
+          <div class="nom-icon">🥇</div>
+          <div class="nom-text"><strong>1-е місце</strong>Кубок, медаль та призи від партнерів</div>
+        </div>
+        <div class="nom">
+          <div class="nom-icon">🥈</div>
+          <div class="nom-text"><strong>2-е місце</strong>Кубок, медаль та призи від партнерів</div>
+        </div>
+        <div class="nom">
+          <div class="nom-icon">🥉</div>
+          <div class="nom-text"><strong>3-є місце</strong>Кубок, медаль та призи від партнерів</div>
+        </div>
+        <div class="nom">
+          <div class="nom-icon">🐟</div>
+          <div class="nom-text"><strong>Big Fish</strong>Символічний приз учаснику, який зловив найбільшу рибу фестивалю (незалежно від командного заліку)</div>
+        </div>
+        <div class="nom">
+          <div class="nom-icon">🍽</div>
+          <div class="nom-text"><strong>Усім учасникам</strong>Смачне частування від організаторів</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Заключні положення -->
+  <div class="reg-section">
+    <div class="reg-section-head"><div class="num">8</div><h2>Заключні положення</h2></div>
+    <div class="reg-section-body">
+      <ul class="reg-list">
+        <li>Участь у фестивалі означає повну згоду з цим Регламентом, фото- та відеозйомку під час заходу та використання матеріалів організатором.</li>
+        <li>Організатор залишає за собою право вносити зміни до Регламенту та повідомляти учасників завчасно.</li>
+        <li>У разі форс-мажорних обставин (погода, безпека, надзвичайні події) захід може бути перенесений або скасований.</li>
+      </ul>
+    </div>
+  </div>
+
 </div>
+
+<footer>
+  <div style="font-size:20px;margin-bottom:8px;">🇺🇦</div>
+  <div><strong>Слава Україні!</strong></div>
+  <div style="margin-top:6px;">Озеро Дідилів — організатор заходу</div>
+</footer>
 
 </body>
 </html>
