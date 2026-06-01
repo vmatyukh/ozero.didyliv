@@ -1117,6 +1117,16 @@ async function handleSubmit() {
   } else {
     if (firstName.length < 2 || lastName.length < 2) { ok = false; }
     if (!validatePhone(phone)) { ok = false; }
+    // Show visible error on phone field for team format
+    const firstDiv = document.querySelector('#membersWrap .team-member');
+    if (firstDiv) {
+      const phoneEl = firstDiv.querySelector('.member-phone');
+      if (!validatePhone(phone)) { phoneEl.style.borderColor = '#e24b4a'; } else { phoneEl.style.borderColor = ''; }
+      const firstEl = firstDiv.querySelector('.member-first');
+      const lastEl  = firstDiv.querySelector('.member-last');
+      if (firstName.length < 2) { firstEl.style.borderColor = '#e24b4a'; } else { firstEl.style.borderColor = ''; }
+      if (lastName.length < 2)  { lastEl.style.borderColor  = '#e24b4a'; } else { lastEl.style.borderColor  = ''; }
+    }
   }
 
   let teamName = '';
