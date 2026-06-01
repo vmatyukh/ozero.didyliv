@@ -5,18 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Події — Озеро Дідилів</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="Озеро Дідилів | Офіційний сайт" />
-<meta property="og:title" content="Озеро Дідилів - Події" />
-<meta property="og:description" content="Події та фестивалі на Озері Дідилів. Хижа Ліга, Дідилівський поплавок та інші фестивалі." />
-<meta property="og:url" content="https://ozero.didyliv.com.ua/events" />
-<meta property="og:image" content="https://ozero.didyliv.com.ua/og-image.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Озеро Дідилів - Події" />
-<meta name="twitter:description" content="Події та фестивалі на Озері Дідилів. Хижа Ліга, Дідилівський поплавок та інші фестивалі." />
-<meta name="twitter:image" content="https://ozero.didyliv.com.ua/og-image.png" />
 <script src="config.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -336,6 +324,7 @@ const CHAT_IDS   = (typeof TG_ADMIN_IDS !== 'undefined') ? TG_ADMIN_IDS : ['8459
 let activeRegRoundKey    = null;
 let activeRegTitle       = null;
 let activeRegDate        = null;
+let activeRegTeamFormat  = false;
 let allRoundsCache       = [];
 let currentFilter        = 'all';
 
@@ -953,9 +942,11 @@ async function loadLeaderboard() {
 
 /* ── Registration ── */
 function openReg(params) {
-  activeRegRoundKey = params.roundKey;
-  activeRegTitle    = params.title;
-  activeRegDate     = params.date;
+  activeRegRoundKey   = params.roundKey;
+  activeRegTitle      = params.title;
+  activeRegDate       = params.date;
+  const r = allRoundsCache.find(x => x.roundKey === params.roundKey) || {};
+  activeRegTeamFormat = !!(r.teamFormat);
   // Rules link
   const rulesMap = {
     hyzha_liga:    'regulations/rules_hyzha_liga.html',
@@ -971,17 +962,45 @@ function openReg(params) {
       <a href="#" style="font-size:13px;color:var(--text-muted);text-decoration:none" onclick="event.preventDefault();document.getElementById('regBackBtn').click()">← Деталі події</a>
       ${rulesKey ? `<a href="${rulesMap[rulesKey]}" style="font-size:13px;color:var(--text-muted);text-decoration:none">📋 Регламент</a>` : ''}
     </div>`;
-  document.getElementById('regCard').innerHTML = `
-    <div class="field-label">Імʼя</div>
-    <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
-    <div class="err-msg" id="firstName-err">Введіть імʼя</div>
-    <div class="field-label">Прізвище</div>
-    <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
-    <div class="err-msg" id="lastName-err">Введіть прізвище</div>
-    <div class="field-label">Номер телефону</div>
-    <input type="tel" id="phone" placeholder="+380XXXXXXXXX" value="+380" autocomplete="tel" />
-    <div class="err-msg" id="phone-err">Введіть коректний номер</div>
-    <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Зареєструватись</button>`;
+  if (activeRegTeamFormat) {
+    document.getElementById('regCard').innerHTML = `
+      <div class="field-label">Назва команди</div>
+      <input type="text" id="teamName" placeholder="Карпатські рибалки" />
+      <div class="err-msg" id="teamName-err">Введіть назву команди</div>
+      <div style="margin-top:20px;margin-bottom:8px;font-size:13px;font-weight:600;color:var(--green-mid)">Учасник 1</div>
+      <div class="field-label" style="margin-top:0">Імʼя</div>
+      <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
+      <div class="err-msg" id="firstName-err">Введіть імʼя</div>
+      <div class="field-label">Прізвище</div>
+      <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
+      <div class="err-msg" id="lastName-err">Введіть прізвище</div>
+      <div class="field-label">Номер телефону</div>
+      <input type="tel" id="phone" placeholder="+380XXXXXXXXX" value="+380" autocomplete="tel" />
+      <div class="err-msg" id="phone-err">Введіть коректний номер</div>
+      <div style="margin-top:20px;margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-muted)">Учасник 2 <span style="font-weight:400;font-size:12px">(опційно)</span></div>
+      <div class="field-label" style="margin-top:0">Імʼя</div>
+      <input type="text" id="firstName2" placeholder="Василь" autocomplete="given-name" />
+      <div class="field-label">Прізвище</div>
+      <input type="text" id="lastName2" placeholder="Коваль" autocomplete="family-name" />
+      <div class="field-label">Номер телефону</div>
+      <input type="tel" id="phone2" placeholder="+380XXXXXXXXX" value="+380" autocomplete="tel" />
+      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Зареєструватись</button>`;
+    setupPhoneInput('phone');
+    setupPhoneInput('phone2');
+  } else {
+    document.getElementById('regCard').innerHTML = `
+      <div class="field-label">Імʼя</div>
+      <input type="text" id="firstName" placeholder="Іван" autocomplete="given-name" />
+      <div class="err-msg" id="firstName-err">Введіть імʼя</div>
+      <div class="field-label">Прізвище</div>
+      <input type="text" id="lastName" placeholder="Петренко" autocomplete="family-name" />
+      <div class="err-msg" id="lastName-err">Введіть прізвище</div>
+      <div class="field-label">Номер телефону</div>
+      <input type="tel" id="phone" placeholder="+380XXXXXXXXX" value="+380" autocomplete="tel" />
+      <div class="err-msg" id="phone-err">Введіть коректний номер</div>
+      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Зареєструватись</button>`;
+    setupPhoneInput('phone');
+  }
 
   document.getElementById('regBackBtn').onclick = () => navigate('event', {
     roundKey: activeRegRoundKey,
@@ -991,21 +1010,26 @@ function openReg(params) {
     isDone: false,
   });
 
-  // Phone auto-format
-  const phoneInput = document.getElementById('phone');
-  phoneInput.addEventListener('input', () => {
-    let v = phoneInput.value.replace(/[^\d+]/g, '');
+  if (!activeRegTeamFormat) setupPhoneInput('phone');
+}
+
+function setupPhoneInput(id) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  input.addEventListener('input', () => {
+    let v = input.value.replace(/[^\d+]/g, '');
     if (!v.startsWith('+380')) {
       if (v.startsWith('380'))    v = '+' + v;
       else if (v.startsWith('0')) v = '+38' + v;
       else                        v = '+380';
     }
     if (v.length > 13) v = v.slice(0, 13);
-    phoneInput.value = v;
-    document.getElementById('phone-err').classList.remove('show');
+    input.value = v;
+    const errEl = document.getElementById(id + '-err');
+    if (errEl) errEl.classList.remove('show');
   });
-  phoneInput.addEventListener('keydown', e => {
-    if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.selectionStart <= 4) e.preventDefault();
+  input.addEventListener('keydown', e => {
+    if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= 4) e.preventDefault();
   });
 }
 
@@ -1027,6 +1051,22 @@ async function handleSubmit() {
   if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
   if (firstName.length < 2)  { setErr('firstName', true); ok = false; } else setErr('firstName', false);
   if (!validatePhone(phone)) { setErr('phone',     true); ok = false; } else setErr('phone',     false);
+
+  let teamName = '', name2 = '', phone2 = '';
+  if (activeRegTeamFormat) {
+    teamName = document.getElementById('teamName').value.trim();
+    if (!teamName) { setErr('teamName', true); ok = false; } else setErr('teamName', false);
+    const fn2 = document.getElementById('firstName2').value.trim();
+    const ln2 = document.getElementById('lastName2').value.trim();
+    const p2  = document.getElementById('phone2').value.trim();
+    // Учасник 2 опційний — але якщо хоч щось заповнено, вимагаємо все
+    if (fn2 || ln2 || (p2 && p2 !== '+380')) {
+      if (fn2.length < 2 || ln2.length < 2) { ok = false; }
+      if (p2 && p2 !== '+380' && !validatePhone(p2)) { ok = false; }
+      name2  = fn2 && ln2 ? `${fn2} ${ln2}` : '';
+      phone2 = p2 !== '+380' ? p2 : '';
+    }
+  }
   if (!ok) return;
 
   const btn = document.getElementById('submitBtn');
@@ -1034,15 +1074,30 @@ async function handleSubmit() {
   btn.innerHTML = '<span class="spinner-sm"></span>Надсилаємо...';
 
   try {
-    const res  = await fetch(API_URL, {
+    const comment1 = teamName ? `Команда: ${teamName}${name2 ? ', партнер: ' + name2 : ''}` : '';
+    const comment2 = teamName ? `Команда: ${teamName}, партнер: ${name}` : '';
+
+    // Реєструємо учасника 1
+    const res1 = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'register', roundKey: activeRegRoundKey, name, phone })
+      body: JSON.stringify({ action: 'register', roundKey: activeRegRoundKey, name, phone, comment: comment1 })
     });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Помилка');
+    const data1 = await res1.json();
+    if (!data1.ok) throw new Error(data1.error || 'Помилка');
+
+    // Реєструємо учасника 2 якщо є
+    if (activeRegTeamFormat && name2 && phone2) {
+      const res2 = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'register', roundKey: activeRegRoundKey, name: name2, phone: phone2, comment: comment2 })
+      });
+      const data2 = await res2.json();
+      if (!data2.ok) throw new Error(data2.error || 'Помилка реєстрації учасника 2');
+    }
 
     const ts   = new Date().toLocaleString('uk-UA', { hour12: false });
-    const text = `🎣 *Нова реєстрація — ${activeRegTitle}*\n\n👤 ${name}\n📞 ${phone}\n📅 ${activeRegDate}\n🕐 ${ts}`;
+    const teamInfo = teamName ? `\n🤝 Команда: ${teamName}` : '';
+    const text = `🎣 *Нова реєстрація — ${activeRegTitle}*\n\n👤 ${name}\n📞 ${phone}${teamInfo}\n📅 ${activeRegDate}\n🕐 ${ts}`;
     CHAT_IDS.forEach(chat_id =>
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
@@ -1051,11 +1106,16 @@ async function handleSubmit() {
       }).catch(() => {})
     );
 
+    const successName = activeRegTeamFormat && teamName ? teamName : name.split(' ')[0];
+    const successMsg  = activeRegTeamFormat && teamName
+      ? `Команду <strong>${teamName}</strong> зареєстровано на<br><strong>${activeRegTitle}</strong>.${name2 ? '<br>Обидва учасники отримають підтвердження.' : '<br>Організатор зв\'яжеться для підтвердження.'}`
+      : `Твою заявку на<br><strong>${activeRegTitle}</strong><br>прийнято.<br>Організатор зв\'яжеться для підтвердження.`;
+
     document.getElementById('regCard').innerHTML = `
       <div class="success">
         <div class="success-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <h2>Готово, ${name.split(' ')[0]}!</h2>
-        <p>Твою заявку на<br><strong>${activeRegTitle}</strong><br>прийнято.<br>Організатор зв'яжеться для підтвердження.</p>
+        <h2>Готово, ${successName}!</h2>
+        <p>${successMsg}</p>
       </div>`;
   } catch(e) {
     btn.disabled = false;
