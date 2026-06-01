@@ -1104,48 +1104,44 @@ function setErr(id, show) {
 }
 
 async function handleSubmit() {
-  let ok = true;
-
   if (activeRegTeamFormat) {
-    // ── Team registration ──
     const teamName = document.getElementById('teamName').value.trim();
-    const m1First  = document.getElementById('m1First').value.trim();
-    const m1Last   = document.getElementById('m1Last').value.trim();
-    const m1Phone  = document.getElementById('m1Phone').value.trim();
-    const m2First  = document.getElementById('m2First').value.trim();
-    const m2Last   = document.getElementById('m2Last').value.trim();
-    const m2Phone  = document.getElementById('m2Phone').value.trim();
+    const m1First  = (document.getElementById('m1First')  || {value:''}).value.trim();
+    const m1Last   = (document.getElementById('m1Last')   || {value:''}).value.trim();
+    const m1Phone  = (document.getElementById('m1Phone')  || {value:''}).value.trim();
+    const m2First  = (document.getElementById('m2First')  || {value:''}).value.trim();
+    const m2Last   = (document.getElementById('m2Last')   || {value:''}).value.trim();
+    const m2Phone  = (document.getElementById('m2Phone')  || {value:''}).value.trim();
 
-    if (!teamName)          { setErr('teamName', true);  ok = false; } else setErr('teamName', false);
-    if (m1First.length < 2) { setErr('m1First',  true);  ok = false; } else setErr('m1First',  false);
-    if (m1Last.length < 2)  { setErr('m1Last',   true);  ok = false; } else setErr('m1Last',   false);
-    if (!validatePhone(m1Phone)) { setErr('m1Phone', true); ok = false; } else setErr('m1Phone', false);
+    let ok = true;
+    const mark = (id, bad) => { const el = document.getElementById(id); if (el) el.style.borderColor = bad ? '#e24b4a' : ''; };
+    const markErr = (id, bad) => { const el = document.getElementById(id+'-err'); if (el) el.classList.toggle('show', bad); mark(id, bad); };
+
+    if (!teamName)               { markErr('teamName', true);  ok = false; } else markErr('teamName', false);
+    if (m1First.length < 2)      { mark('m1First', true);  ok = false; } else mark('m1First', false);
+    if (m1Last.length < 2)       { mark('m1Last',  true);  ok = false; } else mark('m1Last',  false);
+    if (!validatePhone(m1Phone)) { mark('m1Phone', true);  ok = false; } else mark('m1Phone', false);
     if (!ok) return;
 
     const member1Name  = `${m1First} ${m1Last}`;
-    const member2Name  = m2First && m2Last ? `${m2First} ${m2Last}` : '';
-    const member2Phone = m2Phone !== '+380' ? m2Phone : '';
+    const member2Name  = (m2First && m2Last) ? `${m2First} ${m2Last}` : '';
+    const member2Phone = (m2Phone && m2Phone !== '+380') ? m2Phone : '';
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-sm"></span>Надсилаємо...';
 
     try {
-      const res = await fetch(API_URL, {
+      const res  = await fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'registerTeam', roundKey: activeRegRoundKey, teamName, member1Name, member1Phone: m1Phone, member2Name, member2Phone })
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Помилка');
 
-      const ts   = new Date().toLocaleString('uk-UA', { hour12: false });
+      const ts      = new Date().toLocaleString('uk-UA', { hour12: false });
       const members = member2Name ? `${member1Name}, ${member2Name}` : member1Name;
-      const text = `🎣 *Нова реєстрація команди — ${activeRegTitle}*
-
-🤝 ${teamName}
-👥 ${members}
-📅 ${activeRegDate}
-🕐 ${ts}`;
+      const text    = `🎣 *Нова реєстрація команди — ${activeRegTitle}*\n\n🤝 ${teamName}\n👥 ${members}\n📅 ${activeRegDate}\n🕐 ${ts}`;
       CHAT_IDS.forEach(chat_id =>
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1159,19 +1155,19 @@ async function handleSubmit() {
           <h2>Готово!</h2>
           <p>Команду <strong>${teamName}</strong> зареєстровано на<br><strong>${activeRegTitle}</strong>.<br>Організатор зв'яжеться для підтвердження.</p>
         </div>`;
-    } catch(e) {
+    } catch(err) {
       btn.disabled = false;
       btn.innerHTML = 'Зареєструватись';
-      alert('Помилка: ' + e.message);
+      alert('Помилка: ' + err.message);
     }
 
   } else {
-    // ── Individual registration ──
     const lastName  = document.getElementById('lastName').value.trim();
     const firstName = document.getElementById('firstName').value.trim();
     const phone     = document.getElementById('phone').value.trim();
     const name      = `${firstName} ${lastName}`;
 
+    let ok = true;
     if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
     if (firstName.length < 2)  { setErr('firstName', true); ok = false; } else setErr('firstName', false);
     if (!validatePhone(phone)) { setErr('phone',     true); ok = false; } else setErr('phone',     false);
@@ -1190,12 +1186,7 @@ async function handleSubmit() {
       if (!data.ok) throw new Error(data.error || 'Помилка');
 
       const ts   = new Date().toLocaleString('uk-UA', { hour12: false });
-      const text = `🎣 *Нова реєстрація — ${activeRegTitle}*
-
-👤 ${name}
-📞 ${phone}
-📅 ${activeRegDate}
-🕐 ${ts}`;
+      const text = `🎣 *Нова реєстрація — ${activeRegTitle}*\n\n👤 ${name}\n📞 ${phone}\n📅 ${activeRegDate}\n🕐 ${ts}`;
       CHAT_IDS.forEach(chat_id =>
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1209,131 +1200,14 @@ async function handleSubmit() {
           <h2>Готово, ${name.split(' ')[0]}!</h2>
           <p>Твою заявку на<br><strong>${activeRegTitle}</strong><br>прийнято.<br>Організатор зв'яжеться для підтвердження.</p>
         </div>`;
-    } catch(e) {
+    } catch(err) {
       btn.disabled = false;
       btn.innerHTML = 'Зареєструватись';
-      alert('Помилка: ' + e.message);
+      alert('Помилка: ' + err.message);
     }
   }
 }
 
-function validatePhone(v) {
-  return /^\+380\d{9}$/.test(v.replace(/\s/g, ''));
-}
-
-
-async function handleSubmit() {
-  // For team format, read first member from dynamic form
-  let firstName, lastName, phone;
-  if (activeRegTeamFormat) {
-    const firstDiv = document.querySelector('#membersWrap .team-member');
-    firstName = firstDiv ? firstDiv.querySelector('.member-first').value.trim() : '';
-    lastName  = firstDiv ? firstDiv.querySelector('.member-last').value.trim()  : '';
-    phone     = firstDiv ? firstDiv.querySelector('.member-phone').value.trim() : '';
-  } else {
-    lastName  = document.getElementById('lastName').value.trim();
-    firstName = document.getElementById('firstName').value.trim();
-    phone     = document.getElementById('phone').value.trim();
-  }
-  const name = `${firstName} ${lastName}`;
-
-  let ok = true;
-  if (!activeRegTeamFormat) {
-    if (lastName.length < 2)   { setErr('lastName',  true); ok = false; } else setErr('lastName',  false);
-    if (firstName.length < 2)  { setErr('firstName', true); ok = false; } else setErr('firstName', false);
-    if (!validatePhone(phone)) { setErr('phone',     true); ok = false; } else setErr('phone',     false);
-  } else {
-    if (firstName.length < 2 || lastName.length < 2) { ok = false; }
-    if (!validatePhone(phone)) { ok = false; }
-    // Show visible error on phone field for team format
-    const firstDiv = document.querySelector('#membersWrap .team-member');
-    if (firstDiv) {
-      const phoneEl = firstDiv.querySelector('.member-phone');
-      if (!validatePhone(phone)) { phoneEl.style.borderColor = '#e24b4a'; } else { phoneEl.style.borderColor = ''; }
-      const firstEl = firstDiv.querySelector('.member-first');
-      const lastEl  = firstDiv.querySelector('.member-last');
-      if (firstName.length < 2) { firstEl.style.borderColor = '#e24b4a'; } else { firstEl.style.borderColor = ''; }
-      if (lastName.length < 2)  { lastEl.style.borderColor  = '#e24b4a'; } else { lastEl.style.borderColor  = ''; }
-    }
-  }
-
-  let teamName = '';
-  const extraMembers = []; // [{name, phone}]
-  if (activeRegTeamFormat) {
-    teamName = document.getElementById('teamName').value.trim();
-    if (!teamName) { setErr('teamName', true); ok = false; } else setErr('teamName', false);
-    // Collect all members from dynamic form (skip first — already collected above)
-    const memberDivs = document.querySelectorAll('#membersWrap .team-member');
-    memberDivs.forEach((div, i) => {
-      if (i === 0) return; // first member is firstName/lastName/phone above
-      const fn = div.querySelector('.member-first').value.trim();
-      const ln = div.querySelector('.member-last').value.trim();
-      const ph = div.querySelector('.member-phone').value.trim();
-      if (fn || ln || (ph && ph !== '+380')) {
-        if (fn.length < 2 || ln.length < 2) { ok = false; }
-        if (ph && ph !== '+380' && !validatePhone(ph)) { ok = false; }
-        if (fn && ln) extraMembers.push({ name: `${fn} ${ln}`, phone: ph !== '+380' ? ph : '' });
-      }
-    });
-  }
-  if (!ok) return;
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-sm"></span>Надсилаємо...';
-
-  try {
-    const partners = extraMembers.map(m => m.name).join(', ');
-    const comment1 = teamName ? `Команда: ${teamName}${partners ? ', партнер: ' + partners : ''}` : '';
-    const comment2 = teamName ? `Команда: ${teamName}, партнер: ${name}` : '';
-
-    // Реєструємо учасника 1
-    const res1 = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'register', roundKey: activeRegRoundKey, name, phone, comment: comment1 })
-    });
-    const data1 = await res1.json();
-    if (!data1.ok) throw new Error(data1.error || 'Помилка');
-
-    // Реєструємо додаткових учасників
-    for (const member of extraMembers) {
-      const memberComment = teamName ? `Команда: ${teamName}, партнер: ${name}` : '';
-      const res2 = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'register', roundKey: activeRegRoundKey, name: member.name, phone: member.phone, comment: memberComment })
-      });
-      const data2 = await res2.json();
-      if (!data2.ok) throw new Error(data2.error || `Помилка реєстрації: ${member.name}`);
-    }
-
-    const ts   = new Date().toLocaleString('uk-UA', { hour12: false });
-    const teamInfo = teamName ? `\n🤝 Команда: ${teamName}` : '';
-    const text = `🎣 *Нова реєстрація — ${activeRegTitle}*\n\n👤 ${name}\n📞 ${phone}${teamInfo}\n📅 ${activeRegDate}\n🕐 ${ts}`;
-    CHAT_IDS.forEach(chat_id =>
-      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id, text, parse_mode: 'Markdown' })
-      }).catch(() => {})
-    );
-
-    const successName = activeRegTeamFormat && teamName ? teamName : name.split(' ')[0];
-    const successMsg  = activeRegTeamFormat && teamName
-      ? `Команду <strong>${teamName}</strong> зареєстровано на<br><strong>${activeRegTitle}</strong>.${extraMembers.length > 0 ? '<br>Всі учасники зареєстровані.' : '<br>Організатор зв\'яжеться для підтвердження.'}`
-      : `Твою заявку на<br><strong>${activeRegTitle}</strong><br>прийнято.<br>Організатор зв\'яжеться для підтвердження.`;
-
-    document.getElementById('regCard').innerHTML = `
-      <div class="success">
-        <div class="success-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <h2>Готово, ${successName}!</h2>
-        <p>${successMsg}</p>
-      </div>`;
-  } catch(e) {
-    btn.disabled = false;
-    btn.innerHTML = 'Зареєструватись';
-    alert('Помилка: ' + e.message);
-  }
-}
 
 async function init() {
   await loadCalendar();
