@@ -203,6 +203,7 @@ body {
 .sched-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 .sched-table tr {
   border-bottom: 1px solid rgba(0,83,86,0.2);
@@ -210,16 +211,35 @@ body {
 .sched-table tr:last-child { border-bottom: none; }
 .sched-table td {
   padding: 8px 6px;
-  vertical-align: top;
-  font-size: 13.5px;
+  vertical-align: middle;
+  font-size: 13px;
+  word-break: break-word;
 }
 .sched-table td:first-child {
   font-family: var(--display);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--green-light);
   white-space: nowrap;
-  padding-right: 16px;
-  width: 1%;
+  width: 120px;
+  padding-right: 8px;
+}
+@media (max-width: 400px) {
+  .sched-table { display: block; }
+  .sched-table tr {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,83,86,0.2);
+  }
+  .sched-table td {
+    padding: 1px 0;
+    width: 100% !important;
+  }
+  .sched-table td:first-child {
+    font-size: 11px;
+    color: var(--green-light);
+    margin-bottom: 2px;
+  }
 }
 .sched-table tr.highlight td { color: #fff; font-weight: 500; }
 .sched-table tr.special td:first-child { color: var(--accent); }
