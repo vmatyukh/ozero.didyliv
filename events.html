@@ -224,6 +224,23 @@ input.err { border-color: #e24b4a; }
 .success-circle svg { width: 28px; height: 28px; stroke: var(--green-mid); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .success h2 { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin-bottom: 10px; }
 .success p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+/* ── INFO MODAL ── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding:16px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--surface); border:1px solid var(--border); border-radius:16px; max-width:480px; width:100%; max-height:90vh; overflow-y:auto; padding:24px; position:relative; }
+.modal-close { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--text-muted); font-size:22px; cursor:pointer; line-height:1; }
+.modal-title { font-family:var(--font-display); font-size:18px; font-weight:600; margin-bottom:16px; padding-right:24px; }
+.modal-section { margin-bottom:16px; }
+.modal-section h3 { font-family:var(--font-display); font-size:13px; font-weight:600; color:var(--green-mid); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; }
+.modal-section p { font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:6px; }
+.modal-table { width:100%; border-collapse:collapse; margin-bottom:8px; }
+.modal-table th { background:var(--green); color:#fff; font-family:var(--font-display); font-size:11px; padding:8px 12px; text-align:left; }
+.modal-table td { padding:7px 12px; font-size:13px; border-top:1px solid var(--border); }
+.modal-table tr:nth-child(even) td { background:rgba(0,83,86,0.05); }
+.modal-table td:last-child { font-weight:600; color:var(--green-mid); text-align:right; }
+.info-btn { background:rgba(0,136,141,0.15); border:1px solid rgba(0,136,141,0.4); border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--green-mid); font-size:13px; font-weight:700; margin-left:8px; vertical-align:middle; flex-shrink:0; }
+.info-btn:hover { background:rgba(0,136,141,0.3); border-color:var(--green-mid); }
 </style>
 </head>
 <body>
@@ -292,7 +309,10 @@ input.err { border-color: #e24b4a; }
     </div>
     <div class="lb-card">
       <div class="lb-header">
-        <div class="lb-header-title">Хижа Ліга Дідилів 2026</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="lb-header-title">Хижа Ліга Дідилів 2026</div>
+          <button class="info-btn" onclick="document.getElementById('scoringModal').classList.add('open')">?</button>
+        </div>
         <div class="lb-header-sub">Рейтинг сезону · Індивідуальний залік</div>
       </div>
       <div id="lbContent"><div class="loading">Завантаження...</div></div>
@@ -1233,6 +1253,10 @@ async function handleSubmit() {
 }
 
 
+function closeScoringModal() {
+  document.getElementById('scoringModal').classList.remove('open');
+}
+
 async function init() {
   await loadCalendar();
   await handleHash();
@@ -1240,5 +1264,44 @@ async function init() {
 
 init();
 </script>
+
+<!-- ── INFO MODAL ── -->
+<div class="modal-overlay" id="scoringModal" onclick="if(event.target===this)closeScoringModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeScoringModal()">×</button>
+    <div class="modal-title">Система нарахування балів</div>
+    <div class="modal-section">
+      <h3>Загальні принципи</h3>
+      <p>Сезонний рейтинг формується за результатами всіх раундів сезону.</p>
+      <p>Бали нараховуються незалежно від кількості учасників у раунді.</p>
+      <p>Учасники, які не з'явились або не зловили жодної риби, отримують 0 балів.</p>
+    </div>
+    <div class="modal-section">
+      <h3>Таблиця балів</h3>
+      <table class="modal-table">
+        <thead><tr><th>Місце</th><th style="text-align:right">Бали</th></tr></thead>
+        <tbody>
+          <tr><td>1-е місце</td><td>30</td></tr>
+          <tr><td>2-е місце</td><td>22</td></tr>
+          <tr><td>3-є місце</td><td>16</td></tr>
+          <tr><td>4-е місце</td><td>12</td></tr>
+          <tr><td>5-е місце</td><td>9</td></tr>
+          <tr><td>6-е місце</td><td>7</td></tr>
+          <tr><td>7-е місце</td><td>5</td></tr>
+          <tr><td>8-е місце</td><td>4</td></tr>
+          <tr><td>9-е місце</td><td>3</td></tr>
+          <tr><td>10-е місце</td><td>2</td></tr>
+          <tr><td>11–15-е місце</td><td>1</td></tr>
+          <tr><td>16-е місце і далі</td><td style="color:var(--text-muted);font-weight:400">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-section">
+      <h3>Визначення переможця</h3>
+      <p>Переможцем сезону визнається учасник з найбільшою сумою балів.</p>
+      <p>При рівності балів: більше перемог → більша сумарна вага → кращий результат в останньому раунді.</p>
+    </div>
+  </div>
+</div>
 </body>
 </html>
