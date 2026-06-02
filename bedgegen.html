@@ -206,10 +206,10 @@ function badgePrintHtml(p) {
 }
 
 function cutV(left) {
-  return `<div style="position:absolute;top:0;bottom:0;left:${left};width:.3pt;background:repeating-linear-gradient(to bottom,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
+  return `<div style="position:absolute;top:0;bottom:0;left:${left};width:1px;background:repeating-linear-gradient(to bottom,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
 }
 function cutH(top) {
-  return `<div style="position:absolute;left:0;right:0;top:${top};height:.3pt;background:repeating-linear-gradient(to right,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
+  return `<div style="position:absolute;left:0;right:0;top:${top};height:1px;background:repeating-linear-gradient(to right,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
 }
 
 function printAll() {

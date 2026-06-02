@@ -27,12 +27,16 @@
   .card:nth-child(even) { border-right: none; }
   .card:nth-child(-n+2) { border-top: 2px dashed #aaa; }
   .card-header { background: #fff; border-bottom: 2px solid #005356; display: flex; align-items: center; justify-content: space-between; padding: 2px 6px; gap: 3px; height: 12mm; flex-shrink: 0; }
+  .card-header > .logo-wrap:first-child { margin-left: 6mm; }
+  .card-header > .logo-wrap:last-child { margin-right: 6mm; }
   .logo-wrap { width: 22mm; height: 10mm; display: flex; align-items: center; flex-shrink: 0; }
   .logo-wrap img { width: 22mm; height: 10mm; object-fit: contain; }
   .hdr-title { flex: 1; text-align: center; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; line-height: 1.35; color: #005356; }
   .card-body { flex: 1; display: grid; grid-template-columns: 1fr 0.5px 1fr; }
   .col-divider { background: #ccc; width: 1px; }
-  .col { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 8mm 5px; overflow: hidden; }
+  .col { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 4mm 5px 10mm; overflow: hidden; }
+  .card-body > .col:last-child { padding: 4px 12mm 5px 3mm; }
+  .card-body > .col:first-child { padding: 4px 3mm 5px 12mm; }
   .tour-label { font-size: 8pt; font-weight: bold; color: #aaa; letter-spacing: 1px; text-align: center; }
   .zone-start { display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; }
   .zs-lbl { font-size: 8.5pt; font-weight: 600; color: #888; }
@@ -76,12 +80,19 @@ const PCSS=`* { box-sizing: border-box; margin: 0; padding: 0; }
     .card:nth-child(even) { border-right: none; }
     .card:nth-child(-n+2) { border-top: 2px dashed #aaa; }
     .card-header { background: #fff; border-bottom: 2px solid #005356; display: flex; align-items: center; justify-content: space-between; padding: 2px 6px; gap: 3px; height: 12mm; flex-shrink: 0; }
+    .card-header > .logo-wrap:first-child { margin-left: 6mm; }
+    .card-header > .logo-wrap:last-child { margin-right: 6mm; }
+  .card-header > .logo-wrap:first-child { margin-left: 6mm; }
+  .card-header > .logo-wrap:last-child { margin-right: 6mm; }
     .logo-wrap { width: 22mm; height: 10mm; display: flex; align-items: center; flex-shrink: 0; }
     .logo-wrap img { width: 22mm; height: 10mm; object-fit: contain; }
     .hdr-title { flex: 1; text-align: center; font-size: 8pt; font-weight: bold; letter-spacing: 0.8px; line-height: 1.35; color: #005356; }
     .card-body { flex: 1; display: grid; grid-template-columns: 1fr 0.5px 1fr; }
     .col-divider { background: #ccc; width: 1px; }
-    .col { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 8mm 5px; overflow: hidden; }
+    .col { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 4mm 5px 10mm; overflow: hidden; }
+    .card-body > .col:first-child { padding: 4px 3mm 5px 12mm; }
+    .card-body > .col:last-child { padding: 4px 12mm 5px 3mm; }
+  .card-body > .col:first-child { padding: 4px 3mm 5px 12mm; }
     .tour-label { font-size: 8pt; font-weight: bold; color: #aaa; letter-spacing: 1px; text-align: center; }
     .zone-start { display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; }
     .zs-lbl { font-size: 8.5pt; font-weight: 600; color: #888; }
