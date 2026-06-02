@@ -57,8 +57,8 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .b-empty{width:255px;height:147px;background:#fff;border-bottom:1px solid #e0e0e0;flex-shrink:0}
 
 /* Cut lines */
-.cut-v{position:absolute;top:0;bottom:0;width:1px;background:repeating-linear-gradient(to bottom,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:10;pointer-events:none}
-.cut-h{position:absolute;left:0;right:0;height:1px;background:repeating-linear-gradient(to right,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:10;pointer-events:none}
+.cut-v{position:absolute;top:0;bottom:0;width:1px;background:repeating-linear-gradient(to bottom,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:20;pointer-events:none}
+.cut-h{position:absolute;left:0;right:0;height:1px;background:repeating-linear-gradient(to right,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:20;pointer-events:none}
 
 @media print{
   .sidebar,.preview-label{display:none}
@@ -166,19 +166,24 @@ function render() {
     <div class="cut-v" style="left:0"></div>
     <div class="cut-v" style="left:255px"></div>
     <div class="cut-v" style="left:510px"></div>
-    <div class="cut-v" style="left:765px"></div>
-    <div class="cut-h" style="top:147px"></div>
-    <div class="cut-h" style="top:294px"></div>
-    <div class="cut-h" style="top:441px"></div>`;
+    <div class="cut-v" style="left:765px"></div>`;
 
   const rowsEl = document.createElement('div');
   rowsEl.className = 'a4-rows';
+  rowsEl.style.position = 'relative';
   for (let r = 0; r < ROWS; r++) {
     const rowEl = document.createElement('div');
     rowEl.className = 'a4-row';
     for (let c = 0; c < COLS; c++) rowEl.appendChild(makeBadgeEl(players[r * COLS + c] || null));
     rowsEl.appendChild(rowEl);
   }
+  // horizontal cut lines inside rowsEl (on top of badges)
+  [147, 294, 441].forEach(top => {
+    const l = document.createElement('div');
+    l.className = 'cut-h';
+    l.style.top = top + 'px';
+    rowsEl.appendChild(l);
+  });
   sheet.appendChild(rowsEl);
 
   const pages = Math.ceil(players.length / PER_PAGE) || 1;
