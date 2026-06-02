@@ -65,13 +65,12 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
   position:relative;
   font-family:'Barlow Condensed',sans-serif;
   display:flex; flex-direction:column;
-  padding:5px 8px 5px 18px;
-  border-top:1px solid var(--brand);
-  border-bottom:1px solid var(--brand);
+  padding:8px 8px 6px 18px;
+  border-bottom:1px solid #ddd;
   overflow:hidden;
   flex-shrink:0;
 }
-.b-stripe{position:absolute;top:0;left:0;right:0;height:4px;background:var(--brand)}
+.b-stripe{display:none}
 .b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;flex:1;min-height:0}
 .b-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:var(--brand);letter-spacing:-1px;flex-shrink:0;margin-top:4px}
 .b-logo-wrap{flex-shrink:0;margin-top:4px}
@@ -79,7 +78,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .b-name-block{flex-shrink:0}
 .b-surname{font-family:'Bebas Neue',sans-serif;font-size:16px;line-height:1.1;color:var(--brand);text-transform:uppercase;word-break:break-word}
 .b-firstname{font-size:10px;font-weight:600;color:var(--brand);opacity:.65;text-transform:uppercase;word-break:break-word;margin-top:1px}
-.b-empty{width:255px;height:147px;background:#fafafa;border-top:1px dashed #ddd;border-bottom:1px dashed #ddd;flex-shrink:0}
+.b-empty{width:255px;height:147px;background:#fff;border-bottom:1px solid #ddd;flex-shrink:0}
 
 /* Cut lines in preview */
 .cut-v{position:absolute;top:0;bottom:0;width:1px;background:repeating-linear-gradient(to bottom,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:10;pointer-events:none}
@@ -190,8 +189,10 @@ function render() {
 
   // Cut lines
   sheet.innerHTML = `
+    <div class="cut-v" style="left:0px"></div>
     <div class="cut-v" style="left:255px"></div>
     <div class="cut-v" style="left:510px"></div>
+    <div class="cut-v" style="left:765px"></div>
     <div class="cut-h" style="top:147px"></div>
     <div class="cut-h" style="top:294px"></div>
     <div class="cut-h" style="top:441px"></div>`;
@@ -218,7 +219,7 @@ function badgePrintHtml(p) {
   const logo = logoDataUrl
     ? `<img style="height:40mm;max-width:32mm;object-fit:contain;display:block" src="${logoDataUrl}" alt="">`
     : '';
-  return `<div style="width:90mm;height:52mm;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:1.5mm 3mm 2mm 7mm;border-top:.4pt solid #005356;border-bottom:.4pt solid #005356;overflow:hidden;flex-shrink:0">
+  return `<div style="width:90mm;height:52mm;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:1.5mm 3mm 2mm 7mm;overflow:hidden;flex-shrink:0">
     <div style="position:absolute;top:0;left:0;right:0;height:1.5mm;background:#005356"></div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:2mm;flex:1;min-height:0">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:30mm;line-height:1;color:#005356;letter-spacing:-.3mm;flex-shrink:0;margin-top:2mm">${p.num}</div>
@@ -263,7 +264,7 @@ function printAll() {
     }
 
     body += `<div style="width:297mm;height:210mm;background:#fff;position:relative;page-break-after:always;overflow:hidden">
-      ${cutLineV('90mm')} ${cutLineV('180mm')}
+      ${cutLineV('0mm')} ${cutLineV('90mm')} ${cutLineV('180mm')} ${cutLineV('270mm')}
       ${cutLineH('52mm')} ${cutLineH('104mm')} ${cutLineH('156mm')}
       ${rows}
     </div>`;
