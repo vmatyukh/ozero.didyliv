@@ -37,40 +37,16 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .preview-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
 
 /*
-  A4 landscape = 297×210mm
-  Badge = 90×52mm
-  3 cols × 4 rows = 12 badges
-
-  Preview scale: 1mm ≈ 2.835px
-  297mm × 2.835 = 841px
-  210mm × 2.835 = 595px
-  90mm  × 2.835 = 255px
-  52mm  × 2.835 = 147px
+  A4 landscape = 297×210mm | Preview: 1mm = 2.835px
+  Badge = 90×52mm → 255×147px
+  3 cols × 4 rows = 12 badges per page
 */
-.a4-sheet{
-  width:841px; height:595px;
-  background:#fff;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 4px 28px rgba(0,0,0,.5);
-  flex-shrink:0;
-}
-.a4-rows{ width:100%; height:100%; display:flex; flex-direction:column; }
-.a4-row{ display:flex; flex-direction:row; }
+.a4-sheet{width:841px;height:595px;background:#fff;position:relative;overflow:hidden;box-shadow:0 4px 28px rgba(0,0,0,.5);flex-shrink:0}
+.a4-rows{width:100%;height:100%;display:flex;flex-direction:column}
+.a4-row{display:flex;flex-direction:row}
 
-/* Badge preview: 255×147px */
-.badge{
-  width:255px; height:147px;
-  background:#fff;
-  position:relative;
-  font-family:'Barlow Condensed',sans-serif;
-  display:flex; flex-direction:column;
-  padding:8px 8px 6px 18px;
-  border-bottom:1px solid #ddd;
-  overflow:hidden;
-  flex-shrink:0;
-}
-.b-stripe{display:none}
+/* Badge */
+.badge{width:255px;height:147px;background:#fff;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:8px 8px 6px 18px;border-bottom:1px solid #e0e0e0;overflow:hidden;flex-shrink:0}
 .b-top{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;flex:1;min-height:0}
 .b-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:var(--brand);letter-spacing:-1px;flex-shrink:0;margin-top:4px}
 .b-logo-wrap{flex-shrink:0;margin-top:4px}
@@ -78,9 +54,9 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 .b-name-block{flex-shrink:0}
 .b-surname{font-family:'Bebas Neue',sans-serif;font-size:16px;line-height:1.1;color:var(--brand);text-transform:uppercase;word-break:break-word}
 .b-firstname{font-size:10px;font-weight:600;color:var(--brand);opacity:.65;text-transform:uppercase;word-break:break-word;margin-top:1px}
-.b-empty{width:255px;height:147px;background:#fff;border-bottom:1px solid #ddd;flex-shrink:0}
+.b-empty{width:255px;height:147px;background:#fff;border-bottom:1px solid #e0e0e0;flex-shrink:0}
 
-/* Cut lines in preview */
+/* Cut lines */
 .cut-v{position:absolute;top:0;bottom:0;width:1px;background:repeating-linear-gradient(to bottom,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:10;pointer-events:none}
 .cut-h{position:absolute;left:0;right:0;height:1px;background:repeating-linear-gradient(to right,#bbb 0,#bbb 5px,transparent 5px,transparent 10px);z-index:10;pointer-events:none}
 
@@ -140,7 +116,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:#f4f4f2;color:#222;min
 </div>
 
 <script>
-const COLS = 3, ROWS = 4, PER_PAGE = COLS * ROWS; // 12
+const COLS = 3, ROWS = 4, PER_PAGE = 12;
 let logoDataUrl = null;
 
 function loadLogo(input) {
@@ -170,7 +146,6 @@ function makeBadgeEl(p) {
   const logo = logoDataUrl ? `<img class="b-logo-img" src="${logoDataUrl}" alt="">` : '';
   div.className = 'badge';
   div.innerHTML = `
-    <div class="b-stripe"></div>
     <div class="b-top">
       <div class="b-num">${p.num}</div>
       <div class="b-logo-wrap">${logo}</div>
@@ -185,11 +160,10 @@ function makeBadgeEl(p) {
 function render() {
   const players = parseData();
   const sheet = document.getElementById('sheet');
-  sheet.innerHTML = '';
 
   // Cut lines
   sheet.innerHTML = `
-    <div class="cut-v" style="left:0px"></div>
+    <div class="cut-v" style="left:0"></div>
     <div class="cut-v" style="left:255px"></div>
     <div class="cut-v" style="left:510px"></div>
     <div class="cut-v" style="left:765px"></div>
@@ -199,13 +173,10 @@ function render() {
 
   const rowsEl = document.createElement('div');
   rowsEl.className = 'a4-rows';
-
   for (let r = 0; r < ROWS; r++) {
     const rowEl = document.createElement('div');
     rowEl.className = 'a4-row';
-    for (let c = 0; c < COLS; c++) {
-      rowEl.appendChild(makeBadgeEl(players[r * COLS + c] || null));
-    }
+    for (let c = 0; c < COLS; c++) rowEl.appendChild(makeBadgeEl(players[r * COLS + c] || null));
     rowsEl.appendChild(rowEl);
   }
   sheet.appendChild(rowsEl);
@@ -216,11 +187,8 @@ function render() {
 }
 
 function badgePrintHtml(p) {
-  const logo = logoDataUrl
-    ? `<img style="height:40mm;max-width:32mm;object-fit:contain;display:block" src="${logoDataUrl}" alt="">`
-    : '';
-  return `<div style="width:90mm;height:52mm;background:#fff;position:relative;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:1.5mm 3mm 2mm 7mm;overflow:hidden;flex-shrink:0">
-    <div style="position:absolute;top:0;left:0;right:0;height:1.5mm;background:#005356"></div>
+  const logo = logoDataUrl ? `<img style="height:40mm;max-width:32mm;object-fit:contain;display:block" src="${logoDataUrl}" alt="">` : '';
+  return `<div style="width:90mm;height:52mm;background:#fff;font-family:'Barlow Condensed',sans-serif;display:flex;flex-direction:column;padding:1.5mm 3mm 2mm 7mm;overflow:hidden;flex-shrink:0">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:2mm;flex:1;min-height:0">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:30mm;line-height:1;color:#005356;letter-spacing:-.3mm;flex-shrink:0;margin-top:2mm">${p.num}</div>
       <div style="flex-shrink:0;margin-top:1mm">${logo}</div>
@@ -232,15 +200,11 @@ function badgePrintHtml(p) {
   </div>`;
 }
 
-function emptyPrintHtml() {
-  return `<div style="width:90mm;height:52mm;flex-shrink:0"></div>`;
+function cutV(left) {
+  return `<div style="position:absolute;top:0;bottom:0;left:${left};width:.3pt;background:repeating-linear-gradient(to bottom,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
 }
-
-function cutLineV(left) {
-  return `<div style="position:absolute;top:0;bottom:0;left:${left};width:.4pt;background:repeating-linear-gradient(to bottom,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
-}
-function cutLineH(top) {
-  return `<div style="position:absolute;left:0;right:0;top:${top};height:.4pt;background:repeating-linear-gradient(to right,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
+function cutH(top) {
+  return `<div style="position:absolute;left:0;right:0;top:${top};height:.3pt;background:repeating-linear-gradient(to right,#aaa 0,#aaa 2mm,transparent 2mm,transparent 4mm);z-index:99"></div>`;
 }
 
 function printAll() {
@@ -257,23 +221,21 @@ function printAll() {
       let row = `<div style="display:flex">`;
       for (let c = 0; c < COLS; c++) {
         const p = slice[r * COLS + c];
-        row += p ? badgePrintHtml(p) : emptyPrintHtml();
+        row += p ? badgePrintHtml(p) : `<div style="width:90mm;height:52mm;flex-shrink:0"></div>`;
       }
-      row += `</div>`;
-      rows += row;
+      rows += row + `</div>`;
     }
-
     body += `<div style="width:297mm;height:210mm;background:#fff;position:relative;page-break-after:always;overflow:hidden">
-      ${cutLineV('0mm')} ${cutLineV('90mm')} ${cutLineV('180mm')} ${cutLineV('270mm')}
-      ${cutLineH('52mm')} ${cutLineH('104mm')} ${cutLineH('156mm')}
+      ${cutV('0')} ${cutV('90mm')} ${cutV('180mm')} ${cutV('270mm')}
+      ${cutH('52mm')} ${cutH('104mm')} ${cutH('156mm')}
       ${rows}
     </div>`;
   }
 
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4 landscape;margin:0}body{margin:0}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>*{box-sizing:border-box;margin:0;padding:0}@page{size:A4 landscape;margin:0}body{margin:0}</style>
   </head><body>${body}</body></html>`);
   win.document.close();
   setTimeout(() => { win.focus(); win.print(); }, 800);
