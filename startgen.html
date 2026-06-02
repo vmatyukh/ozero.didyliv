@@ -95,17 +95,23 @@ function makeDraw(n){
   const zones=shuffle([...Array(half).fill('A'),...Array(other).fill('B')]);
   const aI=[],bI=[];
   zones.forEach((z,i)=>(z==='A'?aI:bI).push(i));
+  // Session 1: random starts within each zone
   const aS1=shuffle(Array.from({length:aI.length},(_,i)=>i+1));
   const bS1=shuffle(Array.from({length:bI.length},(_,i)=>i+1));
   const cards=Array(n);
   aI.forEach((ci,p)=>{cards[ci]={s1zone:'A',s1start:aS1[p]}});
   bI.forEach((ci,p)=>{cards[ci]={s1zone:'B',s1start:bS1[p]}});
-  const aS2i=cards.map((c,i)=>c.s1zone==='B'?i:-1).filter(i=>i>=0);
-  const bS2i=cards.map((c,i)=>c.s1zone==='A'?i:-1).filter(i=>i>=0);
-  const aS2=shuffle(Array.from({length:aS2i.length},(_,i)=>i+1));
-  const bS2=shuffle(Array.from({length:bS2i.length},(_,i)=>i+1));
-  aS2i.forEach((ci,p)=>{cards[ci].s2zone='A';cards[ci].s2start=aS2[p]});
-  bS2i.forEach((ci,p)=>{cards[ci].s2zone='B';cards[ci].s2start=bS2[p]});
+  // Session 2: zone swaps, start is mirrored (first goes last)
+  // s2 = zone_size - s1 + 1  (so first=1 gets last=zone_size)
+  cards.forEach(c=>{
+    if(c.s1zone==='A'){
+      c.s2zone='B';
+      c.s2start=other - c.s1start + 1;
+    } else {
+      c.s2zone='A';
+      c.s2start=half - c.s1start + 1;
+    }
+  });
   return cards;
 }
 
