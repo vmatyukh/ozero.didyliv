@@ -343,12 +343,19 @@ const SESSION_LABELS = Object.fromEntries(
 const SESSION_PRICES = Object.fromEntries(CONFIG.sessions.map(s=>[ s.key, s.price ]));
 const SESSION_END    = Object.fromEntries(CONFIG.sessions.map(s=>[ s.key, s.endHour ]));
 
+let holidaysData = {};
+db.ref('holidays').on('value', snap=>{
+  holidaysData = snap.val()||{};
+  renderSessionCards();
+});
+
 function getSessionPrice(sessionKey, dateStr){
   const d = dateStr ? new Date(dateStr) : new Date();
   const dow = d.getDay();
   const isWeekend = dow===0||dow===5||dow===6;
+  const isHoliday = dateStr && !!holidaysData[dateStr];
   const s = CONFIG.sessions.find(s=>s.key===sessionKey);
-  return s ? (isWeekend ? s.priceWE : s.price) : 0;
+  return s ? ((isWeekend||isHoliday) ? s.priceWE : s.price) : 0;
 }
 
 // Перевіряємо чи сесія ще доступна для бронювання

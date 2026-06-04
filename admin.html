@@ -212,7 +212,19 @@ button.danger{background:#fdd}
 
   <pre id="statusFloat"></pre>
 
-  <!-- Всі бронювання за день -->
+  <!-- Святкові дні -->
+  <fieldset id="holidaysFieldset" style="margin-top:16px">
+    <legend>🎉 Святкові дні (тариф вихідного дня)</legend>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+      <div style="position:relative;display:inline-block">
+        <div id="holidayDateDisplay" style="padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;min-width:140px"></div>
+        <input type="date" id="holidayDate" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
+      </div>
+      <button onclick="addHoliday()" class="primary" style="padding:7px 14px;font-size:13px">➕ Додати</button>
+    </div>
+    <div id="holidaysList" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </fieldset>
+
   <fieldset id="allBookingsFieldset" style="margin-top:16px">
     <legend id="allBookingsLegend">📋 Всі бронювання за день</legend>
     <div id="allBookingsTable"></div>
@@ -253,6 +265,13 @@ const db = firebase.database();
 const auth = firebase.auth();
 const ADMIN_EMAIL = 'ozero.didyliv@gmail.com';
 let isAdmin = false;
+
+// Святкові дні
+db.ref('holidays').on('value', snap=>{
+  holidaysData = snap.val()||{};
+  renderSessionTabs();
+  renderHolidaysList();
+});
 
 const $=id=>document.getElementById(id);
 const nowStr=()=>new Date().toLocaleString('uk-UA',{hour12:false}).replace(',','');
@@ -634,14 +653,17 @@ const SESSION_LABELS = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,`${s.nam
 const SESSION_PRICES = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,s.price]));
 const SESSION_UK     = Object.fromEntries(CONFIG.sessions.map(s=>[s.key,s.name]));
 
-// Ціна залежно від дати (Пн–Чт = будні, Пт–Нд = вихідні)
+// Ціна залежно від дати (Пн–Чт = будні, Пт–Нд = вихідні, свята = вихідні)
+let holidaysData = {};
+
 function getSessionPrice(sessionKey, dateStr){
   const d = dateStr ? new Date(dateStr) : new Date();
   const dow = d.getDay(); // 0=нд, 5=пт, 6=сб
   const isWeekend = dow===0||dow===5||dow===6;
+  const isHoliday = dateStr && !!holidaysData[dateStr];
   const s = CONFIG.sessions.find(s=>s.key===sessionKey);
   if(!s) return 0;
-  return isWeekend ? s.priceWE : s.price;
+  return (isWeekend||isHoliday) ? s.priceWE : s.price;
 }
 
 function isSessionExpired(sessionKey, dateStr){
@@ -1332,6 +1354,52 @@ db.ref(`stats/${tgDateStr()}/spinning`).on('value', snap=>{
   renderSpinningStats(snap.val(), tgDateStr());
 });
 
+// Автоматично переключаємо сесію коли вона закінчується
+setInterval(()=>{
+  const date = $('floatDate')?.value;
+  if(!date) return;
+  const today = (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+  if(date !== today) return; // тільки для сьогодні
+  const available = CONFIG.sessions.find(s=>!isSessionExpired(s.key, date));
+  if(available && available.key !== floatSession){
+    renderSessionTabs();
+    loadFloatBookings();
+  }
+}, 60000); // кожну хвилину
+function renderHolidaysList(){
+  const wrap = document.getElementById('holidaysList');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const sorted = Object.keys(holidaysData).sort();
+  if(!sorted.length){
+    wrap.innerHTML='<span style="font-size:13px;color:#888">Святкових днів немає</span>';
+    return;
+  }
+  sorted.forEach(date=>{
+    const [y,m,d] = date.split('-');
+    const tag = document.createElement('span');
+    tag.style.cssText='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:#fff3cd;border:1px solid #f0c040;border-radius:20px;font-size:13px;font-weight:600';
+    tag.innerHTML=`🎉 ${d}.${m}.${y} <button onclick="removeHoliday('${date}')" style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:14px;font-weight:700;padding:0;line-height:1">✕</button>`;
+    wrap.appendChild(tag);
+  });
+}
+
+async function addHoliday(){
+  const date = document.getElementById('holidayDate').value;
+  if(!date){ setStatusFloat('Оберіть дату'); return; }
+  try{
+    await db.ref(`holidays/${date}`).set(true);
+    setStatusFloat(`✅ ${date} додано як святковий день`);
+  }catch(e){ setStatusFloat('Помилка: '+e.message); }
+}
+
+async function removeHoliday(date){
+  try{
+    await db.ref(`holidays/${date}`).remove();
+    setStatusFloat(`✅ ${date} видалено зі святкових`);
+  }catch(e){ setStatusFloat('Помилка: '+e.message); }
+}
+
 /* ===== ВСІ БРОНЮВАННЯ ЗА ДЕНЬ ===== */
 function renderAllBookings(){
   const wrap = document.getElementById('allBookingsTable');
@@ -1617,6 +1685,10 @@ function initAdmin(){
   addParticipant();
   initDateDisplay('floatDateDisplay', 'floatDate');
   initDateDisplay('statsDateDisplay', 'statsDate');
+  initDateDisplay('holidayDateDisplay', 'holidayDate');
+  // Ховаємо для не-адміна
+  const holidaysFS = document.getElementById('holidaysFieldset');
+  if(holidaysFS) holidaysFS.style.display = isAdmin ? '' : 'none';
   // Ховаємо форму додавання абонементів для не-адміна
   const abonAdd = document.getElementById('abonAddFieldset');
   if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
