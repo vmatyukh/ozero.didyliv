@@ -709,14 +709,17 @@ async function loadResultsInline(roundKey) {
       document.getElementById('resultsInline').innerHTML = '<div class="loading">Результати ще не опубліковані</div>';
       return;
     }
-    const results = Object.values(data).filter(r => r && r.name);
+    const rawResults = Array.isArray(data) ? data : Object.values(data);
+    const hasTeams  = rawResults[0] && 'teamName' in rawResults[0];
+    const results = hasTeams
+      ? rawResults.filter(r => r && r.teamName)
+      : rawResults.filter(r => r && r.name);
     if (!results.length) {
       document.getElementById('resultsInline').innerHTML = '<div class="loading">Результати ще не опубліковані</div>';
       return;
     }
 
     const hasTours  = results[0] && 't1_weight' in results[0];
-    const hasTeams  = results[0] && 'teamName' in results[0];
 
     if (hasTeams) {
       // ── Командний поплавковий залік ──
