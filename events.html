@@ -715,9 +715,29 @@ async function loadResultsInline(roundKey) {
       return;
     }
 
-    const hasTours = results[0] && 't1_weight' in results[0];
+    const hasTours  = results[0] && 't1_weight' in results[0];
+    const hasTeams  = results[0] && 'teamName' in results[0];
 
-    if (hasTours) {
+    if (hasTeams) {
+      // ── Командний поплавковий залік ──
+      const sorted = [...results].sort((a, b) => Number(b.totalWeight || 0) - Number(a.totalWeight || 0));
+      let html = `<div class="results-table-wrap"><table class="results-table">
+        <thead><tr><th style="width:44px">#</th><th>Команда</th><th>Учасники</th><th style="text-align:right">Вага (г)</th></tr></thead><tbody>`;
+      sorted.forEach((r, i) => {
+        const place = r.place || (i + 1);
+        const placeEl = place <= 3 ? `<span class="medal medal-${place}">${place}</span>` : `<span class="place-num">${place}</span>`;
+        const members = [r.member1Name, r.member2Name].filter(Boolean).join(', ');
+        const w = Number(r.totalWeight || 0);
+        html += `<tr>
+          <td>${placeEl}</td>
+          <td style="font-weight:600">${r.teamName || ''}</td>
+          <td style="font-size:12px;color:var(--text-muted)">${members}</td>
+          <td style="text-align:right" class="${w > 0 ? 'weight-val' : 'zero-weight'}">${w > 0 ? w.toLocaleString('uk-UA') : '—'}</td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+      document.getElementById('resultsInline').innerHTML = html;
+    } else if (hasTours) {
       const tabs = [
         { key:'t1', label:'Тур 1', wKey:'t1_weight', pKey:'t1_points' },
         { key:'t2', label:'Тур 2', wKey:'t2_weight', pKey:'t2_points' },
