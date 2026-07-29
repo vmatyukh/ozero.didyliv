@@ -830,6 +830,7 @@ function renderFloatTable(){
                  style="padding:5px 10px;font-size:12px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}"
                  title="Спосіб оплати">${payIcon} ${payLabel}</button>`;
       if(b.buyFish) nameCell += ' 🐟';
+      if(b.secondRod) nameCell += ' 🎣';
     } else if(isBlocked){
       const bl=floatBlocked[i];
       statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[bl.session]}</span>`;
@@ -1436,7 +1437,7 @@ function renderAllBookings(){
     const table = document.createElement('table');
     table.className='spinning-table';
     table.innerHTML=`<thead><tr>
-      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th>Оплата</th><th>🐟</th><th></th>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Сума</th><th>Оплата</th><th>🎣</th><th>🐟</th><th></th>
     </tr></thead>`;
     const tbody = document.createElement('tbody');
 
@@ -1453,6 +1454,7 @@ function renderAllBookings(){
         <td style="font-size:12px">${createdAt}</td>
         <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
         <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':b.payment==='free'?'🆓 Безкоштовно':'—'}</td>
+        <td>${b.secondRod?'🎣 +200':'—'}</td>
         <td>${b.buyFish?'🐟':'—'}</td>
         <td>
           <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
@@ -1475,10 +1477,10 @@ function renderAllBookings(){
     });
 
     // Підсумок
-    const total = rows.reduce((s,b)=>s+(b.payment==='free'?0:(b.price||SESSION_PRICES[b.sessionKey]||0)),0);
+    const total = rows.reduce((s,b)=>s+(b.payment==='free'?0:((b.price||SESSION_PRICES[b.sessionKey]||0))),0);
     const tfoot = document.createElement('tr');
     tfoot.className='total-row';
-    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td><td></td><td></td>`;
+    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td>${total} грн</td><td></td><td></td><td></td><td></td>`;
     tbody.appendChild(tfoot);
 
     table.appendChild(tbody);

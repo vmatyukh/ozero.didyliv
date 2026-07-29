@@ -186,6 +186,11 @@ header p{margin:2px 0 0;font-size:13px;opacity:.85}
         <input type="checkbox" id="inputBuyFish" style="width:18px;height:18px;cursor:pointer;flex-shrink:0">
         <label for="inputBuyFish" style="font-size:14px;color:#222;cursor:pointer;margin:0">🐟 Планую викупляти зловлену рибу</label>
       </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <input type="checkbox" id="inputSecondRod" style="width:18px;height:18px;cursor:pointer;flex-shrink:0" onchange="updateSummary()">
+        <label for="inputSecondRod" style="font-size:14px;color:#222;cursor:pointer;margin:0">🎣 Друга вудочка / друга особа <strong>(+200 грн)</strong></label>
+      </div>
+      <p style="font-size:12px;color:#888;margin:4px 0 0 28px">Тариф передбачає ловлю на 1 вудочку. Друга вудочка або друга особа (по 1 вудочці кожен) — +200 грн.</p>
     </div>
 
     <!-- Правила -->
@@ -570,12 +575,16 @@ function updateSummary(){
     box.innerHTML='Оберіть дату, сесію та сектор'; return;
   }
   const [y,m,d]=date.split('-');
-  const buyFish = document.getElementById('inputBuyFish')?.checked;
+  const buyFish   = document.getElementById('inputBuyFish')?.checked;
+  const secondRod = document.getElementById('inputSecondRod')?.checked;
+  const price = getSessionPrice(selectedSession, date);
+  const total = price + (secondRod ? 200 : 0);
   box.innerHTML=`
     <strong>📅 Дата:</strong> ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}<br>
     <strong>🕐 Сесія:</strong> ${SESSION_LABELS[selectedSession]}<br>
     <strong>🎣 Сектор:</strong> ${selectedSector}<br>
-    <strong>💰 Сума:</strong> ${getSessionPrice(selectedSession, document.getElementById('inputDate').value)} грн${buyFish?'<br><strong>🐟 Викуп риби:</strong> так':''}`;
+    ${secondRod?'<strong>🎣 Друга вудочка:</strong> +200 грн<br>':''}
+    <strong>💰 Сума:</strong> ${total} грн${buyFish?'<br><strong>🐟 Викуп риби:</strong> так':''}`;
 }
 
 /* ===== Підтвердження ===== */
@@ -583,7 +592,10 @@ async function submitBooking(){
   const date  = document.getElementById('inputDate').value;
   const name  = document.getElementById('inputName').value.trim();
   const phone = document.getElementById('inputPhone').value.trim();
-  const buyFish = document.getElementById('inputBuyFish')?.checked||false;
+  const buyFish   = document.getElementById('inputBuyFish')?.checked||false;
+  const secondRod = document.getElementById('inputSecondRod')?.checked||false;
+  const price = getSessionPrice(selectedSession, date);
+  const total = price + (secondRod ? 200 : 0);
   const agreeRules = document.getElementById('agreeRules')?.checked||false;
   let ok=true;
   document.getElementById('errName').style.display  = name  ?'none':'block'; if(!name)  ok=false;
@@ -613,8 +625,8 @@ async function submitBooking(){
     }
     await db.ref(`bookings/${date}/${selectedSession}`).push({
       sector:selectedSector, name, phone,
-      session:selectedSession, price:getSessionPrice(selectedSession, document.getElementById('inputDate').value),
-      buyFish, date, createdAt:new Date().toISOString()
+      session:selectedSession, price:total,
+      secondRod, buyFish, date, createdAt:new Date().toISOString()
     });
 
     // Telegram повідомлення адміну
@@ -623,7 +635,7 @@ async function submitBooking(){
       `📅 Дата: ${parseInt(d)} ${MONTHS_UA[parseInt(m)-1]} ${y}\n`+
       `🕐 Сесія: ${SESSION_LABELS[selectedSession]}\n`+
       `🎯 Сектор: ${selectedSector}\n`+
-      `💰 Сума: ${getSessionPrice(selectedSession, document.getElementById('inputDate').value)} грн\n`+
+      `💰 Сума: ${total} грн${secondRod?' (з 2-ю вудочкою)':''}\n`+
       `👤 Імʼя: ${name}\n`+
       `📞 Телефон: ${phone}`+
       (buyFish?'\n🐟 Планує викупляти рибу':'');
@@ -656,6 +668,8 @@ function resetForm(){
   document.getElementById('inputPhone').value='';
   const agreeEl = document.getElementById('agreeRules');
   if(agreeEl) agreeEl.checked=false;
+  const secondRodEl = document.getElementById('inputSecondRod');
+  if(secondRodEl) secondRodEl.checked=false;
   document.getElementById('inputDate').value=todayStr;
   updateDateDisplay(todayStr);
   document.getElementById('dateOverlay').style.display='flex';
