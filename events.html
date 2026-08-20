@@ -693,6 +693,7 @@ async function openEvent(params) {
 
   if (regOpen) loadParticipants(roundKey);
   if (isDone)  loadResultsInline(roundKey);
+  else         loadParticipantsInline(roundKey);
 }
 
 function scrollToResults() {
@@ -701,6 +702,25 @@ function scrollToResults() {
 }
 
 /* ── Results inline (inside event detail) ── */
+async function loadParticipantsInline(roundKey) {
+  const el = document.getElementById('resultsInline');
+  if (!el) return;
+  try {
+    const res  = await fetch(`${FB_URL}/participants/${roundKey}.json`);
+    const data = await res.json();
+    if (!data) { el.innerHTML = ''; return; }
+    const participants = Array.isArray(data) ? data : Object.values(data);
+    if (!participants.length) { el.innerHTML = ''; return; }
+    let html = `<div class="results-table-wrap"><table class="results-table">
+      <thead><tr><th style="width:44px">#</th><th>Учасник</th></tr></thead><tbody>`;
+    participants.forEach(p => {
+      html += `<tr><td style="color:var(--text-muted);font-size:13px">${p.num || ''}</td><td>${p.name}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+    el.innerHTML = html;
+  } catch(e) { /* no participants sheet — silent */ }
+}
+
 async function loadResultsInline(roundKey) {
   try {
     const res  = await fetch(`${FB_URL}/results/${roundKey}.json`);
