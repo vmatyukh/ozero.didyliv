@@ -741,17 +741,25 @@ async function loadResultsInline(roundKey) {
       html += `</tbody></table></div>`;
       document.getElementById('resultsInline').innerHTML = html;
     } else if (hasTours) {
-      const tabs = [
-        { key:'t1', label:'Тур 1', wKey:'t1_weight', pKey:'t1_points' },
-        { key:'t2', label:'Тур 2', wKey:'t2_weight', pKey:'t2_points' },
-        { key:'t3', label:'Тур 3', wKey:'t3_weight', pKey:'t3_points' },
-        { key:'t4', label:'Тур 4', wKey:'t4_weight', pKey:'t4_points' },
-        { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points' },
+      // Визначаємо які тури показувати
+      const round = allRoundsCache.find(x => x.roundKey === activeRoundKey) || {};
+      const completedTours = Array.isArray(round.completedTours) && round.completedTours.length
+        ? round.completedTours : [1, 2, 3, 4]; // якщо не задано — всі 4
+
+      const allTabs = [
+        { key:'t1', label:'Тур 1', wKey:'t1_weight', pKey:'t1_points', num:1 },
+        { key:'t2', label:'Тур 2', wKey:'t2_weight', pKey:'t2_points', num:2 },
+        { key:'t3', label:'Тур 3', wKey:'t3_weight', pKey:'t3_points', num:3 },
+        { key:'t4', label:'Тур 4', wKey:'t4_weight', pKey:'t4_points', num:4 },
+        { key:'total', label:'Загальний залік', wKey:'total_weight', pKey:'total_points', num:0 },
       ];
+      // Показуємо тільки завершені тури + загальний залік
+      const tabs = allTabs.filter(t => t.num === 0 || completedTours.includes(t.num));
+
       const tabsEl = document.getElementById('tourTabsInline');
       tabs.forEach((t, i) => {
         const btn = document.createElement('button');
-        btn.className = 'tour-tab' + (i === 4 ? ' active' : '');
+        btn.className = 'tour-tab' + (i === tabs.length - 1 ? ' active' : '');
         btn.textContent = t.label;
         btn.onclick = () => {
           document.querySelectorAll('#tourTabsInline .tour-tab').forEach(b => b.classList.remove('active'));
@@ -760,7 +768,7 @@ async function loadResultsInline(roundKey) {
         };
         tabsEl.appendChild(btn);
       });
-      renderResultsTo(results, tabs[4], 'resultsInline');
+      renderResultsTo(results, tabs[tabs.length - 1], 'resultsInline');
     } else {
       const sorted = [...results].sort((a, b) =>
         Number(a.points || 0) - Number(b.points || 0) ||
