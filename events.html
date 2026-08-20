@@ -742,7 +742,7 @@ async function loadResultsInline(roundKey) {
       document.getElementById('resultsInline').innerHTML = html;
     } else if (hasTours) {
       // Визначаємо які тури показувати
-      const round = allRoundsCache.find(x => x.roundKey === activeRoundKey) || {};
+      const round = allRoundsCache.find(x => x.roundKey === roundKey) || {};
       const completedTours = Array.isArray(round.completedTours) && round.completedTours.length
         ? round.completedTours : [1, 2, 3, 4]; // якщо не задано — всі 4
 
