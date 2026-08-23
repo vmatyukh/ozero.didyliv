@@ -490,8 +490,9 @@ function renderCalendar() {
     const regClosed   = !regOpen && regOpenTo && new Date() > regOpenTo;
     const badge = r.status.archived        ? `<span class="event-badge badge-done">✅ Завершено</span>` :
                   r.status.resultsPublished ? `<span class="event-badge badge-live">🔴 Live результати</span>` :
-                  regOpen && regOpenFromStr  ? `<span class="event-badge badge-soon">🔔 Реєстрація${regOpenFromStr}</span>` :
-                  regOpen                   ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
+                  regPlanned && regOpenFromStr ? `<span class="event-badge badge-soon">🔔 Реєстрація${regOpenFromStr}</span>` :
+                  regPlanned                  ? `<span class="event-badge badge-soon">🔔 Реєстрація скоро</span>` :
+                  regOpen                     ? `<span class="event-badge badge-reg">🟢 Реєстрація відкрита</span>` :
                   regClosed                 ? `<span class="event-badge badge-soon">🔒 Реєстрація завершена</span>` :
                                               `<span class="event-badge badge-soon">📅 Скоро</span>`;
     const isSoon = !regOpen && !isDone;
