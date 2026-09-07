@@ -215,8 +215,8 @@ button.danger{background:#fdd}
 </div>
 
 <!-- ===== ПОПАП СЕКТОРІВ ===== -->
-<div id="sectorsPopup" style="display:none;position:fixed;inset:0;background:#0006;z-index:500;overflow-y:auto;padding:16px">
-  <div style="background:#fff;border-radius:14px;max-width:1100px;margin:0 auto;box-shadow:0 8px 32px #0003">
+<div id="sectorsPopup" style="display:none;position:fixed;inset:0;background:#0006;z-index:500;display:none;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:1200px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px #0003;display:flex;flex-direction:column">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0;z-index:1">
       <h3 id="floatLegend" style="margin:0;flex:1;color:#005356;font-size:16px">Сектори</h3>
       <button onclick="closeSectorsPopup()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;padding:0">✕</button>
@@ -832,7 +832,7 @@ function openSectorsPopup(sessionKey){
   floatSession = sessionKey;
   loadFloatBookings();
   renderFloatStats();
-  document.getElementById('sectorsPopup').style.display='block';
+  document.getElementById('sectorsPopup').style.display='flex';
   document.body.style.overflow='hidden';
 }
 
@@ -1047,8 +1047,8 @@ function renderFloatStats(){
       const isActive = floatSession === s.key;
       return `<button onclick="${expired?'':` openSectorsPopup('${s.key}')`}"
         ${expired?'disabled':''}
-        style="background:${isActive?'#005356':expired?'#f0f0f0':'#fff'};color:${isActive?'#fff':expired?'#999':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${isActive?'#005356':expired?'#ddd':'#ddd'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};opacity:${expired?.6:1};transition:all .2s;text-align:left;width:100%">
-        <div style="font-weight:700;font-size:16px;margin-bottom:6px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span></div>
+        style="background:${expired?'#f0f0f0':'#fff'};color:${expired?'#999':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${expired?'#ddd':'#ccc'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};transition:all .2s;text-align:left;width:100%">
+        <div style="font-weight:700;font-size:16px;margin-bottom:6px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span>${isActive?' 📍':''}</div>
         <div style="display:flex;gap:14px;font-size:13px">
           <span>🟢 Вільних: <strong>${free}</strong></span>
           <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
