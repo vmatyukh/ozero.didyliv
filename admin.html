@@ -890,25 +890,22 @@ function renderFloatTable(){
     tr.className=(isBooked||isBlocked)?'booked-row':'free-row';
     const createdAt=b?new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}):'—';
 
-    let statusBadge, nameCell, rodCell, fishCell, priceCell, actCell;
+    let statusBadge, nameCell, rodCell, fishCell, priceVal, priceCell, actCell;
     if(isBooked){
-      // Статус — якщо є earlyLeaveAt показуємо час звільнення
       statusBadge=`<span class="status-badge booked">🔴 Зайнято</span>`;
       nameCell=b.name||'—';
-      rodCell = b.secondRod ? '✅' : '—';
-      fishCell = b.buyFish ? '✅' : '—';
       const payment = b.payment || '';
       const payIcon = payment==='card'?'💳':payment==='cash'?'💵':payment==='free'?'🆓':'💰';
       const payLabel = payment==='card'?'Картка':payment==='cash'?'Готівка':payment==='free'?'Безкоштовно':'Оплата';
-      const priceVal = payment==='free' ? '0 грн' : (b.price||getSessionPrice(floatSession,$('floatDate').value))+' грн';
-      actCell=`<button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>
-               <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
-               ${isAdmin?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}`;
+      priceVal = payment==='free' ? '0 грн' : (b.price||getSessionPrice(floatSession,$('floatDate').value))+' грн';
       rodCell = b.secondRod ? '✅ +200 грн' : '—';
       fishCell = b.buyFish ? '✅' : '—';
       priceCell=`<button onclick="togglePayment('${b.key}','${floatSession}','${payment}')"
         style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}"
         title="Змінити оплату">${payIcon} ${payLabel}</button>`;
+      actCell=`<button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>
+               <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
+               ${isAdmin?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}`;
     } else if(isBlocked){
       const bl=floatBlocked[i];
       statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[bl.session]}</span>`;
