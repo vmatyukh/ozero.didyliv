@@ -149,6 +149,7 @@ button.danger{background:#fdd}
     <legend>Дії</legend>
     <div class="row">
       <button id="printBtn" class="primary">🖨️ Друкувати всі чеки</button>
+      <button id="reprintBtn" class="secondary" disabled title="Надрукувати останній чек повторно">🔄 Останній чек</button>
     </div>
     <div id="printError" style="display:none;margin-top:10px;color:#c0392b;font-weight:700;font-size:14px"></div>
   </fieldset>
@@ -588,6 +589,34 @@ async function qrRaster(){
 }
 
 
+let lastPrinted = []; // масив {payload, statKey} останнього друку
+
+$('reprintBtn').onclick = async()=>{
+  if(!lastPrinted.length){ setStatus('Немає чеку для повторного друку'); return; }
+  const btn = $('reprintBtn');
+  btn.disabled=true; btn.textContent='⏳ Друкую...';
+  try{
+    await connect(true);
+    const logoBytes=await logoRaster();
+    for(const {payload, statKey} of lastPrinted){
+      const tr=textBlockRaster(buildTextLines(payload),{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
+      const li=textBlockRaster(['——————————————'],{center:true});
+      const qr=await qrRaster();
+      await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
+      // Рахуємо кількість повторних друків
+      if(statKey){
+        const snap = await db.ref(`stats/${tgDateStr()}/spinning/${statKey}/reprints`).once('value');
+        await db.ref(`stats/${tgDateStr()}/spinning/${statKey}/reprints`).set((snap.val()||0)+1);
+      }
+    }
+    setStatus(`✅ Повторно надруковано: ${lastPrinted.length} чек(и)`);
+  }catch(e){
+    setStatus('Помилка: '+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent='🔄 Останній чек';
+  }
+};
+
 $('printBtn').onclick=async()=>{
   if(!participants.length){setStatus('Додай хоча б одного учасника');return;}
 
@@ -635,13 +664,20 @@ $('printBtn').onclick=async()=>{
   try{
     await connect(true);
     const logoBytes=await logoRaster();
+    lastPrinted = [];
     for(const p of participants){
       const d=buildPayload(p);
       const tr=textBlockRaster(buildTextLines(d),{center:false,regularFont:'24px Arial',boldFont:'30px Arial',lineHeight:36});
       const li=textBlockRaster(['——————————————'],{center:true});
       const qr=await qrRaster();
       await send(merge(new Uint8Array([ESC,0x40]),alignC,logoBytes,lf,alignL,tr,lf,alignC,qr,lf,lf,li,lf,lf,cut));
+      // Знаходимо ключ щойно збереженого запису
+      const statsSnap = await db.ref(`stats/${tgDateStr()}/spinning`).orderByChild('time').limitToLast(participants.length).once('value');
+      const statsEntries = statsSnap.val() ? Object.entries(statsSnap.val()) : [];
+      const match = statsEntries.find(([,v])=>v.participantNo===p.id);
+      lastPrinted.push({payload: d, statKey: match?match[0]:null});
     }
+    $('reprintBtn').disabled = false;
     setStatus('✅ Надруковано: '+participants.length+' чек(и)');
     clearParticipants();
   }catch(e){
@@ -1228,7 +1264,7 @@ function renderSpinningStats(data, date){
   table.className='spinning-table';
   table.innerHTML=`<thead><tr>
     <th>#</th><th>Час</th><th>Сума</th>
-    <th>Пільга</th><th>Підсак</th><th>💳</th><th>🆓 Тип</th><th></th>
+    <th>Пільга</th><th>Підсак</th><th>💳</th><th>🆓 Тип</th><th>🔄</th><th></th>
   </tr></thead>`;
 
   const tbody = document.createElement('tbody');
@@ -1251,6 +1287,7 @@ function renderSpinningStats(data, date){
       <td>${e.pidsak?'✅':'—'}</td>
       <td>${e.cardPayment?'💳':'—'}</td>
       <td style="font-size:12px">${freeLabel}</td>
+      <td style="font-size:12px;color:#888">${e.reprints?`🔄×${e.reprints}`:'—'}</td>
       <td style="white-space:nowrap">
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
         <button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#eef;cursor:pointer">✏️</button>
@@ -1274,6 +1311,7 @@ function renderSpinningStats(data, date){
     <td>${entries.filter(([,e])=>e.pidsak).length||'—'}</td>
     <td>${cardCount||'—'}</td>
     <td>${freeCount||'—'}</td>
+    <td></td>
     <td></td>`;
   tbody.appendChild(tfoot);
   table.appendChild(tbody);
