@@ -1017,11 +1017,10 @@ function renderFloatStats(){
       const expired = isSessionExpired(s.key, date);
       return `<div onclick="${expired?'':` selectFloatSessionByKey('${s.key}')`}"
         style="background:${isActive?'#005356':'#fff'};color:${isActive?'#fff':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${isActive?'#005356':'#ddd'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};opacity:${expired?.6:1};transition:all .2s;user-select:none">
-        <div style="font-weight:700;font-size:14px;margin-bottom:6px">${s.icon} ${s.name}</div>
-        <div style="font-size:12px">${s.time}</div>
-        <div style="margin-top:6px;display:flex;gap:10px;font-size:13px">
-          <span>🟢 ${free}</span>
-          <span>🔴 ${booked}</span>
+        <div style="font-weight:700;font-size:16px;margin-bottom:6px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span></div>
+        <div style="display:flex;gap:14px;font-size:13px">
+          <span>🟢 Вільних: <strong>${free}</strong></span>
+          <span>🔴 Зайнятих: <strong>${booked}</strong></span>
         </div>
         ${expired?'<div style="font-size:11px;margin-top:4px;opacity:.7">завершена</div>':''}
       </div>`;
