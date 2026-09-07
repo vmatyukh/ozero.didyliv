@@ -828,7 +828,7 @@ function setFloatDate(offset){
 function openSectorsPopup(sessionKey){
   // Перевіряємо час — якщо сесія вже завершилась, дизейблимо
   const date = $('floatDate').value;
-  if(isSessionExpired(sessionKey, date)) return;
+  if(isSessionExpired(sessionKey, date) && !isAdmin) return;
   floatSession = sessionKey;
   loadFloatBookings();
   renderFloatStats();
@@ -1045,15 +1045,16 @@ function renderFloatStats(){
       }
       const free = 11 - bookedSectors;
       const isActive = floatSession === s.key;
-      return `<button onclick="${expired?'':` openSectorsPopup('${s.key}')`}"
-        ${expired?'disabled':''}
-        style="background:${expired?'#f0f0f0':'#fff'};color:${expired?'#999':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${expired?'#ddd':'#ccc'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};transition:all .2s;text-align:left;width:100%">
+      const disabled = expired && !isAdmin;
+      return `<button onclick="${disabled?'':` openSectorsPopup('${s.key}')`}"
+        ${disabled?'disabled':''}
+        style="background:${disabled?'#f0f0f0':'#fff'};color:${disabled?'#999':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${disabled?'#ddd':'#ccc'};font-size:13px;cursor:${disabled?'not-allowed':'pointer'};transition:all .2s;text-align:left;width:100%">
         <div style="font-weight:700;font-size:16px;margin-bottom:6px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span>${isActive?' 📍':''}</div>
         <div style="display:flex;gap:14px;font-size:13px">
           <span>🟢 Вільних: <strong>${free}</strong></span>
           <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
         </div>
-        ${expired?'<div style="font-size:11px;margin-top:4px;color:#c0392b">Сесія завершена</div>':''}
+        ${disabled?'<div style="font-size:11px;margin-top:4px;color:#c0392b">Сесія завершена</div>':''}
       </button>`;
     }).join('');
   });
@@ -1145,8 +1146,9 @@ function openEditBookingPopup(b, date){
     const phone = popup.querySelector('#ebPhone').value.trim();
     const secondRod = popup.querySelector('#ebRod').checked;
     const buyFish   = popup.querySelector('#ebFish').checked;
-    const basePrice = b.price || getSessionPrice(b.sessionKey, date);
-    const price = (selectedPayment==='free'?0:basePrice) + (secondRod?200:0);
+    // Базова ціна сесії без другої вудочки
+    const sessionPrice = getSessionPrice(b.sessionKey, date);
+    const price = (selectedPayment==='free' ? 0 : sessionPrice) + (secondRod ? 200 : 0);
     try{
       await db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).update({
         name, phone, secondRod, buyFish, payment:selectedPayment, price
@@ -1193,6 +1195,7 @@ async function togglePayment(key, session, currentPayment){
     try{
       await db.ref(`bookings/${date}/${session}/${key}`).update({payment});
       setStatusFloat(`✅ Оплата: ${payment==='card'?'💳 Картка':payment==='free'?'🆓 Безкоштовно':'💵 Готівка'}`);
+      renderAllBookings();
     }catch(e){setStatusFloat('Помилка: '+e.message);}
   };
 
@@ -1694,28 +1697,27 @@ function renderAllBookings(){
         <td style="font-size:12px">
           ${b.earlyLeave
             ? `<span style="color:#e67e00">${earlyLeaveAt}</span>`
-            : `<button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fff3cd;cursor:pointer;border:1px solid #f0c040">🚪 Звільнити</button>`}
+            : `<button class="btn-early" style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fff3cd;cursor:pointer;border:1px solid #f0c040">🚪 Звільнити</button>`}
         </td>
         <td>${b.secondRod?'✅':'—'}</td>
         <td>${b.buyFish?'✅':'—'}</td>
         <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
         <td>
           ${isAdmin
-            ? `<button style="padding:3px 8px;font-size:14px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}">${payIcon}</button>`
+            ? `<button class="btn-pay" style="padding:3px 8px;font-size:14px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}">${payIcon}</button>`
             : `<span>${payIcon}</span>`}
         </td>
         <td style="white-space:nowrap">
-          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
-          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e8e8ff;cursor:pointer">✏️</button>`:''}
-          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
+          <button class="btn-print" style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
+          ${isAdmin?`<button class="btn-edit" style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e8e8ff;cursor:pointer">✏️</button>`:''}
+          ${isAdmin?`<button class="btn-cancel" style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
         </td>`;
 
-      const btns = tr.querySelectorAll('button');
-      let idx = 0;
+      // Прив'язуємо обробники по класах
+      const qb = sel => tr.querySelector(sel);
 
-      // Звільнити
-      if(!b.earlyLeave){
-        btns[idx++].onclick = ()=>{
+      if(!b.earlyLeave && qb('.btn-early')){
+        qb('.btn-early').onclick = ()=>{
           if(confirm(`Позначити сектор ${b.sector} як вільний?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`)
               .update({earlyLeave:true, earlyLeaveAt:new Date().toISOString()})
@@ -1725,18 +1727,12 @@ function renderAllBookings(){
         };
       }
 
-      // Чек
-      btns[idx++].onclick = ()=> adminPrintByData(b);
+      qb('.btn-print').onclick = ()=> adminPrintByData(b);
 
       if(isAdmin){
-        // Оплата
-        btns[idx++].onclick = ()=> togglePayment(b.key, b.sessionKey, payment);
-
-        // Едіт
-        btns[idx++].onclick = ()=> openEditBookingPopup(b, date);
-
-        // Скасувати
-        btns[idx].onclick = ()=>{
+        qb('.btn-pay').onclick  = ()=> togglePayment(b.key, b.sessionKey, payment);
+        qb('.btn-edit').onclick = ()=> openEditBookingPopup(b, date);
+        qb('.btn-cancel').onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
               .then(()=>{ renderAllBookings(); renderFloatStats(); })
