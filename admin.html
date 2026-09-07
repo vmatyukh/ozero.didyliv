@@ -323,18 +323,15 @@ function renderList(){
         <span style="font-size:13px">🆓</span>
         <select data-field="freeType" style="padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px">
           <option value="">— платний —</option>
-          <option value="child"    ${p.freeType==='child'   ?'selected':''}>Діти до 14 р.</option>
+          <option value="child"    ${p.freeType==='child'   ?'selected':''}>Діти до 10 р.</option>
           <option value="cert"     ${p.freeType==='cert'    ?'selected':''}>Сертифікат</option>
           <option value="abon"     ${p.freeType==='abon'    ?'selected':''}>Абонемент</option>
           <option value="birthday" ${p.freeType==='birthday'?'selected':''}>🎂 День народження</option>
         </select>
-        <span class="abon-search" style="display:${p.freeType==='abon'?'flex':'none'};align-items:center;gap:4px">
-          <span style="position:relative">
-            <input type="text" placeholder="🔍 Введіть ім'я абонемента"
-              style="padding:4px 8px;border:2px solid ${p.abonKey?'#ccc':'#e74c3c'};border-radius:6px;font-size:13px;width:190px"
-              value="${p.abonName||''}">
-            <span class="abon-results"></span>
-          </span>
+        <span class="abon-search" style="display:${p.freeType==='abon'?'flex':'none'};align-items:center;gap:6px">
+          <button type="button" class="abon-pick-btn" style="padding:5px 12px;font-size:13px;border:2px solid ${p.abonKey?'#005356':'#e74c3c'};border-radius:8px;background:${p.abonKey?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">
+            ${p.abonName||'👤 Обрати особу'}
+          </button>
         </span>
       </span>
       <span class="sum">${calcSum(p)} грн</span>
@@ -360,49 +357,17 @@ function renderList(){
       updateTotals();
     };
 
-    // Select абонементів
-    const abonInput = row.querySelector('.abon-search input');
-    const abonResults = row.querySelector('.abon-results');
-    if(abonInput){
-      // Стиль дропдауну результатів
-      abonResults.style.cssText='position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 12px #0002;z-index:100;display:none;max-height:200px;overflow-y:auto';
-
-      const showResults = (q)=>{
-        const data = Object.entries(window._abonData||{});
-        const matches = q
-          ? data.filter(([,v])=>v.name&&v.name.toLowerCase().includes(q.toLowerCase()))
-          : data;
-        if(!matches.length){ abonResults.style.display='none'; return; }
-        abonResults.innerHTML='';
-        matches.slice(0,8).forEach(([key,val])=>{
-          const visits=val.visits||0;
-          const monthlyLeft=Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
-          const info=visits>0?`${visits} разових`:monthlyLeft>0?`${monthlyLeft}/${val.monthlyLimit} міс`:'';
-          const item=document.createElement('div');
-          item.style.cssText='padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee';
-          item.innerHTML=`<strong>${val.name}</strong>${info?` <span style="color:#888;font-size:12px">(${info})</span>`:''}`;
-          item.onmousedown=()=>{
-            p.abonKey=key; p.abonName=val.name;
-            abonInput.value=val.name;
-            abonInput.style.borderColor='#ccc';
-            abonResults.style.display='none';
-            row.querySelector('.sum').textContent=calcSum(p)+' грн';
-            updateTotals();
-          };
-          item.onmouseover=()=>item.style.background='#e0f0f0';
-          item.onmouseout=()=>item.style.background='';
-          abonResults.appendChild(item);
-        });
-        abonResults.style.display='block';
-      };
-
-      abonInput.onfocus=()=>showResults(abonInput.value);
-      abonInput.oninput=()=>{
-        p.abonKey=''; p.abonName='';
-        abonInput.style.borderColor='#e74c3c';
-        showResults(abonInput.value);
-      };
-      abonInput.onblur=()=>setTimeout(()=>{ abonResults.style.display='none'; },200);
+    // Кнопка вибору абонемента
+    const abonPickBtn = row.querySelector('.abon-pick-btn');
+    if(abonPickBtn){
+      abonPickBtn.onclick = ()=> openAbonPopup(p, (key, name)=>{
+        p.abonKey=key; p.abonName=name;
+        abonPickBtn.textContent=name;
+        abonPickBtn.style.borderColor='#005356';
+        abonPickBtn.style.background='#e0f0f0';
+        row.querySelector('.sum').textContent=calcSum(p)+' грн';
+        updateTotals();
+      });
     }
 
     // Кнопка видалення конкретного учасника
@@ -420,6 +385,72 @@ function updateTotals(){
   $('totalSum').textContent=`Разом: ${t} грн`;
   renderPreview();
 }
+function openAbonPopup(p, onSelect){
+  const existing = document.getElementById('abonPopup');
+  if(existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id='abonPopup';
+  popup.style.cssText='position:fixed;inset:0;background:#0005;z-index:999;display:flex;align-items:center;justify-content:center;padding:16px';
+
+  const renderList = (q='')=>{
+    const data = Object.entries(window._abonData||{});
+    const matches = q ? data.filter(([,v])=>v.name&&v.name.toLowerCase().includes(q.toLowerCase())) : data;
+    const sorted = matches.sort((a,b)=>{
+      const aM=(a[1].monthlyLimit||0)>0, bM=(b[1].monthlyLimit||0)>0;
+      if(aM!==bM) return aM?1:-1;
+      return (a[1].name||'').localeCompare(b[1].name||'','uk');
+    });
+    const list = popup.querySelector('#abonPopupList');
+    list.innerHTML='';
+    if(!sorted.length){
+      list.innerHTML='<p style="color:#888;text-align:center;padding:16px">Нікого не знайдено</p>';
+      return;
+    }
+    sorted.forEach(([key,val])=>{
+      const visits=val.visits||0;
+      const monthlyLeft=Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #eee';
+      const info = visits>0&&monthlyLeft>0
+        ? `🎫 ${visits} + 📅 ${monthlyLeft}/${val.monthlyLimit}`
+        : visits>0 ? `🎫 ${visits} разових`
+        : monthlyLeft>0 ? `📅 ${monthlyLeft}/${val.monthlyLimit} міс`
+        : '<span style="color:#c0392b">вичерпано</span>';
+      row.innerHTML=`
+        <span style="flex:1;font-weight:600;font-size:14px">${val.name}</span>
+        <span style="font-size:13px;color:#555">${info}</span>
+        <button style="padding:5px 14px;background:#005356;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">Обрати</button>`;
+      row.querySelector('button').onclick=()=>{
+        onSelect(key, val.name);
+        popup.remove();
+      };
+      row.style.background = p.abonKey===key ? '#e0f0f0' : '';
+      list.appendChild(row);
+    });
+  };
+
+  popup.innerHTML=`
+    <div style="background:#fff;border-radius:14px;padding:0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px #0003">
+      <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px">
+        <h3 style="margin:0;flex:1;color:#005356;font-size:16px">👤 Оберіть абонемента</h3>
+        <button onclick="document.getElementById('abonPopup').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
+      </div>
+      <div style="padding:12px 20px;border-bottom:1px solid #eee">
+        <input id="abonPopupSearch" type="text" placeholder="🔍 Пошук за іменем..."
+          style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+      </div>
+      <div id="abonPopupList" style="overflow-y:auto;flex:1"></div>
+    </div>`;
+
+  document.body.appendChild(popup);
+  renderList();
+
+  popup.querySelector('#abonPopupSearch').oninput = e => renderList(e.target.value);
+  popup.querySelector('#abonPopupSearch').focus();
+  popup.onclick = e=>{ if(e.target===popup) popup.remove(); };
+}
+
 $('add').onclick=addParticipant;
 $('clear').onclick=clearParticipants;
 
@@ -436,7 +467,7 @@ function buildTextLines(d){
   if(d.instrument) lines.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
   if(d.discount)   lines.push('Пільга −50%');
   if(d.free){
-    const label = d.freeType==='child'?'Діти до 14 років'
+    const label = d.freeType==='child'?'Діти до 10 років'
       :d.freeType==='cert'?'Сертифікат'
       :d.freeType==='birthday'?'🎂 День народження'
       :d.abonName?`Абонемент: ${d.abonName}`:'Безкоштовно';
@@ -570,6 +601,10 @@ $('printBtn').onclick=async()=>{
   }
   document.getElementById('printError')?.style && (document.getElementById('printError').style.display='none');
 
+  const printBtn = $('printBtn');
+  printBtn.disabled = true;
+  printBtn.textContent = '⏳ Друкую...';
+
   // Зберігаємо статистику і списуємо абонементи одразу — незалежно від принтера
   await saveStats(participants).catch(()=>{});
   for(const p of participants){
@@ -611,6 +646,9 @@ $('printBtn').onclick=async()=>{
     clearParticipants();
   }catch(e){
     setStatus('⚠️ Статистику збережено, але помилка друку: '+e.message);
+  }finally{
+    printBtn.disabled = false;
+    printBtn.textContent = '🖨️ Друкувати всі чеки';
   }
 };
 
@@ -1287,7 +1325,7 @@ function editStatRow(key, e){
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <label style="font-size:13px"><input type="checkbox" id="ed_free"     ${e.free       ?'checked':''}> 🆓</label>
         <select id="ed_freeType" style="padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px;display:${e.free?'inline':'none'}">
-          <option value="child"    ${e.freeType==='child'   ?'selected':''}>Діти до 14 р.</option>
+          <option value="child"    ${e.freeType==='child'   ?'selected':''}>Діти до 10 р.</option>
           <option value="cert"     ${e.freeType==='cert'    ?'selected':''}>Сертифікат</option>
           <option value="abon"     ${e.freeType==='abon'    ?'selected':''}>Абонемент</option>
           <option value="birthday" ${e.freeType==='birthday'?'selected':''}>🎂 День народження</option>
