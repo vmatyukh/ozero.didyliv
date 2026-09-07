@@ -193,26 +193,6 @@ button.danger{background:#fdd}
 
   <div class="session-tabs" id="sessionTabs" style="display:none"></div>
 
-  <fieldset>
-    <legend id="floatLegend">Сектори — Ранкова — сьогодні</legend>
-    <table class="sectors-table">
-      <thead>
-        <tr>
-          <th>Сектор</th>
-          <th>Статус</th>
-          <th>Імʼя</th>
-          <th>Друга вудочка</th>
-          <th>Планує купити рибу</th>
-          <th>Сума</th>
-          <th>Оплата</th>
-          <th>Дії</th>
-          <th>Доступно</th>
-        </tr>
-      </thead>
-      <tbody id="floatTbody"></tbody>
-    </table>
-  </fieldset>
-
   <pre id="statusFloat"></pre>
 
   <!-- Святкові дні -->
@@ -232,6 +212,37 @@ button.danger{background:#fdd}
     <legend id="allBookingsLegend">📋 Всі бронювання за день</legend>
     <div id="allBookingsTable"></div>
   </fieldset>
+</div>
+
+<!-- ===== ПОПАП СЕКТОРІВ ===== -->
+<div id="sectorsPopup" style="display:none;position:fixed;inset:0;background:#0006;z-index:500;overflow-y:auto;padding:16px">
+  <div style="background:#fff;border-radius:14px;max-width:1100px;margin:0 auto;box-shadow:0 8px 32px #0003">
+    <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0;z-index:1">
+      <h3 id="floatLegend" style="margin:0;flex:1;color:#005356;font-size:16px">Сектори</h3>
+      <button onclick="closeSectorsPopup()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;padding:0">✕</button>
+    </div>
+    <div style="padding:16px 20px;overflow-x:auto">
+      <table class="sectors-table" style="width:100%">
+        <thead>
+          <tr>
+            <th>Сектор</th>
+            <th>Статус</th>
+            <th>Імʼя</th>
+            <th>Друга вудочка</th>
+            <th>Планує купити рибу</th>
+            <th>Сума</th>
+            <th>Оплата</th>
+            <th>Дії</th>
+            <th>Доступно</th>
+          </tr>
+        </thead>
+        <tbody id="floatTbody"></tbody>
+      </table>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid #eee">
+      <pre id="statusFloat" style="margin:0"></pre>
+    </div>
+  </div>
 </div>
 
 <!-- ===== АБОНЕМЕНТИ ===== -->
@@ -814,6 +825,27 @@ function setFloatDate(offset){
   renderSessionTabs();
   loadFloatBookings();
 }
+function openSectorsPopup(sessionKey){
+  // Перевіряємо час — якщо сесія вже завершилась, дизейблимо
+  const date = $('floatDate').value;
+  if(isSessionExpired(sessionKey, date)) return;
+  floatSession = sessionKey;
+  loadFloatBookings();
+  renderFloatStats();
+  document.getElementById('sectorsPopup').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeSectorsPopup(){
+  document.getElementById('sectorsPopup').style.display='none';
+  document.body.style.overflow='';
+}
+
+// Закрити попап по кліку на фон
+document.getElementById('sectorsPopup').addEventListener('click', e=>{
+  if(e.target.id==='sectorsPopup') closeSectorsPopup();
+});
+
 function selectFloatSessionByKey(key){
   floatSession = key;
   loadFloatBookings();
@@ -1000,9 +1032,9 @@ function renderFloatStats(){
   db.ref(`bookings/${date}`).once('value').then(snap=>{
     const data = snap.val()||{};
     wrap.innerHTML = CONFIG.sessions.map(s=>{
+      const expired = isSessionExpired(s.key, date);
       let bookedSectors;
       if(s.key === 'fullday'){
-        // Для повного дня — зайняті сектори з усіх сесій
         const allSectors = new Set();
         CONFIG.sessions.forEach(ss=>{
           Object.values(data[ss.key]||{}).filter(b=>!b.earlyLeave).forEach(b=>allSectors.add(b.sector));
@@ -1011,19 +1043,18 @@ function renderFloatStats(){
       } else {
         bookedSectors = Object.values(data[s.key]||{}).filter(b=>!b.earlyLeave).length;
       }
-      const booked = bookedSectors;
-      const free = 11 - booked;
+      const free = 11 - bookedSectors;
       const isActive = floatSession === s.key;
-      const expired = isSessionExpired(s.key, date);
-      return `<div onclick="${expired?'':` selectFloatSessionByKey('${s.key}')`}"
-        style="background:${isActive?'#005356':'#fff'};color:${isActive?'#fff':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${isActive?'#005356':'#ddd'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};opacity:${expired?.6:1};transition:all .2s;user-select:none">
+      return `<button onclick="${expired?'':` openSectorsPopup('${s.key}')`}"
+        ${expired?'disabled':''}
+        style="background:${isActive?'#005356':expired?'#f0f0f0':'#fff'};color:${isActive?'#fff':expired?'#999':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${isActive?'#005356':expired?'#ddd':'#ddd'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};opacity:${expired?.6:1};transition:all .2s;text-align:left;width:100%">
         <div style="font-weight:700;font-size:16px;margin-bottom:6px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span></div>
         <div style="display:flex;gap:14px;font-size:13px">
           <span>🟢 Вільних: <strong>${free}</strong></span>
-          <span>🔴 Зайнятих: <strong>${booked}</strong></span>
+          <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
         </div>
-        ${expired?'<div style="font-size:11px;margin-top:4px;opacity:.7">завершена</div>':''}
-      </div>`;
+        ${expired?'<div style="font-size:11px;margin-top:4px;color:#c0392b">Сесія завершена</div>':''}
+      </button>`;
     }).join('');
   });
 }
