@@ -803,7 +803,7 @@ function initDateDisplay(displayId, inputId){
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
 $('floatDate').value=todayStr;
 setDateDisplay('floatDateDisplay', todayStr);
-$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); renderSessionTabs(); loadFloatBookings(); };
+$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); renderSessionTabs(); loadFloatBookings(); renderAllBookings(); };
 
 function setFloatDate(offset){
   const d=new Date();d.setDate(d.getDate()+offset);
@@ -860,11 +860,6 @@ function loadFloatBookings(){
     floatUnsubs.push({ref,fn});
   });
   updateFloatLegend();
-  // Окремий listener для таблиці всіх бронювань
-  const allRef = db.ref(`bookings/${date}`);
-  const allFn = snap => renderAllBookings();
-  allRef.on('value', allFn);
-  floatUnsubs.push({ref:allRef, fn:allFn});
 }
 
 function updateFloatLegend(){
@@ -1790,6 +1785,7 @@ function initAdmin(){
   if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
   const allBookings = document.getElementById('allBookingsFieldset');
   if(allBookings) allBookings.style.display = '';
+  renderAllBookings();
   const spinningStats = document.getElementById('spinningStatsFieldset');
   if(spinningStats) spinningStats.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
