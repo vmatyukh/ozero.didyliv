@@ -202,7 +202,7 @@ button.danger{background:#fdd}
           <th>Статус</th>
           <th>Імʼя</th>
           <th>Друга вудочка</th>
-          <th>🐟 Планує купити рибу</th>
+          <th>Планує купити рибу</th>
           <th>Сума</th>
           <th>Оплата</th>
           <th>Дії</th>
@@ -963,7 +963,10 @@ function renderFloatTable(){
             <option value="free">🆓 Безкоштовно</option>
           </select>
           <label style="font-size:13px;display:flex;align-items:center;gap:5px;white-space:nowrap">
-            <input type="checkbox" id="msecondrod_${i}"> 🎣 +200 грн
+            <input type="checkbox" id="msecondrod_${i}"> Друга вудочка (+200 грн)
+          </label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:5px;white-space:nowrap">
+            <input type="checkbox" id="mbuyfish_${i}"> Планує викупляти рибу
           </label>
           <button class="primary" onclick="adminBook(${i})">✅ Підтвердити</button>
           <button class="secondary" onclick="hideManualBook(${i})">Скасувати</button>
@@ -976,7 +979,7 @@ function renderFloatTable(){
   }
 
   const revenue = Object.values(sectorMap).reduce((sum, b)=>
-    sum + (b.payment==='free' ? 0 : (b.price || getSessionPrice(floatSession, $('floatDate').value) + (b.secondRod?200:0))), 0);
+    sum + (b.payment==='free' ? 0 : ((b.price || getSessionPrice(floatSession, $('floatDate').value)) + (b.secondRod?200:0))), 0);
   $('floatStats').innerHTML=`
     <div class="stat-card"><strong>${11-bookedCount}</strong>Вільних</div>
     <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
@@ -994,13 +997,14 @@ async function adminBook(i){
   const phone=($(`mphone_${i}`)?.value||'').trim()||'—';
   const payment=$(`mpay_${i}`)?.value||'cash';
   const secondRod=$(`msecondrod_${i}`)?.checked||false;
+  const buyFish=$(`mbuyfish_${i}`)?.checked||false;
   const basePrice = getSessionPrice(floatSession, $('floatDate').value);
   const price = basePrice + (secondRod ? 200 : 0);
   const currentUser = firebase.auth().currentUser;
   try{
     await db.ref(`bookings/${date}/${floatSession}`).push({
       sector:i, name, phone, session:floatSession,
-      price, secondRod, date,
+      price, secondRod, buyFish, date,
       payment, createdBy: currentUser?.email||'',
       createdAt:new Date().toISOString()
     });
@@ -1539,10 +1543,10 @@ function renderAllBookings(){
         <td>${b.phone||'—'}</td>
         <td style="font-size:12px">${createdAt}</td>
         <td style="font-size:12px;color:${b.earlyLeave?'#e67e00':'#888'}">${earlyLeaveAt}</td>
-        <td>${b.secondRod?'✅ +200':'—'}</td>
+        <td>${b.secondRod?'✅':'—'}</td>
         <td>${b.buyFish?'✅':'—'}</td>
         <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
-        <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':b.payment==='free'?'🆓 Безкоштовно':'—'}</td>
+        <td>${b.payment==='card'?'💳':b.payment==='cash'?'💵':b.payment==='free'?'🆓':'—'}</td>
         <td style="white-space:nowrap">
           <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️ Чек</button>
           ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌ Скасувати</button>`:''}
