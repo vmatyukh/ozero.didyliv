@@ -371,7 +371,7 @@ function renderList(){
     }
 
     // Кнопка видалення конкретного учасника
-    row.querySelector('button').onclick = ()=>{
+    row.querySelector('.del-btn').onclick = ()=>{
       participants = participants.filter(x=>x.id!==p.id);
       renderList();
     };
