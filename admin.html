@@ -860,6 +860,7 @@ function loadFloatBookings(){
     floatUnsubs.push({ref,fn});
   });
   updateFloatLegend();
+  renderAllBookings(); // одразу при зміні дати/сесії
 }
 
 function updateFloatLegend(){
