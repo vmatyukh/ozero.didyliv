@@ -1525,7 +1525,7 @@ function renderAllBookings(){
     const table = document.createElement('table');
     table.className='spinning-table';
     table.innerHTML=`<thead><tr>
-      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Звільнено</th><th>Сума</th><th>Оплата</th><th>Друга вудочка</th><th>🐟</th><th></th>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час бронювання</th><th>Звільнено</th><th>Сума</th><th>Оплата</th><th>Друга вудочка</th><th>Планує купити рибу</th><th></th>
     </tr></thead>`;
     const tbody = document.createElement('tbody');
 
@@ -1542,16 +1542,27 @@ function renderAllBookings(){
         <td style="font-size:12px;color:${b.earlyLeave?'#e67e00':'#888'}">${earlyLeaveAt}</td>
         <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
         <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':b.payment==='free'?'🆓 Безкоштовно':'—'}</td>
-        <td>${b.secondRod?'✅':'—'}</td>
-        <td>${b.buyFish?'🐟':'—'}</td>
-        <td>
-          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
-          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
+        <td>${b.secondRod?'✅ +200 грн':'—'}</td>
+        <td>${b.buyFish?'✅':'—'}</td>
+        <td style="white-space:nowrap">
+          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️ Чек</button>
+          ${!b.earlyLeave?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#ffd966;cursor:pointer">🚪 Звільнити</button>`:''}
+          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌ Скасувати</button>`:''}
         </td>`;
       const btns = tr.querySelectorAll('button');
-      btns[0].onclick = ()=> adminPrintByData(b);
-      if(isAdmin && btns[1]){
-        btns[1].onclick = ()=>{
+      let btnIdx = 0;
+      btns[btnIdx++].onclick = ()=> adminPrintByData(b);
+      if(!b.earlyLeave && btns[btnIdx]){
+        btns[btnIdx++].onclick = ()=>{
+          if(confirm(`Позначити сектор ${b.sector} як вільний?`)){
+            db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).update({earlyLeave:true, earlyLeaveAt:new Date().toISOString()})
+              .then(()=>renderAllBookings())
+              .catch(e=>setStatusFloat('Помилка: '+e.message));
+          }
+        };
+      }
+      if(isAdmin && btns[btnIdx]){
+        btns[btnIdx].onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
               .then(()=>renderAllBookings())
