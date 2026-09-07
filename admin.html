@@ -1494,11 +1494,12 @@ function renderAllBookings(){
   const legend = document.getElementById('allBookingsLegend');
   if(!wrap) return;
 
-  const date = $('floatDate').value;
+  const date = $('floatDate')?.value;
+  if(!date){ wrap.innerHTML=''; return; }
   const [y,m,d] = date.split('-');
   if(legend) legend.textContent = `📋 Всі бронювання за ${d}.${m}.${y}`;
 
-  db.ref(`bookings/${date}`).once('value', snap=>{
+  db.ref(`bookings/${date}`).once('value').then(snap=>{
     const data = snap.val();
     if(!data){
       wrap.innerHTML='<p style="color:#888;font-size:13px;padding:8px 0">Бронювань немає</p>';
@@ -1524,7 +1525,7 @@ function renderAllBookings(){
     const table = document.createElement('table');
     table.className='spinning-table';
     table.innerHTML=`<thead><tr>
-      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Звільнено</th><th>Сума</th><th>Оплата</th><th>🎣</th><th>🐟</th><th></th>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час</th><th>Звільнено</th><th>Сума</th><th>Оплата</th><th>Друга вудочка</th><th>🐟</th><th></th>
     </tr></thead>`;
     const tbody = document.createElement('tbody');
 
@@ -1532,8 +1533,6 @@ function renderAllBookings(){
       const tr = document.createElement('tr');
       const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}) : '—';
       const earlyLeaveAt = b.earlyLeaveAt ? new Date(b.earlyLeaveAt).toLocaleString('uk-UA',{hour12:false}) : (b.earlyLeave?'✅':'—');
-      const currentEmail = firebase.auth().currentUser?.email||'';
-      const canCancel = isAdmin || b.createdBy === currentEmail;
       tr.innerHTML=`
         <td><strong>Сектор ${b.sector}</strong></td>
         <td>${b.sessionName}<br><span style="font-size:11px;color:#888">${b.sessionTime}</span></td>
@@ -1550,11 +1549,9 @@ function renderAllBookings(){
           ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
         </td>`;
       const btns = tr.querySelectorAll('button');
-      let btnIdx = 0;
-      // Кнопка друку завжди перша
-      btns[btnIdx++].onclick = ()=> adminPrintByData(b);
-      if(canCancel){
-        btns[btnIdx].onclick = ()=>{
+      btns[0].onclick = ()=> adminPrintByData(b);
+      if(isAdmin && btns[1]){
+        btns[1].onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
               .then(()=>renderAllBookings())
@@ -1565,17 +1562,15 @@ function renderAllBookings(){
       tbody.appendChild(tr);
     });
 
-    // Підсумок
-    const total = rows.reduce((s,b)=>s+(b.payment==='free'?0:((b.price||SESSION_PRICES[b.sessionKey]||0))),0);
+    const total = rows.reduce((s,b)=>s+(b.payment==='free'?0:(b.price||SESSION_PRICES[b.sessionKey]||0)),0);
     const tfoot = document.createElement('tr');
     tfoot.className='total-row';
     tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td></td><td>${total} грн</td><td></td><td></td><td></td><td></td>`;
     tbody.appendChild(tfoot);
-
     table.appendChild(tbody);
     wrap.innerHTML='';
     wrap.appendChild(table);
-  });
+  }).catch(e=>{ wrap.innerHTML=`<p style="color:#c0392b;font-size:13px">Помилка: ${e.message}</p>`; });
 }
 
 /* ===== АБОНЕМЕНТИ ===== */
