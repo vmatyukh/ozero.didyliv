@@ -1000,8 +1000,18 @@ function renderFloatStats(){
   db.ref(`bookings/${date}`).once('value').then(snap=>{
     const data = snap.val()||{};
     wrap.innerHTML = CONFIG.sessions.map(s=>{
-      const sessionData = data[s.key]||{};
-      const booked = Object.values(sessionData).filter(b=>!b.earlyLeave).length;
+      let bookedSectors;
+      if(s.key === 'fullday'){
+        // Для повного дня — зайняті сектори з усіх сесій
+        const allSectors = new Set();
+        CONFIG.sessions.forEach(ss=>{
+          Object.values(data[ss.key]||{}).filter(b=>!b.earlyLeave).forEach(b=>allSectors.add(b.sector));
+        });
+        bookedSectors = allSectors.size;
+      } else {
+        bookedSectors = Object.values(data[s.key]||{}).filter(b=>!b.earlyLeave).length;
+      }
+      const booked = bookedSectors;
       const free = 11 - booked;
       const isActive = floatSession === s.key;
       const expired = isSessionExpired(s.key, date);
