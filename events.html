@@ -445,10 +445,12 @@ function parseDate(val) {
 function fmtDate(val) {
   const d = parseDate(val);
   if (!d) return String(val);
-  const day  = d.getDate();
-  const mon  = d.getMonth();
-  const year = d.getFullYear();
-  const dow  = WEEKDAYS_UA[d.getDay()];
+  // +3h корекція для київського часу щоб дата була однакова у всіх країнах
+  const kyiv = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+  const day  = kyiv.getUTCDate();
+  const mon  = kyiv.getUTCMonth();
+  const year = kyiv.getUTCFullYear();
+  const dow  = WEEKDAYS_UA[kyiv.getUTCDay()];
   return `${String(day).padStart(2,'0')}.${String(mon+1).padStart(2,'0')}.${year} · ${dow}`;
 }
 
