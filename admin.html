@@ -189,9 +189,9 @@ button.danger{background:#fdd}
     <button class="secondary" onclick="setFloatDate(1)">Завтра ▶</button>
   </div>
 
-  <div class="session-tabs" id="sessionTabs"></div>
+  <div id="floatStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px"></div>
 
-  <div class="stats-bar" id="floatStats"></div>
+  <div class="session-tabs" id="sessionTabs" style="display:none"></div>
 
   <fieldset>
     <legend id="floatLegend">Сектори — Ранкова — сьогодні</legend>
@@ -804,7 +804,7 @@ function initDateDisplay(displayId, inputId){
 const todayStr=(()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
 $('floatDate').value=todayStr;
 setDateDisplay('floatDateDisplay', todayStr);
-$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); renderSessionTabs(); loadFloatBookings(); renderAllBookings(); };
+$('floatDate').onchange=e=>{ setDateDisplay('floatDateDisplay', e.target.value); renderSessionTabs(); loadFloatBookings(); renderAllBookings(); renderFloatStats(); };
 
 function setFloatDate(offset){
   const d=new Date();d.setDate(d.getDate()+offset);
@@ -814,6 +814,12 @@ function setFloatDate(offset){
   renderSessionTabs();
   loadFloatBookings();
 }
+function selectFloatSessionByKey(key){
+  floatSession = key;
+  loadFloatBookings();
+  renderFloatStats();
+}
+
 function selectFloatSession(el){
   document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
@@ -857,6 +863,7 @@ function loadFloatBookings(){
       });
       renderFloatTable();
       renderAllBookings();
+      renderFloatStats();
     });
     floatUnsubs.push({ref,fn});
   });
@@ -980,12 +987,36 @@ function renderFloatTable(){
 
   const revenue = Object.values(sectorMap).reduce((sum, b)=>
     sum + (b.payment==='free' ? 0 : ((b.price || getSessionPrice(floatSession, $('floatDate').value)) + (b.secondRod?200:0))), 0);
-  $('floatStats').innerHTML=`
-    <div class="stat-card"><strong>${11-bookedCount}</strong>Вільних</div>
-    <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
-    <div class="stat-card"><strong>${revenue} грн</strong>Виручка</div>`;
 
+  renderFloatStats();
+}
 
+function renderFloatStats(){
+  const wrap = document.getElementById('floatStats');
+  if(!wrap) return;
+  const date = $('floatDate').value;
+  if(!date){ wrap.innerHTML=''; return; }
+
+  db.ref(`bookings/${date}`).once('value').then(snap=>{
+    const data = snap.val()||{};
+    wrap.innerHTML = CONFIG.sessions.map(s=>{
+      const sessionData = data[s.key]||{};
+      const booked = Object.values(sessionData).filter(b=>!b.earlyLeave).length;
+      const free = 11 - booked;
+      const isActive = floatSession === s.key;
+      const expired = isSessionExpired(s.key, date);
+      return `<div onclick="${expired?'':` selectFloatSessionByKey('${s.key}')`}"
+        style="background:${isActive?'#005356':'#fff'};color:${isActive?'#fff':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${isActive?'#005356':'#ddd'};font-size:13px;cursor:${expired?'not-allowed':'pointer'};opacity:${expired?.6:1};transition:all .2s;user-select:none">
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">${s.icon} ${s.name}</div>
+        <div style="font-size:12px">${s.time}</div>
+        <div style="margin-top:6px;display:flex;gap:10px;font-size:13px">
+          <span>🟢 ${free}</span>
+          <span>🔴 ${booked}</span>
+        </div>
+        ${expired?'<div style="font-size:11px;margin-top:4px;opacity:.7">завершена</div>':''}
+      </div>`;
+    }).join('');
+  });
 }
 
 function showManualBook(i){$(`manualRow_${i}`).style.display='';}
@@ -1784,6 +1815,7 @@ function initAdmin(){
   const allBookings = document.getElementById('allBookingsFieldset');
   if(allBookings) allBookings.style.display = '';
   renderAllBookings();
+  renderFloatStats();
   const spinningStats = document.getElementById('spinningStatsFieldset');
   if(spinningStats) spinningStats.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
