@@ -860,7 +860,10 @@ function loadFloatBookings(){
     floatUnsubs.push({ref,fn});
   });
   updateFloatLegend();
-  renderAllBookings(); // одразу при зміні дати/сесії
+  // Окремий listener для таблиці всіх бронювань
+  const allRef = db.ref(`bookings/${date}`);
+  const allFn = allRef.on('value', ()=>renderAllBookings());
+  floatUnsubs.push({ref:allRef, fn:allFn});
 }
 
 function updateFloatLegend(){
