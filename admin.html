@@ -287,7 +287,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   };
 });
 
-const PRICE_BASE=400, PRICE_PIDSAK=100, PRICE_INSTRUMENT=100;
+const PRICE_BASE=400, PRICE_PIDSAK=100;
 let participants=[];
 
 function calcSum(p){
@@ -298,12 +298,11 @@ function calcSum(p){
   }
   // Оренда рахується завжди, незалежно від типу
   if(p.pidsak)     s += PRICE_PIDSAK;
-  if(p.instrument) s += PRICE_INSTRUMENT;
   return s;
 }
 function addParticipant(){
   const id=participants.length?participants[participants.length-1].id+1:1;
-  participants.push({id,discount:false,pidsak:false,instrument:false,cardPayment:false,free:false,freeType:'',abonKey:'',abonName:''});
+  participants.push({id,discount:false,pidsak:false,cardPayment:false,free:false,freeType:'',abonKey:'',abonName:''});
   renderList();
 }
 function removeParticipant(){participants.pop();renderList();}
@@ -316,7 +315,6 @@ function renderList(){
     row.innerHTML=`
       <span>#${p.id}</span>
       <label><input type="checkbox" data-field="pidsak" ${p.pidsak?'checked':''}> Підсак (+${PRICE_PIDSAK} грн)</label>
-      <label><input type="checkbox" data-field="instrument" ${p.instrument?'checked':''}> Інструмент (+${PRICE_INSTRUMENT} грн)</label>
       <label><input type="checkbox" data-field="discount" ${p.discount?'checked':''}> Пільга −50%</label>
       <label><input type="checkbox" data-field="cardPayment" ${p.cardPayment?'checked':''}> 💳 Картка</label>
       <span style="display:flex;align-items:center;gap:6px">
@@ -456,7 +454,7 @@ $('clear').onclick=clearParticipants;
 
 function buildPayload(p){
   return{lake:'Озеро Дідилів',type:'Спінінг (спортивна риболовля)',
-    pidsak:p.pidsak,instrument:p.instrument,
+    pidsak:p.pidsak,
     discount:p.discount,cardPayment:p.cardPayment,
     free:p.free,freeType:p.freeType||'',abonName:p.abonName||'',
     amount:calcSum(p),time:nowStr(),participantNo:p.id};
@@ -464,7 +462,6 @@ function buildPayload(p){
 function buildTextLines(d){
   const lines=[`Дата: ${d.time}`,'—————————————————','Квиток рибалки',`${d.type}`];
   if(d.pidsak)     lines.push(`Підсак (+${PRICE_PIDSAK} грн)`);
-  if(d.instrument) lines.push(`Інструмент (+${PRICE_INSTRUMENT} грн)`);
   if(d.discount)   lines.push('Пільга −50%');
   if(d.free){
     const label = d.freeType==='child'?'Діти до 10 років'
@@ -474,7 +471,7 @@ function buildTextLines(d){
     lines.push(label);
   }
   // Якщо безкоштовний але є оренда — показуємо суму оренди
-  const rentAmount = (d.pidsak?PRICE_PIDSAK:0) + (d.instrument?PRICE_INSTRUMENT:0);
+  const rentAmount = (d.pidsak?PRICE_PIDSAK:0);
   if(d.free && rentAmount>0){
     lines.push(`Риболовля: Безкоштовно`);
     lines.push(`Оренда: ${rentAmount} грн`);
@@ -1132,7 +1129,6 @@ async function saveStats(pList){
       amount: calcSum(p),
       discount: p.discount,
       pidsak: p.pidsak,
-      instrument: p.instrument,
       cardPayment: p.cardPayment||false,
       free: p.free||false,
       freeType: p.freeType||'',
@@ -1162,7 +1158,6 @@ async function sendDailyReport(dateStr){
   const total=entries.reduce((s,e)=>s+e.amount,0);
   const discounts=entries.filter(e=>e.discount).length;
   const pidsaks=entries.filter(e=>e.pidsak).length;
-  const instruments=entries.filter(e=>e.instrument).length;
   const cardPayments=entries.filter(e=>e.cardPayment).length;
   const cashPayments=paidCount-cardPayments;
 
@@ -1183,8 +1178,7 @@ async function sendDailyReport(dateStr){
       (cardPayments ? `💳 Картка: ${cardPayments}\n`   : '')+
       (cashPayments ? `💵 Готівка: ${cashPayments}\n`  : '')+
       (discounts    ? `🎫 Пільга: ${discounts}\n`      : '')+
-      (pidsaks      ? `🪣 Підсак: ${pidsaks}\n`        : '')+
-      (instruments  ? `🔧 Інструмент: ${instruments}\n`: '')+'\n';
+      (pidsaks      ? `🪣 Підсак: ${pidsaks}\n`        : '')+'\n';
   } else {
     msg+=`🎣 Спінінг: не було\n\n`;
   }
@@ -1231,7 +1225,7 @@ function renderSpinningStats(data, date){
   table.className='spinning-table';
   table.innerHTML=`<thead><tr>
     <th>#</th><th>Час</th><th>Сума</th>
-    <th>Пільга</th><th>Підсак</th><th>Інстр.</th><th>💳</th><th>🆓 Тип</th><th></th>
+    <th>Пільга</th><th>Підсак</th><th>💳</th><th>🆓 Тип</th><th></th>
   </tr></thead>`;
 
   const tbody = document.createElement('tbody');
@@ -1252,7 +1246,6 @@ function renderSpinningStats(data, date){
       <td>${e.free?'<span style="color:#2a7;font-weight:600">Безкоштовно</span>':(e.amount||0)+' грн'}</td>
       <td>${e.discount?'✅':'—'}</td>
       <td>${e.pidsak?'✅':'—'}</td>
-      <td>${e.instrument?'✅':'—'}</td>
       <td>${e.cardPayment?'💳':'—'}</td>
       <td style="font-size:12px">${freeLabel}</td>
       <td style="white-space:nowrap">
@@ -1276,7 +1269,6 @@ function renderSpinningStats(data, date){
     <td>${total} грн</td>
     <td>${entries.filter(([,e])=>e.discount).length||'—'}</td>
     <td>${entries.filter(([,e])=>e.pidsak).length||'—'}</td>
-    <td>${entries.filter(([,e])=>e.instrument).length||'—'}</td>
     <td>${cardCount||'—'}</td>
     <td>${freeCount||'—'}</td>
     <td></td>`;
@@ -1293,7 +1285,7 @@ async function printStatRow(e){
     const d = {
       type: 'Спінінг (спортивна риболовля)',
       time: e.time||nowStr(),
-      pidsak: e.pidsak, instrument: e.instrument,
+      pidsak: e.pidsak,
       discount: e.discount, cardPayment: e.cardPayment,
       free: e.free, freeType: e.freeType||'', abonName: e.abonName||'',
       amount: e.amount||0
@@ -1336,7 +1328,6 @@ function editStatRow(key, e){
         </span>
         <label style="font-size:13px"><input type="checkbox" id="ed_discount" ${e.discount   ?'checked':''}> Пільга</label>
         <label style="font-size:13px"><input type="checkbox" id="ed_pidsak"   ${e.pidsak     ?'checked':''}> Підсак</label>
-        <label style="font-size:13px"><input type="checkbox" id="ed_instr"    ${e.instrument ?'checked':''}> Інстр.</label>
         <label style="font-size:13px"><input type="checkbox" id="ed_card"     ${e.cardPayment?'checked':''}> 💳 Картка</label>
         <button id="ed_save_btn" style="padding:4px 12px;font-size:13px;border:none;border-radius:6px;background:#005356;color:#fff;cursor:pointer">💾 Зберегти</button>
         <button id="ed_cancel_btn" style="padding:4px 10px;font-size:13px;border:none;border-radius:6px;background:#eee;cursor:pointer">✖</button>
@@ -1361,20 +1352,18 @@ async function saveStatRow(key){
   const abonName   = document.getElementById('ed_abonName')?.value.trim()||'';
   const discount   = document.getElementById('ed_discount')?.checked||false;
   const pidsak     = document.getElementById('ed_pidsak')  ?.checked||false;
-  const instrument = document.getElementById('ed_instr')   ?.checked||false;
   const cardPayment= document.getElementById('ed_card')    ?.checked||false;
 
   let amount = free ? 0 : PRICE_BASE;
   if(!free){
     if(pidsak)     amount += PRICE_PIDSAK;
-    if(instrument) amount += PRICE_INSTRUMENT;
     if(discount)   amount  = Math.round(amount/2);
   }
 
   try{
     await db.ref(`stats/${getStatsDate()}/spinning/${key}`).update({
       free, freeType: free?freeType:'', abonName: free&&freeType==='abon'?abonName:'',
-      discount, pidsak, instrument, cardPayment, amount
+      discount, pidsak, cardPayment, amount
     });
   }catch(e){setStatus('Помилка: '+e.message);}
 }
