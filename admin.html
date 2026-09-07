@@ -130,7 +130,7 @@ button.danger{background:#fdd}
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="spinning">🎣 Спінінг</button>
-  <button class="tab-btn" data-tab="float">🪣 Поплавцеве</button>
+  <button class="tab-btn" data-tab="float">🪣 Поплавок</button>
   <button class="tab-btn" data-tab="abonements">🎫 Абонементи</button>
 </div>
 
@@ -973,7 +973,7 @@ function renderFloatTable(){
   }
 
   const revenue = Object.values(sectorMap).reduce((sum, b)=>
-    sum + (b.payment==='free' ? 0 : getSessionPrice(floatSession, $('floatDate').value)), 0);
+    sum + (b.payment==='free' ? 0 : (b.price || getSessionPrice(floatSession, $('floatDate').value) + (b.secondRod?200:0))), 0);
   $('floatStats').innerHTML=`
     <div class="stat-card"><strong>${11-bookedCount}</strong>Вільних</div>
     <div class="stat-card"><strong>${bookedCount}</strong>Заброньовано</div>
@@ -1086,6 +1086,7 @@ async function adminPrintByData(b){
       `Сектор: ${b.sector}`,
       `Імʼя: ${b.name||'—'}`,
       `День: ${d}.${m}.${y}`,
+      ...(b.secondRod ? [`Вудочки: 2 (+200 грн)`] : []),
       `Сума: ${b.price||SESSION_PRICES[b.sessionKey]} грн`,
       '—————————————————',
       'Гарного кльову!',
@@ -1104,6 +1105,9 @@ async function adminPrint(sectorNum){
   try{
     await connect(true);
     const logoBytes=await logoRaster();
+    // Знаходимо бронювання для цього сектору
+    const booking = Object.values(floatBookings).find(b=>b.sector===sectorNum||b.sector===String(sectorNum));
+    const price = booking?.price || getSessionPrice(floatSession, $('floatDate').value);
     const lines=[
       `Дата: ${nowStr()}`,
       '—————————————————',
@@ -1111,8 +1115,10 @@ async function adminPrint(sectorNum){
       'Поплавцеве озеро',
       `Сесія: ${SESSION_LABELS[floatSession]}`,
       `Сектор: ${sectorNum}`,
+      ...(booking?.name ? [`Імʼя: ${booking.name}`] : []),
       `День: ${d}.${m}.${y}`,
-      `Сума: ${getSessionPrice(floatSession, $('floatDate').value)} грн`,
+      ...(booking?.secondRod ? [`Вудочки: 2 (+200 грн)`] : []),
+      `Сума: ${price} грн`,
       '—————————————————',
       'Гарного кльову!',
     ];
@@ -1769,7 +1775,7 @@ function initAdmin(){
   const abonAdd = document.getElementById('abonAddFieldset');
   if(abonAdd) abonAdd.style.display = isAdmin ? '' : 'none';
   const allBookings = document.getElementById('allBookingsFieldset');
-  if(allBookings) allBookings.style.display = isAdmin ? '' : 'none';
+  if(allBookings) allBookings.style.display = '';
   const spinningStats = document.getElementById('spinningStatsFieldset');
   if(spinningStats) spinningStats.style.display = isAdmin ? '' : 'none';
   const statsDateEl = document.getElementById('statsDate');
