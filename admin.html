@@ -202,8 +202,9 @@ button.danger{background:#fdd}
           <th>Статус</th>
           <th>Імʼя</th>
           <th>Друга вудочка</th>
-          <th>🐟</th>
-          <th>💰 Сума</th>
+          <th>🐟 Планує купити рибу</th>
+          <th>Сума</th>
+          <th>Оплата</th>
           <th>Дії</th>
           <th>Доступно</th>
         </tr>
@@ -899,15 +900,15 @@ function renderFloatTable(){
       const payment = b.payment || '';
       const payIcon = payment==='card'?'💳':payment==='cash'?'💵':payment==='free'?'🆓':'💰';
       const payLabel = payment==='card'?'Картка':payment==='cash'?'Готівка':payment==='free'?'Безкоштовно':'Оплата';
-      const priceVal = b.payment==='free' ? '🆓 0 грн' : (b.price||getSessionPrice(floatSession,$('floatDate').value))+'грн';
+      const priceVal = payment==='free' ? '0 грн' : (b.price||getSessionPrice(floatSession,$('floatDate').value))+' грн';
+      actCell=`<button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>
+               <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
+               ${isAdmin?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}`;
+      rodCell = b.secondRod ? '✅ +200 грн' : '—';
+      fishCell = b.buyFish ? '✅' : '—';
       priceCell=`<button onclick="togglePayment('${b.key}','${floatSession}','${payment}')"
         style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}"
-        title="Змінити оплату">${payIcon} ${priceVal}</button>`;
-      const currentEmail = firebase.auth().currentUser?.email||'';
-      const canCancel = isAdmin || b.createdBy === currentEmail;
-      actCell=`${isAdmin?`<button class="danger" onclick="adminCancel('${b.key}',${i},'${floatSession}')">❌ Скасувати</button>`:''}
-               <button class="warn" onclick="earlyLeave('${b.key}','${floatSession}',${i})">🚪 Звільнити</button>
-               <button class="primary" onclick="adminPrint(${i})">🖨️ Чек</button>`;
+        title="Змінити оплату">${payIcon} ${payLabel}</button>`;
     } else if(isBlocked){
       const bl=floatBlocked[i];
       statusBadge=`<span class="status-badge booked">🟡 ${SESSION_UK[bl.session]}</span>`;
@@ -925,12 +926,13 @@ function renderFloatTable(){
       <td>${nameCell}</td>
       <td>${rodCell}</td>
       <td>${fishCell}</td>
-      <td>${priceCell}</td>
+      <td>${isBooked ? priceVal : '—'}</td>
+      <td>${isBooked ? priceCell : '—'}</td>
       <td class="act-btns">${actCell}</td>
       <td></td>`;
 
     // Чекбокс доступності — тільки для вільних секторів і тільки адмін
-    const availCell = tr.querySelectorAll('td')[7];
+    const availCell = tr.querySelectorAll('td')[8];
     if(!isBooked && !isBlocked){
       const chk = document.createElement('input');
       chk.type='checkbox'; chk.checked=isAvailable;
@@ -954,7 +956,7 @@ function renderFloatTable(){
       const formRow=document.createElement('tr');
       formRow.id=`manualRow_${i}`;
       formRow.style.display='none';
-      formRow.innerHTML=`<td colspan="7" style="background:#e0f2f2;padding:8px 10px">
+      formRow.innerHTML=`<td colspan="9" style="background:#e0f2f2;padding:8px 10px">
         <div class="manual-form">
           <input type="text" id="mname_${i}" placeholder="Імʼя">
           <input type="tel" id="mphone_${i}" placeholder="Телефон">
@@ -1525,7 +1527,7 @@ function renderAllBookings(){
     const table = document.createElement('table');
     table.className='spinning-table';
     table.innerHTML=`<thead><tr>
-      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час бронювання</th><th>Звільнено</th><th>Сума</th><th>Оплата</th><th>Друга вудочка</th><th>Планує купити рибу</th><th></th>
+      <th>Сектор</th><th>Сесія</th><th>Імʼя</th><th>Телефон</th><th>Час бронювання</th><th>Звільнено</th><th>🎣</th><th>🐟</th><th>Сума</th><th>Оплата</th><th></th>
     </tr></thead>`;
     const tbody = document.createElement('tbody');
 
@@ -1540,29 +1542,18 @@ function renderAllBookings(){
         <td>${b.phone||'—'}</td>
         <td style="font-size:12px">${createdAt}</td>
         <td style="font-size:12px;color:${b.earlyLeave?'#e67e00':'#888'}">${earlyLeaveAt}</td>
+        <td>${b.secondRod?'✅ +200':'—'}</td>
+        <td>${b.buyFish?'✅':'—'}</td>
         <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
         <td>${b.payment==='card'?'💳 Картка':b.payment==='cash'?'💵 Готівка':b.payment==='free'?'🆓 Безкоштовно':'—'}</td>
-        <td>${b.secondRod?'✅ +200 грн':'—'}</td>
-        <td>${b.buyFish?'✅':'—'}</td>
         <td style="white-space:nowrap">
           <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️ Чек</button>
-          ${!b.earlyLeave?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#ffd966;cursor:pointer">🚪 Звільнити</button>`:''}
           ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌ Скасувати</button>`:''}
         </td>`;
       const btns = tr.querySelectorAll('button');
-      let btnIdx = 0;
-      btns[btnIdx++].onclick = ()=> adminPrintByData(b);
-      if(!b.earlyLeave && btns[btnIdx]){
-        btns[btnIdx++].onclick = ()=>{
-          if(confirm(`Позначити сектор ${b.sector} як вільний?`)){
-            db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).update({earlyLeave:true, earlyLeaveAt:new Date().toISOString()})
-              .then(()=>renderAllBookings())
-              .catch(e=>setStatusFloat('Помилка: '+e.message));
-          }
-        };
-      }
-      if(isAdmin && btns[btnIdx]){
-        btns[btnIdx].onclick = ()=>{
+      btns[0].onclick = ()=> adminPrintByData(b);
+      if(isAdmin && btns[1]){
+        btns[1].onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
               .then(()=>renderAllBookings())
@@ -1576,7 +1567,7 @@ function renderAllBookings(){
     const total = rows.reduce((s,b)=>s+(b.payment==='free'?0:(b.price||SESSION_PRICES[b.sessionKey]||0)),0);
     const tfoot = document.createElement('tr');
     tfoot.className='total-row';
-    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td></td><td>${total} грн</td><td></td><td></td><td></td><td></td>`;
+    tfoot.innerHTML=`<td colspan="5">Разом: ${rows.length} бронювань</td><td></td><td></td><td></td><td>${total} грн</td><td></td><td></td>`;
     tbody.appendChild(tfoot);
     table.appendChild(tbody);
     wrap.innerHTML='';
