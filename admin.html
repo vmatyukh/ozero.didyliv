@@ -1083,6 +1083,81 @@ async function adminBook(i){
   }catch(e){setStatusFloat('Помилка: '+e.message);}
 }
 
+function openEditBookingPopup(b, date){
+  const existing = document.getElementById('editBookingPopup');
+  if(existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id='editBookingPopup';
+  popup.style.cssText='position:fixed;inset:0;background:#0005;z-index:999;display:flex;align-items:center;justify-content:center;padding:16px';
+  popup.innerHTML=`
+    <div style="background:#fff;border-radius:14px;padding:0;width:100%;max-width:420px;box-shadow:0 8px 32px #0003">
+      <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px">
+        <h3 style="margin:0;flex:1;color:#005356;font-size:16px">✏️ Редагування — Сектор ${b.sector}</h3>
+        <button id="ebClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Імʼя</label>
+          <input id="ebName" type="text" value="${b.name||''}" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Телефон</label>
+          <input id="ebPhone" type="tel" value="${b.phone||''}" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px">
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input id="ebRod" type="checkbox" ${b.secondRod?'checked':''} style="width:18px;height:18px"> Друга вудочка (+200 грн)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+          <input id="ebFish" type="checkbox" ${b.buyFish?'checked':''} style="width:18px;height:18px"> Планує викупляти рибу
+        </label>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Оплата</label>
+          <div style="display:flex;gap:8px">
+            <button id="ebCash" style="flex:1;padding:10px;font-size:14px;border:2px solid ${(!b.payment||b.payment==='cash')?'#005356':'#ccc'};border-radius:8px;background:${(!b.payment||b.payment==='cash')?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">💵 Готівка</button>
+            <button id="ebCard" style="flex:1;padding:10px;font-size:14px;border:2px solid ${b.payment==='card'?'#005356':'#ccc'};border-radius:8px;background:${b.payment==='card'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">💳 Картка</button>
+            <button id="ebFree" style="flex:1;padding:10px;font-size:14px;border:2px solid ${b.payment==='free'?'#005356':'#ccc'};border-radius:8px;background:${b.payment==='free'?'#e0f0f0':'#fff'};cursor:pointer;font-weight:600">🆓</button>
+          </div>
+        </div>
+        <button id="ebSave" style="padding:12px;font-size:15px;border:none;border-radius:10px;background:#005356;color:#fff;cursor:pointer;font-weight:600;margin-top:4px">💾 Зберегти</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(popup);
+
+  let selectedPayment = b.payment||'cash';
+  const highlightPayment = (p)=>{
+    selectedPayment=p;
+    ['cash','card','free'].forEach(k=>{
+      const btn=popup.querySelector('#eb'+k.charAt(0).toUpperCase()+k.slice(1));
+      btn.style.borderColor=k===p?'#005356':'#ccc';
+      btn.style.background=k===p?'#e0f0f0':'#fff';
+    });
+  };
+  popup.querySelector('#ebCash').onclick=()=>highlightPayment('cash');
+  popup.querySelector('#ebCard').onclick=()=>highlightPayment('card');
+  popup.querySelector('#ebFree').onclick=()=>highlightPayment('free');
+  popup.querySelector('#ebClose').onclick=()=>popup.remove();
+  popup.onclick=e=>{ if(e.target===popup) popup.remove(); };
+
+  popup.querySelector('#ebSave').onclick=async()=>{
+    const name  = popup.querySelector('#ebName').value.trim();
+    const phone = popup.querySelector('#ebPhone').value.trim();
+    const secondRod = popup.querySelector('#ebRod').checked;
+    const buyFish   = popup.querySelector('#ebFish').checked;
+    const basePrice = b.price || getSessionPrice(b.sessionKey, date);
+    const price = (selectedPayment==='free'?0:basePrice) + (secondRod?200:0);
+    try{
+      await db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).update({
+        name, phone, secondRod, buyFish, payment:selectedPayment, price
+      });
+      popup.remove();
+      renderAllBookings();
+      renderFloatStats();
+    }catch(e){ setStatusFloat('Помилка: '+e.message); }
+  };
+}
+
 async function togglePayment(key, session, currentPayment){
   const date = $('floatDate').value;
   // Показуємо діалог вибору
@@ -1606,29 +1681,65 @@ function renderAllBookings(){
     rows.forEach(b=>{
       const tr = document.createElement('tr');
       const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}) : '—';
-      const earlyLeaveAt = b.earlyLeaveAt ? new Date(b.earlyLeaveAt).toLocaleString('uk-UA',{hour12:false}) : (b.earlyLeave?'✅':'—');
+      const earlyLeaveAt = b.earlyLeaveAt ? new Date(b.earlyLeaveAt).toLocaleString('uk-UA',{hour12:false}) : '—';
+      const payment = b.payment||'';
+      const payIcon = payment==='card'?'💳':payment==='cash'?'💵':payment==='free'?'🆓':'💰';
+
       tr.innerHTML=`
         <td><strong>Сектор ${b.sector}</strong></td>
         <td>${b.sessionName}<br><span style="font-size:11px;color:#888">${b.sessionTime}</span></td>
         <td>${b.name||'—'}</td>
         <td>${b.phone||'—'}</td>
         <td style="font-size:12px">${createdAt}</td>
-        <td style="font-size:12px;color:${b.earlyLeave?'#e67e00':'#888'}">${earlyLeaveAt}</td>
+        <td style="font-size:12px">
+          ${b.earlyLeave
+            ? `<span style="color:#e67e00">${earlyLeaveAt}</span>`
+            : `<button style="padding:3px 8px;font-size:12px;border:none;border-radius:6px;background:#fff3cd;cursor:pointer;border:1px solid #f0c040">🚪 Звільнити</button>`}
+        </td>
         <td>${b.secondRod?'✅':'—'}</td>
         <td>${b.buyFish?'✅':'—'}</td>
         <td>${b.payment==='free'?'🆓 0 грн':(b.price||SESSION_PRICES[b.sessionKey]||'—')+' грн'}</td>
-        <td>${b.payment==='card'?'💳':b.payment==='cash'?'💵':b.payment==='free'?'🆓':'—'}</td>
+        <td>
+          ${isAdmin
+            ? `<button style="padding:3px 8px;font-size:14px;border:none;border-radius:6px;background:${payment?'#e0f0e0':'#fff3cd'};cursor:pointer;border:1px solid ${payment?'#aad':'#f0c040'}">${payIcon}</button>`
+            : `<span>${payIcon}</span>`}
+        </td>
         <td style="white-space:nowrap">
-          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️ Чек</button>
-          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌ Скасувати</button>`:''}
+          <button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e0f0e0;cursor:pointer">🖨️</button>
+          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#e8e8ff;cursor:pointer">✏️</button>`:''}
+          ${isAdmin?`<button style="padding:4px 8px;font-size:12px;border:none;border-radius:6px;background:#fdd;cursor:pointer">❌</button>`:''}
         </td>`;
+
       const btns = tr.querySelectorAll('button');
-      btns[0].onclick = ()=> adminPrintByData(b);
-      if(isAdmin && btns[1]){
-        btns[1].onclick = ()=>{
+      let idx = 0;
+
+      // Звільнити
+      if(!b.earlyLeave){
+        btns[idx++].onclick = ()=>{
+          if(confirm(`Позначити сектор ${b.sector} як вільний?`)){
+            db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`)
+              .update({earlyLeave:true, earlyLeaveAt:new Date().toISOString()})
+              .then(()=>{ renderAllBookings(); renderFloatStats(); })
+              .catch(e=>setStatusFloat('Помилка: '+e.message));
+          }
+        };
+      }
+
+      // Чек
+      btns[idx++].onclick = ()=> adminPrintByData(b);
+
+      if(isAdmin){
+        // Оплата
+        btns[idx++].onclick = ()=> togglePayment(b.key, b.sessionKey, payment);
+
+        // Едіт
+        btns[idx++].onclick = ()=> openEditBookingPopup(b, date);
+
+        // Скасувати
+        btns[idx].onclick = ()=>{
           if(confirm(`Скасувати бронювання сектору ${b.sector} (${b.sessionName})?`)){
             db.ref(`bookings/${date}/${b.sessionKey}/${b.key}`).remove()
-              .then(()=>renderAllBookings())
+              .then(()=>{ renderAllBookings(); renderFloatStats(); })
               .catch(e=>setStatusFloat('Помилка: '+e.message));
           }
         };
