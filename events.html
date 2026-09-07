@@ -687,7 +687,7 @@ async function openEvent(params) {
   }
 
   // Results inline
-  if (isDone || true) {  // показуємо блок завжди — для учасників або результатів
+  if (!regOpen) {  // показуємо тільки коли реєстрація закрита
     html += `<div id="resultsSection" style="margin-top:28px">
       <div class="section-title">Результати</div>
       <div class="tour-tabs" id="tourTabsInline"></div>
