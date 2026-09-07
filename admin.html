@@ -393,7 +393,7 @@ function openAbonPopup(p, onSelect){
   popup.id='abonPopup';
   popup.style.cssText='position:fixed;inset:0;background:#0005;z-index:999;display:flex;align-items:center;justify-content:center;padding:16px';
 
-  const renderList = (q='')=>{
+  const renderPopupList = (q='')=>{
     const data = Object.entries(window._abonData||{});
     const matches = q ? data.filter(([,v])=>v.name&&v.name.toLowerCase().includes(q.toLowerCase())) : data;
     const sorted = matches.sort((a,b)=>{
@@ -410,23 +410,22 @@ function openAbonPopup(p, onSelect){
     sorted.forEach(([key,val])=>{
       const visits=val.visits||0;
       const monthlyLeft=Math.max(0,(val.monthlyLimit||0)-(val.monthlyUsed||0));
-      const row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #eee';
+      const item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #eee'+(p.abonKey===key?';background:#e0f0f0':'');
       const info = visits>0&&monthlyLeft>0
         ? `🎫 ${visits} + 📅 ${monthlyLeft}/${val.monthlyLimit}`
         : visits>0 ? `🎫 ${visits} разових`
         : monthlyLeft>0 ? `📅 ${monthlyLeft}/${val.monthlyLimit} міс`
         : '<span style="color:#c0392b">вичерпано</span>';
-      row.innerHTML=`
+      item.innerHTML=`
         <span style="flex:1;font-weight:600;font-size:14px">${val.name}</span>
         <span style="font-size:13px;color:#555">${info}</span>
         <button style="padding:5px 14px;background:#005356;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">Обрати</button>`;
-      row.querySelector('button').onclick=()=>{
+      item.querySelector('button').onclick=()=>{
         onSelect(key, val.name);
         popup.remove();
       };
-      row.style.background = p.abonKey===key ? '#e0f0f0' : '';
-      list.appendChild(row);
+      list.appendChild(item);
     });
   };
 
@@ -434,20 +433,21 @@ function openAbonPopup(p, onSelect){
     <div style="background:#fff;border-radius:14px;padding:0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px #0003">
       <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px">
         <h3 style="margin:0;flex:1;color:#005356;font-size:16px">👤 Оберіть абонемента</h3>
-        <button onclick="document.getElementById('abonPopup').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
+        <button id="abonPopupClose" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
       </div>
       <div style="padding:12px 20px;border-bottom:1px solid #eee">
         <input id="abonPopupSearch" type="text" placeholder="🔍 Пошук за іменем..."
           style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:8px;font-size:14px">
       </div>
-      <div id="abonPopupList" style="overflow-y:auto;flex:1"></div>
+      <div id="abonPopupList" style="overflow-y:auto;flex:1;min-height:100px"></div>
     </div>`;
 
   document.body.appendChild(popup);
-  renderList();
+  renderPopupList();
 
-  popup.querySelector('#abonPopupSearch').oninput = e => renderList(e.target.value);
+  popup.querySelector('#abonPopupSearch').oninput = e => renderPopupList(e.target.value);
   popup.querySelector('#abonPopupSearch').focus();
+  popup.querySelector('#abonPopupClose').onclick = ()=> popup.remove();
   popup.onclick = e=>{ if(e.target===popup) popup.remove(); };
 }
 
