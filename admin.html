@@ -862,7 +862,8 @@ function loadFloatBookings(){
   updateFloatLegend();
   // Окремий listener для таблиці всіх бронювань
   const allRef = db.ref(`bookings/${date}`);
-  const allFn = allRef.on('value', ()=>renderAllBookings());
+  const allFn = snap => renderAllBookings();
+  allRef.on('value', allFn);
   floatUnsubs.push({ref:allRef, fn:allFn});
 }
 
