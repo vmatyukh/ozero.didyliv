@@ -460,24 +460,27 @@ function buildPayload(p){
     amount:calcSum(p),time:nowStr(),participantNo:p.id};
 }
 function buildTextLines(d){
-  const lines=[`Дата: ${d.time}`,'—————————————————','Квиток рибалки',`${d.type}`];
-  if(d.pidsak)     lines.push(`Підсак (+${PRICE_PIDSAK} грн)`);
-  if(d.discount)   lines.push('Пільга −50%');
+  const lines=[`Дата: ${d.time}`,'—————————————————','Квиток рибалки'];
   if(d.free){
     const label = d.freeType==='child'?'Діти до 10 років'
       :d.freeType==='cert'?'Сертифікат'
       :d.freeType==='birthday'?'🎂 День народження'
       :d.abonName?`Абонемент: ${d.abonName}`:'Безкоштовно';
+    lines.push(`${d.type}`);
     lines.push(label);
-  }
-  // Якщо безкоштовний але є оренда — показуємо суму оренди
-  const rentAmount = (d.pidsak?PRICE_PIDSAK:0);
-  if(d.free && rentAmount>0){
-    lines.push(`Риболовля: Безкоштовно`);
-    lines.push(`Оренда: ${rentAmount} грн`);
-    lines.push(`Сума: ${rentAmount} грн`);
+    const rentAmount = (d.pidsak?PRICE_PIDSAK:0);
+    if(rentAmount>0){
+      if(d.pidsak) lines.push(`Підсак: +${PRICE_PIDSAK} грн`);
+      lines.push(`Риболовля: Безкоштовно`);
+      lines.push(`Сума: ${rentAmount} грн`);
+    } else {
+      lines.push(`Сума: Безкоштовно`);
+    }
   } else {
-    lines.push(`Сума: ${d.free?'Безкоштовно':d.amount+' грн'}`);
+    lines.push(`${d.type} — ${PRICE_BASE} грн`);
+    if(d.discount) lines.push(`Пільга −50%`);
+    if(d.pidsak)   lines.push(`Підсак: +${PRICE_PIDSAK} грн`);
+    lines.push(`Сума: ${d.amount} грн`);
   }
   lines.push('—————————————————','Гарного кльову!');
   return lines;
