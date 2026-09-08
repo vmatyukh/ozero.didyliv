@@ -543,7 +543,14 @@ async function connect(auto=false){
 $('connectBtn').onclick=connect;
 async function send(b){if(!device){await connect();if(!device)return;}await device.transferOut(epOut,b);}
 function setStatus(t){const el=$('status');if(el)el.textContent=t;}
-function setStatusFloat(t){const el=$('statusFloat');if(el)el.textContent=t;}
+function setStatusFloat(t){
+  const el=$('statusFloat');
+  if(el) el.textContent=t;
+  // Також показуємо в головному статусі якщо попап закритий
+  if(document.getElementById('sectorsPopup')?.style.display==='none'||!document.getElementById('sectorsPopup')){
+    setStatus(t);
+  }
+}
 
 $('testBtn').onclick=async()=>{
   try{
