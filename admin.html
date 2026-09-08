@@ -1065,11 +1065,13 @@ function renderFloatStats(){
           <div style="font-weight:700;font-size:16px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span></div>
           <span style="font-weight:700;font-size:14px">💰 ${getSessionPrice(s.key, date)} грн</span>
         </div>
-        <div style="display:flex;gap:14px;font-size:13px;flex-wrap:wrap;align-items:center">
-          <span>🟢 Вільних: <strong>${free}</strong></span>
-          <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
-          ${unavailCount>0?`<span>⛔ Вимкнених: <strong>${unavailCount}</strong></span>`:''}
-          ${isCurrent?'<span style="margin-left:auto">📍</span>':''}
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <span>🟢 Вільних: <strong>${free}</strong></span>
+            <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
+            ${unavailCount>0?`<span>⛔ Вимкнених: <strong>${unavailCount}</strong></span>`:''}
+          </div>
+          ${isCurrent?'<span>📍</span>':''}
         </div>
         ${disabled?'<div style="font-size:11px;margin-top:4px;color:#c0392b">Сесія завершена</div>':''}
       </button>`;
