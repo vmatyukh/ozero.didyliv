@@ -66,6 +66,7 @@ button.danger{background:#fdd}
 .sectors-table th{background:#e0f0f0;font-weight:600}
 .sectors-table tr.booked-row td{background:#fff8e1}
 .sectors-table tr.free-row td{background:#f9fdf9}
+.sectors-table tr.unavailable-row td{background:#fde8e8}
 .status-badge{font-weight:700;font-size:12px;padding:3px 8px;border-radius:12px}
 .status-badge.free{background:#e0f0f0;color:#005356}
 .status-badge.booked{background:#fff3e0;color:#e67e00}
@@ -926,7 +927,7 @@ function renderFloatTable(){
     );
     if(isBooked||isBlocked) bookedCount++;
     const tr=document.createElement('tr');
-    tr.className=(isBooked||isBlocked)?'booked-row':'free-row';
+    tr.className=(isBooked||isBlocked)?'booked-row':(!isAvailable?'unavailable-row':'free-row');
     const createdAt=b?new Date(b.createdAt).toLocaleString('uk-UA',{hour12:false}):'—';
 
     let statusBadge, nameCell, rodCell, fishCell, priceVal, priceCell, actCell;
@@ -1044,15 +1045,20 @@ function renderFloatStats(){
         bookedSectors = Object.values(data[s.key]||{}).filter(b=>!b.earlyLeave).length;
       }
       const free = 11 - bookedSectors;
+
+      // Рахуємо вимкнені (недоступні) сектори для цієї сесії
+      const sessionAvail = (snap.val()||{}); // але нам треба sectorAvailabilityData
+      const unavailCount = Object.keys(sectorAvailabilityData[s.key]||{}).filter(k=>sectorAvailabilityData[s.key][k]===false).length;
       const isActive = floatSession === s.key;
       const disabled = expired && !isAdmin;
       return `<button onclick="${disabled?'':` openSectorsPopup('${s.key}')`}"
         ${disabled?'disabled':''}
         style="background:${disabled?'#f0f0f0':'#fff'};color:${disabled?'#999':'#222'};border-radius:10px;padding:12px 14px;border:2px solid ${disabled?'#ddd':'#ccc'};font-size:13px;cursor:${disabled?'not-allowed':'pointer'};transition:all .2s;text-align:left;width:100%">
         <div style="font-weight:700;font-size:16px;margin-bottom:6px">${s.icon} ${s.name} <span style="font-weight:400;font-size:13px;opacity:.8">${s.time}</span>${isActive?' 📍':''}</div>
-        <div style="display:flex;gap:14px;font-size:13px">
+        <div style="display:flex;gap:14px;font-size:13px;flex-wrap:wrap">
           <span>🟢 Вільних: <strong>${free}</strong></span>
           <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
+          ${unavailCount>0?`<span>⛔ Вимкнених: <strong>${unavailCount}</strong></span>`:''}
         </div>
         ${disabled?'<div style="font-size:11px;margin-top:4px;color:#c0392b">Сесія завершена</div>':''}
       </button>`;
