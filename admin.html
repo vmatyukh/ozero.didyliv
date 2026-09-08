@@ -1066,15 +1066,10 @@ function renderFloatStats(){
           <span style="font-weight:700;font-size:14px">💰 ${getSessionPrice(s.key, date)} грн</span>
         </div>
         <div style="display:flex;gap:14px;font-size:13px;flex-wrap:wrap;align-items:center">
-          ${isCurrent?'<span>📍</span>':''}
           <span>🟢 Вільних: <strong>${free}</strong></span>
           <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
           ${unavailCount>0?`<span>⛔ Вимкнених: <strong>${unavailCount}</strong></span>`:''}
-        </div>
-        <div style="display:flex;gap:14px;font-size:13px;flex-wrap:wrap;align-items:center">
-          <span>🟢 Вільних: <strong>${free}</strong></span>
-          <span>🔴 Зайнятих: <strong>${bookedSectors}</strong></span>
-          ${unavailCount>0?`<span>⛔ Вимкнених: <strong>${unavailCount}</strong></span>`:''}
+          ${isCurrent?'<span style="margin-left:auto">📍</span>':''}
         </div>
         ${disabled?'<div style="font-size:11px;margin-top:4px;color:#c0392b">Сесія завершена</div>':''}
       </button>`;
