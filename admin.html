@@ -765,8 +765,13 @@ function isSessionExpired(sessionKey, dateStr){
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   if(!dateStr) return false;
-  if(dateStr < today) return true; // минула дата — всі сесії завершені
-  if(dateStr > today) return false; // майбутня дата — всі доступні
+  if(dateStr < today) return true;
+  if(dateStr > today) return false;
+  // Повний день недоступний якщо ранкова вже завершилась
+  if(sessionKey === 'fullday'){
+    const morning = CONFIG.sessions.find(s=>s.key==='morning');
+    return morning && now.getHours() >= morning.endHour;
+  }
   const session = CONFIG.sessions.find(s=>s.key===sessionKey);
   return session && now.getHours() >= session.endHour;
 }
