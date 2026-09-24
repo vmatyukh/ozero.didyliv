@@ -477,6 +477,17 @@ function renderCalendar() {
   const isArchive = currentFilter === 'archive';
   const _today = new Date(); _today.setHours(0,0,0,0);
   const isEventToday = r => { const d = dateToSort(r.date); return d && d >= _today && d <= new Date(_today.getTime() + 86400000); };
+  const _now = new Date();
+  // подія ще не настала (сьогодні або в майбутньому)
+  const isUpcoming = r => { const d = dateToSort(r.date); return d && d >= _today; };
+  // реєстрація закрита: regEnabled=false і дата закриття реєстрації вже минула
+  const regClosedPassed = r => {
+    if (r.status.regEnabled) return false;
+    const to = r.status && r.status.regOpenTo ? parseDate(r.status.regOpenTo) : null;
+    return !!(to && _now > to);
+  };
+  // подія "в процесі": реєстрація закрита, але подія ще не відбулася
+  const isInProgress = r => !r.status.archived && !r.status.resultsPublished && !r.status.regPlanned && regClosedPassed(r) && isUpcoming(r);
 
   const renderCard = r => {
     const date    = fmtDate(r.date);
@@ -522,13 +533,13 @@ function renderCalendar() {
       ? allRoundsCache
       : allRoundsCache.filter(r => (r.category || 'other') === currentFilter);
 
-  const active = isArchive ? [] : filtered.filter(r => r.status.regEnabled || (!r.status.archived && !r.status.resultsPublished && !r.status.regPlanned && isEventToday(r)))
+  const active = isArchive ? [] : filtered.filter(r => r.status.regEnabled || isInProgress(r) || (!r.status.archived && !r.status.resultsPublished && !r.status.regPlanned && isEventToday(r)))
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const live   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.archived && r.status.resultsPublished)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const planned = isArchive ? [] : filtered.filter(r => r.status.regPlanned)
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
-  const soon   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.regPlanned && !r.status.archived && !r.status.resultsPublished && !isEventToday(r))
+  const soon   = isArchive ? [] : filtered.filter(r => !r.status.regEnabled && !r.status.regPlanned && !r.status.archived && !r.status.resultsPublished && !isEventToday(r) && !isInProgress(r))
                     .sort((a, b) => dateToSort(a.date) - dateToSort(b.date));
   const done   = isArchive
     ? filtered.sort((a, b) => dateToSort(b.date) - dateToSort(a.date))
