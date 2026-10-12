@@ -693,8 +693,8 @@ async function openEvent(params) {
         </div>
       </div>
       <table class="participants-table">
-        <thead><tr><th class="p-num">#</th><th>Ім'я</th></tr></thead>
-        <tbody id="pList"><tr><td colspan="2" class="p-loading">Завантаження...</td></tr></tbody>
+        <thead><tr><th class="p-num">#</th><th>Ім'я</th><th style="text-align:center">Підтверджено</th></tr></thead>
+        <tbody id="pList"><tr><td colspan="3" class="p-loading">Завантаження...</td></tr></tbody>
       </table>
     </div>`;
   }
@@ -832,6 +832,14 @@ async function loadResultsInline(roundKey) {
 }
 
 /* ── Participants ── */
+
+// Зелена галочка якщо оплата підтверджена
+function paidMark(paid) {
+  return paid
+    ? '<span style="color:#34c759;font-weight:700">✓</span>'
+    : '<span style="color:var(--text-muted)">—</span>';
+}
+
 async function loadParticipants(roundKey) {
   const r = allRoundsCache.find(x => x.roundKey === roundKey) || {};
   if (r.teamFormat) {
@@ -845,8 +853,8 @@ async function loadIndividualParticipants(roundKey) {
   try {
     const res   = await fetch(`${FB_URL}/registrations/${roundKey}.json`);
     const data  = await res.json();
-    const names = data ? Object.values(data).map(v => v.name).filter(Boolean) : [];
-    const count = names.length;
+    const list  = data ? Object.values(data).filter(v => v && v.name) : [];
+    const count = list.length;
     const pCount = document.getElementById('pCount');
     if (pCount) pCount.textContent =
       count === 0 ? 'ще немає' :
@@ -855,11 +863,11 @@ async function loadIndividualParticipants(roundKey) {
     const tbody = document.getElementById('pList');
     if (!tbody) return;
     tbody.innerHTML = count
-      ? names.map((n, i) => `<tr><td class="p-num">${i+1}</td><td>${n}</td></tr>`).join('')
-      : '<tr><td colspan="2" class="p-empty">Поки що ніхто не зареєструвався.<br>Будь першим!</td></tr>';
+      ? list.map((p, i) => `<tr><td class="p-num">${i+1}</td><td>${p.name}</td><td style="text-align:center">${paidMark(p.paid)}</td></tr>`).join('')
+      : '<tr><td colspan="3" class="p-empty">Поки що ніхто не зареєструвався.<br>Будь першим!</td></tr>';
   } catch(e) {
     const tbody = document.getElementById('pList');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="p-empty">Не вдалось завантажити список.</td></tr>';
   }
 }
 
@@ -877,7 +885,7 @@ async function loadTeamParticipants(roundKey) {
     const tbody = document.getElementById('pList');
     if (!tbody) return;
     if (!count) {
-      tbody.innerHTML = '<tr><td colspan="2" class="p-empty">Поки що немає зареєстрованих команд.<br>Будь першим!</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" class="p-empty">Поки що немає зареєстрованих команд.<br>Будь першим!</td></tr>';
       return;
     }
     tbody.innerHTML = teams.map((t, i) => {
@@ -888,11 +896,12 @@ async function loadTeamParticipants(roundKey) {
           <div style="font-weight:600">${t.teamName}</div>
           ${members ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">${members}</div>` : ''}
         </td>
+        <td style="text-align:center">${paidMark(t.paid)}</td>
       </tr>`;
     }).join('');
   } catch(e) {
     const tbody = document.getElementById('pList');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="2" class="p-empty">Не вдалось завантажити список.</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="p-empty">Не вдалось завантажити список.</td></tr>';
   }
 }
 
